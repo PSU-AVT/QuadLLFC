@@ -8,6 +8,7 @@ enum PWM32_TIMER_T {
 	PWM32_TIMER1,
 };
 
+/* PINX can only be used with TIMERX */
 enum PWM32_PIN_T {
 	PWM32_PIN0_0 = 1,
 	PWM32_PIN0_1 = 2,
@@ -23,5 +24,11 @@ enum PWM32_PIN_T {
  * Returns -1 on failure, 0 on success
  */
 int pwm32Init(int timer, int pins);
+
+int pwm32Start(int timer);
+
+int pwm32SetDutyCycleInTicks(uint32_t ticks);
+
+int pwm32SetFrequencyInTicks(uint32_t ticks);
 
 #endif

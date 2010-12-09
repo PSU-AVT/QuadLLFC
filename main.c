@@ -12,18 +12,30 @@
 #include "LPC13xx.h"
 #endif
 
-// TODO: insert other include files here
+#include "cpu/cpu.h"
+#include "systick/systick.h"
+#include "pwm/pwm32.h"
 
-// TODO: insert other definitions and declarations here
+int main(void)
+{
+	uint32_t dutycycle;
+	cpuInit();
+	pwm32Init(PWM32_TIMER0, PWM32_PIN0_0);
 
-int main(void) {
-	
-	// TODO: insert code here
+	// Start systick with tick every 10ms
+	systickInit(10);
 
-	// Enter an infinite loop, just incrementing a counter
-	volatile static int i = 0 ;
-	while(1) {
-		i++ ;
+	pwm32SetDutyCycleInTicks(0xFF);
+	pwm32Start(PWM32_TIMER0);
+
+	while(1)
+	{
+		for(dutycycle = 0xFF;dutycycle<0xFFFF;dutycycle++)
+		{
+			systickDelay(1);
+			pwm32SetDutyCycleInTicks(dutycycle);
+			dutycycle++;
+		}
 	}
 	return 0 ;
 }

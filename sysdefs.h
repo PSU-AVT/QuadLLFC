@@ -8,6 +8,9 @@
 #define BOOL bool
 #define TRUE true
 #define FALSE false
+#define true 1
+#define false 0
+#define bool int;
 
 typedef volatile uint8_t REG8;
 typedef volatile uint16_t REG16;
