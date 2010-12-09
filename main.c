@@ -41,12 +41,12 @@ int main(void)
 {
 	uint32_t dutycycle;
 	cpuInit();
-	pwm32Init(PWM32_TIMER0, PWM32_PIN0_0);
+	pwm32Init(PWM32_TIMER0, PWM32_PIN0_2);
 
 	// Start systick with tick every 10ms
 	systickInit(10);
 
-	pwm32SetDutyCycleInTicks(0xFF);
+	pwm32SetDutyCycleInTicks(PWM32_PIN0_2, 0xFF);
 	pwm32Start(PWM32_TIMER0);
 
 	while(1)
@@ -54,7 +54,7 @@ int main(void)
 		for(dutycycle = 0xFF;dutycycle<0xFFFF;dutycycle++)
 		{
 			systickDelay(1);
-			pwm32SetDutyCycleInTicks(dutycycle);
+			pwm32SetDutyCycleInTicks(PWM32_PIN0_2, dutycycle);
 		}
 	}
 	return 0 ;

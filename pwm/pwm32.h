@@ -63,7 +63,7 @@ int pwm32Start(int timer);
  *
  * Returns -1 on error
  */
-int pwm32SetDutyCycleInTicks(uint32_t ticks);
+int pwm32SetDutyCycleInTicks(int pin, uint32_t ticks);
 
 /**
  * Returns -1 on error

@@ -193,7 +193,7 @@ int pwm32Start(int timer)
 	return 0;
 }
 
-int pwm32SetDutyCycleInTicks(uint32_t ticks)
+int pwm32SetDutyCycleInTicks(int pin, uint32_t ticks)
 {
   if (ticks > pwmPulseWidth)
   {
@@ -201,8 +201,31 @@ int pwm32SetDutyCycleInTicks(uint32_t ticks)
     return -1;
   }
 
-  /* Set Duty Cycle (MR0) */
-  TMR_TMR32B0MR0 = pwmPulseWidth - ticks;
+  switch(pin)
+  {
+  case PWM32_PIN0_0:
+	  TMR_TMR32B0MR0 = pwmPulseWidth - ticks;
+	  break;
+  case PWM32_PIN0_1:
+	  TMR_TMR32B0MR1 = pwmPulseWidth - ticks;
+	  break;
+  case PWM32_PIN0_2:
+	  TMR_TMR32B0MR2 = pwmPulseWidth - ticks;
+	  break;
+  case PWM32_PIN0_3:
+	  return -1;
+  case PWM32_PIN1_0:
+	  return -1;
+  case PWM32_PIN1_1:
+	  return -1;
+  case PWM32_PIN1_2:
+	  return -1;
+  case PWM32_PIN1_3:
+	  TMR_TMR32B1MR3 = pwmPulseWidth - ticks;
+	  break;
+  default:
+	  return -1;
+  }
 
   return 0;
 }
