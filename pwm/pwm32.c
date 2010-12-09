@@ -34,13 +34,11 @@
 uint32_t pwmPulseWidth = CFG_PWM_DEFAULT_PULSEWIDTH;
 uint32_t pwmDutyCycle = CFG_PWM_DEFAULT_DUTYCYCLE;
 
-/**
- * Returns -1 on failure, 0 on success
- */
 int pwm32EnablePins(int pins);
 
 int pwm32Init(int timer, int pins)
 {
+	int ret = 0;
 	if(timer == PWM32_TIMER0)
 	{
 		/* Enable the clock for CT32B0 */
@@ -50,7 +48,7 @@ int pwm32Init(int timer, int pins)
 		if(-1 == pwm32EnablePins(pins))
 		{
 			SCB_SYSAHBCLKCTRL &= ~SCB_SYSAHBCLKCTRL_CT32B0;
-			return -1;
+			ret = -1;
 		}
 
 		/* Enable PWM0 */
@@ -83,7 +81,7 @@ int pwm32Init(int timer, int pins)
 		if(-1 == pwm32EnablePins(pins))
 		{
 			SCB_SYSAHBCLKCTRL &= ~SCB_SYSAHBCLKCTRL_CT32B1;
-			return -1;
+			ret = -1;
 		}
 
 		/* Set default pulse width */
@@ -106,11 +104,12 @@ int pwm32Init(int timer, int pins)
 	}
 	else
 		return -1;
-	return 0;
+	return ret;
 }
 
 int pwm32EnablePins(int pins)
 {
+	int ret = 0;
 	if(pins & PWM32_PIN0_0)
 	{
 		/* Configure PIN 1.6 as Timer32B0 MAT0 output */
@@ -120,7 +119,55 @@ int pwm32EnablePins(int pins)
 		/* Enable PWM0 */
 		TMR_TMR32B0PWMC |= TMR_TMR32B0PWMC_PWM0_ENABLED;
 	}
-	return 0;
+	if(pins & PWM32_PIN0_1)
+	{
+		/* Configure PIN 1.7 as Timer32B0 MAT1 output */
+		IOCON_PIO1_7 &= ~IOCON_PIO1_7_FUNC_MASK;
+		IOCON_PIO1_7 |= IOCON_PIO1_7_FUNC_CT32B0_MAT1;
+
+		/* Enable PWM0 */
+		TMR_TMR32B0PWMC |= TMR_TMR32B0PWMC_PWM1_ENABLED;
+	}
+	if(pins & PWM32_PIN0_2)
+	{
+		/* Configure PIN 0.1 as Timer32B0 MAT2 output */
+		IOCON_PIO0_1 &= ~IOCON_PIO0_1_FUNC_MASK;
+		IOCON_PIO0_1 |= IOCON_PIO0_1_FUNC_CT32B0_MAT2;
+
+		/* Enable PWM2 */
+		TMR_TMR32B0PWMC |= TMR_TMR32B0PWMC_PWM2_ENABLED;
+	}
+	if(pins & PWM32_PIN0_3)
+	{
+		/* This is a JTAG pin */
+		ret = -1;
+	}
+	if(pins & PWM32_PIN1_0)
+	{
+		/* This is a JTAG pin */
+		ret = -1;
+	}
+	if(pins & PWM32_PIN1_1)
+	{
+		/* This is a JTAG pin */
+		ret = -1;
+	}
+	if(pins & PWM32_PIN1_2)
+	{
+		/* This is a SWD pin */
+		ret = -1;
+	}
+	if(pins & PWM32_PIN1_3)
+	{
+		/* Configure PIN 0.1 as Timer32B1 MAT3 output */
+		IOCON_PIO1_4 &= ~IOCON_PIO1_4_FUNC_MASK;
+		IOCON_PIO1_4 |= IOCON_PIO1_4_FUNC_CT32B1_MAT3;
+
+		/* Enable PWM3 */
+		TMR_TMR32B1PWMC |= TMR_TMR32B1PWMC_PWM3_ENABLED;
+	}
+
+	return ret;
 }
 
 int pwm32Start(int timer)

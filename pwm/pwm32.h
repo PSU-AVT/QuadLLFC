@@ -52,7 +52,7 @@ enum PWM32_PIN_T {
 };
 
 /**
- * Returns -1 on failure, 0 on success
+ * Returns -1 on error
  */
 int pwm32Init(int timer, int pins);
 
@@ -61,12 +61,12 @@ int pwm32Start(int timer);
 /**
  * Duty cycle is freqTicks - dutyCycleTicks
  *
- * Returns -1 on failure, 0 on success
+ * Returns -1 on error
  */
 int pwm32SetDutyCycleInTicks(uint32_t ticks);
 
 /**
- * Returns -1 on failure, 0 on success
+ * Returns -1 on error
  */
 int pwm32SetFrequencyInTicks(uint32_t ticks);
 
