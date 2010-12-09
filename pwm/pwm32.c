@@ -17,15 +17,11 @@ int pwm32Init(int timer, int pins)
 		SCB_SYSAHBCLKCTRL |= SCB_SYSAHBCLKCTRL_CT32B0;
 
 		/* Enable specified pins */
-		/*
 		if(-1 == pwm32EnablePins(pins))
 		{
 			SCB_SYSAHBCLKCTRL &= ~SCB_SYSAHBCLKCTRL_CT32B0;
 			return -1;
-		}*/
-		/* Configure PIN 1.6 as Timer32B0 MAT0 output */
-		IOCON_PIO1_6 &= ~IOCON_PIO1_6_FUNC_MASK;
-		IOCON_PIO1_6 |= IOCON_PIO1_6_FUNC_CT32B0_MAT0;
+		}
 
 		/* Enable PWM0 */
 		TMR_TMR32B0PWMC |= TMR_TMR32B0PWMC_PWM0_ENABLED;
@@ -44,9 +40,6 @@ int pwm32Init(int timer, int pins)
 
 		/* Disable Timer0 by default (enabled by pwmStart of pwmStartFixed) */
 		TMR_TMR32B0TCR &= ~TMR_TMR32B0TCR_COUNTERENABLE_MASK;
-
-		/* Enable PWM0 */
-		TMR_TMR32B0PWMC |= TMR_TMR32B0PWMC_PWM0_ENABLED | TMR_TMR32B0PWMC_PWM3_ENABLED;
 
 		/* Make sure that the timer interrupt is enabled */
 		NVIC_EnableIRQ(TIMER_32_0_IRQn);

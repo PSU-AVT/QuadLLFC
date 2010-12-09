@@ -27,8 +27,16 @@ int pwm32Init(int timer, int pins);
 
 int pwm32Start(int timer);
 
+/**
+ * Duty cycle is freqTicks - dutyCycleTicks
+ *
+ * Returns -1 on failure, 0 on success
+ */
 int pwm32SetDutyCycleInTicks(uint32_t ticks);
 
+/**
+ * Returns -1 on failure, 0 on success
+ */
 int pwm32SetFrequencyInTicks(uint32_t ticks);
 
 #endif

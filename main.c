@@ -34,7 +34,6 @@ int main(void)
 		{
 			systickDelay(1);
 			pwm32SetDutyCycleInTicks(dutycycle);
-			dutycycle++;
 		}
 	}
 	return 0 ;
