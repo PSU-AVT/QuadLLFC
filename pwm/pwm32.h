@@ -3,7 +3,7 @@
  *
  * Software License Agreement (BSD License)
  *
- * Copyright (c) 2010, Gregory Haynes
+ * Copyright (c) 2010-2011, Gregory Haynes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,8 +29,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef _PWM_H_
-#define _PWM_H_
+#ifndef _PWM32_H_
+#define _PWM32_H_
 
 #include "../config.h"
 
