@@ -32,9 +32,12 @@
 #include "pwm16.h"
 #include "../config.h"
 
+static int _pwm16_timer0_initialized;
+static int _pwm16_timer1_initialized;
+
 void pwm16InitTimers(int timers)
 {
-	if(timers & PWM16_TIMER0)
+	if(timers & PWM16_TIMER0 && !_pwm16_timer0_initialized)
 	{
 		/* Enable Timer */
 		SCB_SYSAHBCLKCTRL |= SCB_SYSAHBCLKCTRL_CT16B0;
@@ -48,8 +51,10 @@ void pwm16InitTimers(int timers)
 		TMR_TMR16B0TCR &= ~TMR_TMR16B0TCR_COUNTERENABLE_MASK;
 
 		NVIC_EnableIRQ(TIMER_16_0_IRQn);
+
+		_pwm16_timer0_initialized = 1;
 	}
-	if(timers & PWM16_TIMER1)
+	if(timers & PWM16_TIMER1 && !_pwm16_timer1_initialized)
 	{
 		/* Enable Timer */
 		SCB_SYSAHBCLKCTRL |= SCB_SYSAHBCLKCTRL_CT16B1;
@@ -63,6 +68,8 @@ void pwm16InitTimers(int timers)
 		TMR_TMR16B1TCR &= ~TMR_TMR16B1TCR_COUNTERENABLE_MASK;
 
 		NVIC_EnableIRQ(TIMER_16_1_IRQn);
+
+		_pwm16_timer1_initialized = 1;
 	}
 }
 

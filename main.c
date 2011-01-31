@@ -36,11 +36,37 @@
 #include "cpu/cpu.h"
 #include "systick/systick.h"
 #include "pwm/pwm16.h"
+#include "esc/esc.h"
 
+void setupEscs(void)
+{
+	struct esc_controller_t *controller;
+
+	controller = escGetController();
+	ESC_SETUP(controller->escs[0],
+	          ESC_0_PWM_PIN,
+	          ESC_0_PWM_TIMER,
+	          0)
+	ESC_SETUP(controller->escs[1],
+	          ESC_1_PWM_PIN,
+	          ESC_1_PWM_TIMER,
+	          0)
+	ESC_SETUP(controller->escs[2],
+	          ESC_2_PWM_PIN,
+	          ESC_2_PWM_TIMER,
+	          0)
+	ESC_SETUP(controller->escs[3],
+	          ESC_3_PWM_PIN,
+	          ESC_3_PWM_TIMER,
+	          0)
+	escsInit();
+	escsArm();
+}
 
 int main(void)
 {
 	cpuInit();
+	setupEscs();
 
 	pwm16InitTimers(PWM16_TIMER0);
 	pwm16InitPins(PWM16_PIN0_0);
