@@ -35,27 +35,65 @@
 
 #include "cpu/cpu.h"
 #include "systick/systick.h"
-#include "pwm/pwm32.h"
+#include "pwm/pwm.h"
 
+#if 1
 int main(void)
 {
-	uint32_t dutycycle;
 	cpuInit();
-	pwm32Init(PWM32_TIMER0, PWM32_PIN0_2);
 
-	// Start systick with tick every 10ms
-	systickInit(10);
+	/* Enable the clock for CT16B0 */
+	SCB_SYSAHBCLKCTRL |= SCB_SYSAHBCLKCTRL_CT16B0;
 
-	pwm32SetDutyCycleInTicks(PWM32_PIN0_2, 0xFF);
-	pwm32Start(PWM32_TIMER0);
+	IOCON_PIO0_8 &= ~IOCON_PIO0_8_FUNC_MASK;
+	IOCON_PIO0_8 |= IOCON_PIO0_8_FUNC_CT16B0_MAT0;
+
+	/* Set pulse width */
+	TMR_TMR16B0MR3 = 60000;
+
+	/* Set duty cycle */
+	TMR_TMR16B0MR0 = 60000-24000;
+
+	TMR_TMR16B0MCR = (TMR_TMR16B0MCR_MR3_RESET_ENABLED);
+
+	/* External Match Register Settings for PWM */
+	TMR_TMR16B0EMR = TMR_TMR16B0EMR_EMC0_TOGGLE | TMR_TMR16B0EMR_EM0;
+
+	TMR_TMR16B0TCR &= ~TMR_TMR16B0TCR_COUNTERENABLE_MASK;
+
+	/* Enable PWM0 */
+	TMR_TMR16B0PWMC |= TMR_TMR16B0PWMC_PWM0_ENABLED | TMR_TMR16B0PWMC_PWM3_ENABLED;;
+
+	/* Make sure that the timer interrupt is enabled */
+	NVIC_EnableIRQ(TIMER_16_0_IRQn);
+
+	TMR_TMR16B0MCR  &= ~(TMR_TMR16B0MCR_MR3_INT_MASK);
+	TMR_TMR16B0TCR = TMR_TMR16B0TCR_COUNTERENABLE_ENABLED;
+
+	TMR_TMR16B0PR = 2;
+
+	systickInit(1);
+
+	systickDelay(10000);
 
 	while(1)
 	{
-		for(dutycycle = 0xFF;dutycycle<0xFFFF;dutycycle++)
-		{
-			systickDelay(1);
-			pwm32SetDutyCycleInTicks(PWM32_PIN0_2, dutycycle);
-		}
+		systickDelay(1);
+		TMR_TMR16B0MR0--;
 	}
+
 	return 0 ;
 }
+#else
+
+int main(void)
+{
+
+	pwmInit();
+	pwmStart();
+
+	while(1);
+	return 0;
+}
+
+#endif
