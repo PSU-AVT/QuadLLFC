@@ -9,4 +9,7 @@
 #define CFG_PWM_DEFAULT_PULSEWIDTH  (CFG_CPU_CCLK / 1000)
 #define CFG_PWM_DEFAULT_DUTYCYCLE   (50)
 
+#define CFG_UART_BAUDRATE           (115200)
+#define CFG_UART_BUFSIZE            (512)
+
 #endif
