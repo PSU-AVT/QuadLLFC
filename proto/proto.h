@@ -29,11 +29,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef _CRC_8_
-#define _CRC_8_
+#ifndef _PROTO_H_
+#define _PROTO_H_
 
-#include <stdint.h>
+#define PROTO_MSG_MAXLENGTH 512
+#define PROTO_MSG_FOOTER_TAG 0xB2
 
-uint8_t crc8(const volatile uint8_t *buff, int length);
+#define PROTO_USB 1
+
+void proto_init(void);
 
 #endif

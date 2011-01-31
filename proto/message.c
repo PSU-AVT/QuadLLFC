@@ -29,11 +29,4 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef _CRC_8_
-#define _CRC_8_
-
-#include <stdint.h>
-
-uint8_t crc8(const volatile uint8_t *buff, int length);
-
-#endif
+#include "message.h"

@@ -29,11 +29,52 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef _CRC_8_
-#define _CRC_8_
+#include "proto.h"
+#include "message.h"
+#include "../crypto/crc8.h"
 
-#include <stdint.h>
+enum ProtoMsgGetcharRet // Return val for proto_msg_getchar
+{
+	PROTO_MSG_OK,
+	PROTO_MSG_IO_ERROR,
+	PROTO_MSG_INVALID,
+	PROTO_MSG_COMPLETE
+};
 
-uint8_t crc8(const volatile uint8_t *buff, int length);
+enum ProtoMsgParseState_t // State machine for msg parser
+{
+	PROTO_MSG_PARSE_STATE_DISCARD, // Discard until footer tag
+	PROTO_MSG_PARSE_STATE_READ, // Read into msg buffer
+	PROTO_MSG_PARSE_STATE_COMPLETE // Complete, valid message stored
+};
 
-#endif
+static volatile uint8_t proto_msg_buff[PROTO_MSG_MAXLENGTH];
+static volatile uint8_t proto_msg_buff_offset;
+static volatile int proto_msg_parse_state;
+
+void proto_msg_parse_init(void)
+{
+	proto_msg_parse_state = PROTO_MSG_PARSE_STATE_READ;
+	proto_msg_buff_offset = 0;
+}
+
+/* Validates msg buffer
+   Returns 0 on error, 1 on success. */
+int proto_msg_validate(void)
+{
+	uint8_t crc;
+	uint8_t len = proto_msg_buff[0];
+
+	// Footer tag check
+	if(proto_msg_buff[len-1] != PROTO_MSG_FOOTER_TAG)
+		return 0;
+
+	// CRC check
+	crc = crc8(proto_msg_buff, (int)len - 2);
+	if(crc != proto_msg_buff[len-2])
+		return 0;
+
+	return 1;
+}
+
+
