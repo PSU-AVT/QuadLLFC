@@ -30,3 +30,83 @@
 */
 
 #include "pwm16.h"
+#include "../config.h"
+
+void pwm16InitTimers(int timers)
+{
+	if(timers & PWM16_TIMER0)
+	{
+		/* Enable Timer */
+		SCB_SYSAHBCLKCTRL |= SCB_SYSAHBCLKCTRL_CT16B0;
+
+		TMR_TMR16B0MCR = (TMR_TMR16B0MCR_MR3_RESET_ENABLED);
+
+		/* External Match Register Settings for PWM */
+		TMR_TMR16B0EMR = TMR_TMR16B0EMR_EMC0_TOGGLE | TMR_TMR16B0EMR_EM0;
+
+		/* Disable counter */
+		TMR_TMR16B0TCR &= ~TMR_TMR16B0TCR_COUNTERENABLE_MASK;
+
+		NVIC_EnableIRQ(TIMER_16_0_IRQn);
+	}
+	if(timers & PWM16_TIMER1)
+	{
+		/* Enable Timer */
+		SCB_SYSAHBCLKCTRL |= SCB_SYSAHBCLKCTRL_CT16B1;
+
+		TMR_TMR16B1MCR = (TMR_TMR16B1MCR_MR3_RESET_ENABLED);
+
+		/* External Match Register Settings for PWM */
+		TMR_TMR16B1EMR = TMR_TMR16B1EMR_EMC0_TOGGLE | TMR_TMR16B1EMR_EM0;
+
+		/* Disable counter */
+		TMR_TMR16B1TCR &= ~TMR_TMR16B1TCR_COUNTERENABLE_MASK;
+
+		NVIC_EnableIRQ(TIMER_16_1_IRQn);
+	}
+}
+
+void pwm16InitPins(int pins)
+{
+	if(pins & PWM16_PIN0_0)
+	{
+		IOCON_PIO0_8 &= ~IOCON_PIO0_8_FUNC_MASK;
+		IOCON_PIO0_8 |= IOCON_PIO0_8_FUNC_CT16B0_MAT0;
+
+		TMR_TMR16B0PWMC |= TMR_TMR16B0PWMC_PWM0_ENABLED;
+	}
+}
+
+void pwm16StartTimers(int timers)
+{
+	if(timers & PWM16_TIMER0)
+	{
+		TMR_TMR16B0MCR  &= ~(TMR_TMR16B0MCR_MR3_INT_MASK);
+		TMR_TMR16B0TCR = TMR_TMR16B0TCR_COUNTERENABLE_ENABLED;
+	}
+	if(timers & PWM16_TIMER1)
+	{
+		TMR_TMR16B1MCR  &= ~(TMR_TMR16B1MCR_MR3_INT_MASK);
+		TMR_TMR16B1TCR = TMR_TMR16B1TCR_COUNTERENABLE_ENABLED;
+	}
+}
+
+void pwm16SetTimerPrescaler(int timer, int value)
+{
+	if(timer == PWM16_TIMER0)
+		TMR_TMR16B0PR = value;
+	else if(timer == PWM16_TIMER1)
+		TMR_TMR16B1PR = value;
+}
+
+void pwm16SetFrequencyInTicks(int pins, int value)
+{
+	if(pins & PWM16_PIN0_0)
+		TMR_TMR16B0MR3 = value;
+}
+
+void pwm16SetDutyCycleInTicks(int pins, int value)
+{
+	if(pins & PWM16_PIN0_0)
+		TMR_TMR16B0MR0 = value;
+}

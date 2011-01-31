@@ -32,6 +32,33 @@
 #ifndef _PWM16_H_
 #define _PWM16_H_
 
-void pwm16Init(void);
+enum PWM16_TIMER_T {
+	PWM16_TIMER0 = 1,
+	PWM16_TIMER1 = 2,
+};
+
+/* PINX can only be used with TIMERX */
+enum PWM16_PIN_T {
+	PWM16_PIN0_0 = 1,
+	PWM16_PIN0_1 = 2,
+	PWM16_PIN0_2 = 4,
+	PWM16_PIN0_3 = 8,
+	PWM16_PIN1_0 = 16,
+	PWM16_PIN1_1 = 32,
+	PWM16_PIN1_2 = 64,
+	PWM16_PIN1_3 = 128
+};
+
+void pwm16InitTimers(int timer);
+
+void pwm16InitPins(int pins);
+
+void pwm16StartTimers(int timers);
+
+void pwm16SetTimerPrescaler(int timer, int value);
+
+void pwm16SetFrequencyInTicks(int pins, int value);
+
+void pwm16SetDutyCycleInTicks(int pins, int value);
 
 #endif

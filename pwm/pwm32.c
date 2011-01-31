@@ -31,8 +31,8 @@
 
 #include "pwm32.h"
 
-uint32_t pwmPulseWidth = CFG_PWM_DEFAULT_PULSEWIDTH;
-uint32_t pwmDutyCycle = CFG_PWM_DEFAULT_DUTYCYCLE;
+static uint32_t pwmPulseWidth = CFG_PWM_DEFAULT_PULSEWIDTH;
+static uint32_t pwmDutyCycle = CFG_PWM_DEFAULT_DUTYCYCLE;
 
 int pwm32EnablePins(int pins);
 
