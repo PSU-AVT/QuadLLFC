@@ -42,11 +42,8 @@ enum PWM16_PIN_T {
 	PWM16_PIN0_0 = 1,
 	PWM16_PIN0_1 = 2,
 	PWM16_PIN0_2 = 4,
-	PWM16_PIN0_3 = 8,
 	PWM16_PIN1_0 = 16,
 	PWM16_PIN1_1 = 32,
-	PWM16_PIN1_2 = 64,
-	PWM16_PIN1_3 = 128
 };
 
 void pwm16InitTimers(int timer);

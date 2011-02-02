@@ -66,15 +66,19 @@ void setupEscs(void)
 int main(void)
 {
 	cpuInit();
-	setupEscs();
-
-	pwm16InitTimers(PWM16_TIMER0);
+	systickInit(1);
+/*
 	pwm16InitPins(PWM16_PIN0_0);
-	pwm16SetFrequencyInTicks(PWM16_PIN0_0, 60000);
+	pwm16InitTimers(PWM16_TIMER0);
+	pwm16SetFrequencyInTicks(PWM16_TIMER0, 60000);
 	pwm16SetDutyCycleInTicks(PWM16_PIN0_0, 30000);
+	pwm16SetTimerPrescaler(PWM16_TIMER0, 1);
 	pwm16StartTimers(PWM16_TIMER0);
+*/
+
+	setupEscs();
 
 	while(1);
 
-	return 0 ;
+	return 0;
 }

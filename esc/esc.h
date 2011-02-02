@@ -53,13 +53,13 @@
 
 #define ESC_0_PWM_PIN PWM16_PIN0_0
 #define ESC_1_PWM_PIN PWM16_PIN0_1
-#define ESC_2_PWM_PIN PWM16_PIN0_2
-#define ESC_3_PWM_PIN PWM16_PIN0_3
+#define ESC_2_PWM_PIN PWM16_PIN1_0
+#define ESC_3_PWM_PIN PWM16_PIN1_1
 
 #define ESC_0_PWM_TIMER PWM16_TIMER0
 #define ESC_1_PWM_TIMER PWM16_TIMER0
 #define ESC_2_PWM_TIMER PWM16_TIMER0
-#define ESC_3_PWM_TIMER PWM16_TIMER0
+#define ESC_3_PWM_TIMER PWM16_TIMER1
 
 struct esc_t
 {
@@ -79,6 +79,7 @@ struct esc_controller_t
 	ESC.duty_cycle = CYCLE;
 
 struct esc_controller_t *escGetController(void);
+void escInit(struct esc_t *esc);
 void escsInit(void);
 void escsArm(void);
 void escSetDutyCycle(struct esc_t *esc, uint16_t cycle);

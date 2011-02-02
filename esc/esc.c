@@ -30,13 +30,17 @@
 */
 
 #include "esc.h"
+#include "../systick/systick.h"
 
 static struct esc_controller_t _esc_control;
-static int _esc_initialized;
+static int _escs_initialized;
+
+#define ESC_PWM_FREQUENCY 60000
+#define ESC_PWM_PRESCALE 2
+#define ESC_ARM_DCYCLE 36000
 
 void escInit(struct esc_t *esc)
 {
-	pwm16InitTimers(esc->pwm_timer);
 	pwm16InitPins(esc->pwm_pin);
 	escSetDutyCycle(esc, esc->duty_cycle);
 }
@@ -49,17 +53,35 @@ struct esc_controller_t *escGetController(void)
 void escsInit(void)
 {
 	int i;
-	if(!_esc_initialized)
+
+	pwm16InitTimers(PWM16_TIMER0);
+	pwm16InitTimers(PWM16_TIMER1);
+	pwm16SetFrequencyInTicks(PWM16_TIMER0, ESC_PWM_FREQUENCY);
+	pwm16SetFrequencyInTicks(PWM16_TIMER1, ESC_PWM_FREQUENCY);
+	pwm16SetTimerPrescaler(PWM16_TIMER0, ESC_PWM_PRESCALE);
+	pwm16SetTimerPrescaler(PWM16_TIMER1, ESC_PWM_PRESCALE);
+
+	if(!_escs_initialized)
 	{
 		for(i = 0;i < ESC_CNT;i++)
 			escInit(&_esc_control.escs[i]);
+		_escs_initialized = 1;
 	}
 }
 
 void escsArm(void)
 {
+	int i;
+	for(i = 0;i < ESC_CNT;i++)
+		escSetDutyCycle(&_esc_control.escs[i], ESC_ARM_DCYCLE);
+
+	pwm16StartTimers(PWM16_TIMER0);
+	pwm16StartTimers(PWM16_TIMER1);
+
+	systickDelay(10000);
 }
 
 void escSetDutyCycle(struct esc_t *esc, uint16_t cycle)
 {
+	pwm16SetDutyCycleInTicks(esc->pwm_pin, cycle);
 }
