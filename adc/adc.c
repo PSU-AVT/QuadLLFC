@@ -31,7 +31,6 @@
 
 #include "adc.h"
 
-static int _adc_complete;
 static int _adc_selected_pins;
 static int _adc_selected_pin;
 static unsigned int _adc_vals[ADC_PIN_CNT];
@@ -45,7 +44,15 @@ static unsigned int _adc_vals[ADC_PIN_CNT];
 
 void ADC_IRQHandler(void)
 {
-	_adc_complete = 1;
+	switch(_adc_selected_pin)
+	{
+	case ADC_PIN0:
+		_adc_vals[0] = (*(pREG32(ADC_AD0DR0)));
+		break;
+	case ADC_PIN1:
+		_adc_vals[1] = (*(pREG32(ADC_AD0DR1)));
+		break;
+	}
 }
 
 /* Performs the multiplexing */
@@ -59,7 +66,7 @@ void adcSelectNextPin()
 	} while(!(_adc_selected_pin & _adc_selected_pins));
 }
 
-/* Set ADC recisters to read from seleceted pin */
+/* Set ADC registers to read from selected pin */
 void adcCtlSetSelectedPin()
 {
 	ADC_CTL_RESET
@@ -68,7 +75,6 @@ void adcCtlSetSelectedPin()
 
 void adcStart()
 {
-	_adc_complete = 0;
 	int i;
 
 	/* Select the first pin */
