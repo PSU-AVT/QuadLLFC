@@ -35,7 +35,7 @@ static int _adc_selected_pins;
 static int _adc_selected_pin;
 static unsigned int _adc_vals[ADC_PIN_CNT];
 
-#define ADC_CTL_RESET \
+#define ADC_CTL_RESET /* Puts ADC into state where only pin needs to be set */\
 	ADC_AD0CR = ((((CFG_CPU_CCLK / SCB_SYSAHBCLKDIV) / 1000000 - 1 ) << 8) |   /* CLKDIV = Fpclk / 1000000 - 1 */\
 	             ADC_AD0CR_BURST_SWMODE |                 /* BURST = 0, no BURST, software controlled */\
 	             ADC_AD0CR_CLKS_10BITS |                  /* CLKS = 0, 11 clocks/10 bits */\

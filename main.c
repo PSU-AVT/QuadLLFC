@@ -37,6 +37,10 @@
 #include "systick/systick.h"
 #include "pwm/pwm16.h"
 #include "esc/esc.h"
+#include "uart/uart.h"
+#include "timer32/timer32.h"
+
+extern volatile uint32_t timer32_0_counter; // In timer32.c
 
 void setupEscs(void)
 {
@@ -65,32 +69,27 @@ void setupEscs(void)
 
 int main(void)
 {
+	struct esc_controller_t *controller;
+
 	cpuInit();
 	systickInit(1);
 
-	struct esc_controller_t *controller;
+	uartInit(57600);
+	setupEscs();
 
 	controller = escGetController();
 
-	/*
-	pwm16InitPins(PWM16_PIN1_0);
-	pwm16InitTimers(PWM16_TIMER1);
-	pwm16SetFrequencyInTicks(PWM16_TIMER1, 60000);
-	pwm16SetDutyCycleInTicks(PWM16_PIN1_0, 30000);
-	pwm16SetTimerPrescaler(PWM16_TIMER1, 2);
-	pwm16StartTimers(PWM16_TIMER1);
-	*/
-
-	setupEscs();
+	timer32Init(0, 72000000);
+	timer32Enable(0);
+	timer32_0_counter = 0;
 
 	while(1)
 	{
-		systickDelay(10);
-		escSetDutyCycle(&(controller->escs[0]),
-		                controller->escs[0].duty_cycle+1);
-		escSetDutyCycle(&(controller->escs[1]),
-                        controller->escs[1].duty_cycle+1);
+		if(timer32_0_counter)
+		{
+			uartSend("Hello\n", 6);
+			timer32_0_counter = 0;
+		}
 	}
-
 	return 0;
 }
