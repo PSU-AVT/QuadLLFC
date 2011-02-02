@@ -55,6 +55,5 @@ uint8_t crc8(const volatile uint8_t *buff, int length)
 
 	while (length--) {
 		crc = dscrc_table[crc ^ *buff++];
-	}
-	return crc;
 }
+
