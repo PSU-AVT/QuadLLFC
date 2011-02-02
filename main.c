@@ -68,6 +68,10 @@ int main(void)
 	cpuInit();
 	systickInit(1);
 
+	struct esc_controller_t *controller;
+
+	controller = escGetController();
+
 	/*
 	pwm16InitPins(PWM16_PIN1_0);
 	pwm16InitTimers(PWM16_TIMER1);
@@ -79,7 +83,14 @@ int main(void)
 
 	setupEscs();
 
-	while(1);
+	while(1)
+	{
+		systickDelay(10);
+		escSetDutyCycle(&(controller->escs[0]),
+		                controller->escs[0].duty_cycle+1);
+		escSetDutyCycle(&(controller->escs[1]),
+                        controller->escs[1].duty_cycle+1);
+	}
 
 	return 0;
 }

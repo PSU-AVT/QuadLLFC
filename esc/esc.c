@@ -83,5 +83,6 @@ void escsArm(void)
 
 void escSetDutyCycle(struct esc_t *esc, uint16_t cycle)
 {
+	esc->duty_cycle = cycle;
 	pwm16SetDutyCycleInTicks(esc->pwm_pin, cycle);
 }
