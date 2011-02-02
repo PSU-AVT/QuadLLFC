@@ -35,9 +35,9 @@
 static struct esc_controller_t _esc_control;
 static int _escs_initialized;
 
-#define ESC_PWM_FREQUENCY 60000
+static const unsigned int ESC_PWM_FREQUENCY = 60000;
 #define ESC_PWM_PRESCALE 2
-#define ESC_ARM_DCYCLE 36000
+static const unsigned int ESC_ARM_DCYCLE = 36000;
 
 void escInit(struct esc_t *esc)
 {
