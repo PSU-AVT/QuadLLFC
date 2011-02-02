@@ -138,10 +138,12 @@ void pwm16SetTimerPrescaler(int timer, int value)
 		TMR_TMR16B1PR = value;
 }
 
-void pwm16SetFrequencyInTicks(int pins, int value)
+void pwm16SetFrequencyInTicks(int timer, int value)
 {
-	if(pins & PWM16_PIN0_0)
+	if(timer & PWM16_TIMER0)
 		TMR_TMR16B0MR3 = value;
+	if(timer & PWM16_TIMER1)
+		TMR_TMR16B1MR3 = value;
 }
 
 void pwm16SetDutyCycleInTicks(int pins, int value)

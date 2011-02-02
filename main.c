@@ -67,14 +67,15 @@ int main(void)
 {
 	cpuInit();
 	systickInit(1);
-/*
-	pwm16InitPins(PWM16_PIN0_0);
-	pwm16InitTimers(PWM16_TIMER0);
-	pwm16SetFrequencyInTicks(PWM16_TIMER0, 60000);
-	pwm16SetDutyCycleInTicks(PWM16_PIN0_0, 30000);
-	pwm16SetTimerPrescaler(PWM16_TIMER0, 1);
-	pwm16StartTimers(PWM16_TIMER0);
-*/
+
+	/*
+	pwm16InitPins(PWM16_PIN1_0);
+	pwm16InitTimers(PWM16_TIMER1);
+	pwm16SetFrequencyInTicks(PWM16_TIMER1, 60000);
+	pwm16SetDutyCycleInTicks(PWM16_PIN1_0, 30000);
+	pwm16SetTimerPrescaler(PWM16_TIMER1, 2);
+	pwm16StartTimers(PWM16_TIMER1);
+	*/
 
 	setupEscs();
 

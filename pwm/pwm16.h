@@ -54,7 +54,7 @@ void pwm16StartTimers(int timers);
 
 void pwm16SetTimerPrescaler(int timer, int value);
 
-void pwm16SetFrequencyInTicks(int pins, int value);
+void pwm16SetFrequencyInTicks(int timer, int value);
 
 void pwm16SetDutyCycleInTicks(int pins, int value);
 
