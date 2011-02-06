@@ -108,7 +108,7 @@ int main(void)
 	{
 		systickDelay(100);
 		uartSendByte('.');
-		val = adcGetVal(0);
+		val = adcGetVal(ADC_PIN0);
 		low = ((uint8_t*)(&val)[0]);
 		high = ((uint8_t*)(&val))[1];
 		uartSendByte(high);

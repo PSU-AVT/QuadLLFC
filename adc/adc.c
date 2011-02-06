@@ -48,7 +48,15 @@ void adcSelectNextPin(void);
 
 uint16_t adcGetVal(uint16_t pin)
 {
-	return _adc_vals[pin];
+	int i = -1;
+	if(!pin)
+		return 0;
+	while(pin)
+	{
+		i++;
+		pin = pin >> 1;
+	}
+	return _adc_vals[i];
 }
 
 void ADC_IRQHandler(void)
