@@ -49,6 +49,7 @@ enum ADC_PIN_T
 
 #define adcIsResultValid(VAL) (VAL & ADC_RESULT_INVALID)
 
+uint16_t adcGetVal(uint16_t pin);
 void adcStart(void);
 void adcSelectPins(int pin);
 void adcInit(int pins);

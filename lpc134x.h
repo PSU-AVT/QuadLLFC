@@ -3276,17 +3276,17 @@ static inline void NVIC_DisableIRQ(IRQn_t IRQn)
 #define ADC_AD0_BASE_ADDRESS                      (0x4001C000)
 
 #define ADC_AD0CR                                 (*(pREG32 (0x4001C000)))      // ADC Control Register
-#define ADC_AD0GDR                                ((unsigned int) 0x4001C004)   // ADC Global Data Register
-#define ADC_AD0INTEN                              ((unsigned int) 0x4001C00C)   // ADC Interrupt Enable Register
-#define ADC_AD0DR0                                ((unsigned int) 0x4001C010)   // ADC Data Register 0
-#define ADC_AD0DR1                                ((unsigned int) 0x4001C014)   // ADC Data Register 1
-#define ADC_AD0DR2                                ((unsigned int) 0x4001C018)   // ADC Data Register 2
-#define ADC_AD0DR3                                ((unsigned int) 0x4001C01C)   // ADC Data Register 3
-#define ADC_AD0DR4                                ((unsigned int) 0x4001C020)   // ADC Data Register 4
-#define ADC_AD0DR5                                ((unsigned int) 0x4001C024)   // ADC Data Register 5
-#define ADC_AD0DR6                                ((unsigned int) 0x4001C028)   // ADC Data Register 6
-#define ADC_AD0DR7                                ((unsigned int) 0x4001C02C)   // ADC Data Register 7
-#define ADC_AD0STAT                               ((unsigned int) 0x4001C030)   // ADC Status Register
+#define ADC_AD0GDR                                (*(pREG32 (0x4001C004)))   // ADC Global Data Register
+#define ADC_AD0INTEN                              (*(pREG32 (0x4001C00C)))   // ADC Interrupt Enable Register
+#define ADC_AD0DR0                                (*(pREG32 (0x4001C010)))   // ADC Data Register 0
+#define ADC_AD0DR1                                (*(pREG32 (0x4001C014)))   // ADC Data Register 1
+#define ADC_AD0DR2                                (*(pREG32 (0x4001C018)))   // ADC Data Register 2
+#define ADC_AD0DR3                                (*(pREG32 (0x4001C01C)))   // ADC Data Register 3
+#define ADC_AD0DR4                                (*(pREG32 (0x4001C020)))   // ADC Data Register 4
+#define ADC_AD0DR5                                (*(pREG32 (0x4001C024)))   // ADC Data Register 5
+#define ADC_AD0DR6                                (*(pREG32 (0x4001C028)))   // ADC Data Register 6
+#define ADC_AD0DR7                                (*(pREG32 (0x4001C02C)))   // ADC Data Register 7
+#define ADC_AD0STAT                               (*(pREG32 (0x4001C030)))   // ADC Status Register
 
 #define ADC_AD0CR_SEL_MASK                        (0x000000FF)
 #define ADC_AD0CR_SEL_AD0                         (0x00000001)

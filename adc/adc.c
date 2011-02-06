@@ -31,9 +31,9 @@
 
 #include "adc.h"
 
-static int _adc_selected_pins;
-static int _adc_selected_pin;
-static unsigned int _adc_vals[ADC_PIN_CNT];
+static volatile int _adc_selected_pins;
+static volatile int _adc_selected_pin;
+static volatile uint16_t _adc_vals[ADC_PIN_CNT];
 
 #define ADC_CTL_RESET /* Puts ADC into state where only pin needs to be set */\
 	ADC_AD0CR = ((((CFG_CPU_CCLK / SCB_SYSAHBCLKDIV) / 1000000 - 1 ) << 8) |   /* CLKDIV = Fpclk / 1000000 - 1 */\
@@ -42,21 +42,30 @@ static unsigned int _adc_vals[ADC_PIN_CNT];
 	             ADC_AD0CR_START_NOSTART |                /* START = 0 A/D conversion stops */\
 	             ADC_AD0CR_EDGE_RISING);                  /* EDGE = 0 (CAP/MAT signal falling, trigger A/D conversion) */
 
+void adcSelectNextPin(void);
+
+uint16_t adcGetVal(uint16_t pin)
+{
+	return _adc_vals[pin];
+}
+
 void ADC_IRQHandler(void)
 {
-	switch(_adc_selected_pin)
-	{
-	case ADC_PIN0:
-		_adc_vals[0] = (*(pREG32(ADC_AD0DR0)));
-		break;
-	case ADC_PIN1:
-		_adc_vals[1] = (*(pREG32(ADC_AD0DR1)));
-		break;
-	}
+	if(ADC_AD0STAT & ADC_PIN0) // This works...trust me
+		_adc_vals[0] = ADC_AD0DR0;
+	if(ADC_AD0STAT & ADC_PIN1)
+		_adc_vals[1] = ADC_AD0DR1;
+	if(ADC_AD0STAT & ADC_PIN2)
+		_adc_vals[2] = ADC_AD0DR2;
+	if(ADC_AD0STAT & ADC_PIN3)
+		_adc_vals[3] = ADC_AD0DR3;
+
+	adcSelectNextPin();
+	ADC_AD0CR |= ADC_AD0CR_START_STARTNOW;
 }
 
 /* Performs the multiplexing */
-void adcSelectNextPin()
+void adcSelectNextPin(void)
 {
 	do
 	{
@@ -77,14 +86,16 @@ void adcStart()
 {
 	int i;
 
-	/* Select the first pin */
-	_adc_selected_pin = 1;
 	if(!(_adc_selected_pins & 1))
 		adcSelectNextPin();
+	else
+		_adc_selected_pin = 1;
 
 	/* Set all results to invalid */
 	for(i = 0;i < ADC_PIN_CNT;i++)
 		_adc_vals[i] = ADC_RESULT_INVALID;
+
+	adcCtlSetSelectedPin();
 
 	/* Start the ADC */
 	ADC_AD0CR |= ADC_AD0CR_START_STARTNOW;

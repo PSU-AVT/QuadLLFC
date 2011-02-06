@@ -33,14 +33,19 @@
 #include "LPC13xx.h"
 #endif
 
+#include <stdint.h>
+
 #include "cpu/cpu.h"
 #include "systick/systick.h"
 #include "pwm/pwm16.h"
 #include "esc/esc.h"
 #include "uart/uart.h"
 #include "timer32/timer32.h"
+#include "adc/adc.h"
 
 extern volatile uint32_t timer32_0_counter; // In timer32.c
+
+#define ESC_STARTUP_CYCLE 35000
 
 void setupEscs(void)
 {
@@ -74,22 +79,85 @@ int main(void)
 	cpuInit();
 	systickInit(1);
 
-	uartInit(57600);
+	uartInit(9600);
+	uartSend("Arming\n", 7);
+
 	setupEscs();
+	uartSend("Armed\n", 6);
 
 	controller = escGetController();
 
-	timer32Init(0, 72000000);
-	timer32Enable(0);
-	timer32_0_counter = 0;
+	escSetDutyCycle(&(controller->escs[0]),
+	                ESC_STARTUP_CYCLE);
+	escSetDutyCycle(&(controller->escs[1]),
+	                ESC_STARTUP_CYCLE);
+	escSetDutyCycle(&(controller->escs[2]),
+	                ESC_STARTUP_CYCLE);
+	escSetDutyCycle(&(controller->escs[3]),
+	                ESC_STARTUP_CYCLE);
+
+
+	adcInit(ADC_PIN0);
+	adcSelectPins(ADC_PIN0);
+	adcStart();
+
+	uint16_t val = 0;
+	uint8_t low, high;
 
 	while(1)
 	{
-		if(timer32_0_counter)
-		{
-			uartSend("Hello\n", 6);
-			timer32_0_counter = 0;
-		}
+		systickDelay(100);
+		uartSendByte('.');
+		val = adcGetVal(0);
+		low = ((uint8_t*)(&val)[0]);
+		high = ((uint8_t*)(&val))[1];
+		uartSendByte(high);
+		uartSendByte(low);
+	}
+
+	int speed;
+	uint8_t read;
+	while(1)
+	{
+			while(uartRxBufferDataPending())
+			{
+				read = uartRxBufferRead();
+				if(read == '.')
+				{
+					speed = -400;
+				}
+				else if(read == '-')
+				{
+					speed = 400;
+				}
+				else
+				{
+					speed = 0;
+				}
+
+				if(speed)
+				{
+					escSetDutyCycle(&(controller->escs[0]),
+									controller->escs[0].duty_cycle+speed);
+					escSetDutyCycle(&(controller->escs[1]),
+									controller->escs[1].duty_cycle+speed);
+					escSetDutyCycle(&(controller->escs[2]),
+									controller->escs[2].duty_cycle+speed);
+					escSetDutyCycle(&(controller->escs[3]),
+									controller->escs[3].duty_cycle+speed);
+				}
+				else
+				{
+					escSetDutyCycle(&(controller->escs[0]),
+					                ESC_STARTUP_CYCLE);
+					escSetDutyCycle(&(controller->escs[1]),
+					                ESC_STARTUP_CYCLE);
+					escSetDutyCycle(&(controller->escs[2]),
+					                ESC_STARTUP_CYCLE);
+					escSetDutyCycle(&(controller->escs[3]),
+					                ESC_STARTUP_CYCLE);
+				}
+			}
 	}
 	return 0;
 }
