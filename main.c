@@ -40,7 +40,7 @@
 #include "pwm/pwm16.h"
 #include "esc/esc.h"
 #include "uart/uart.h"
-#include "timer32/timer32.h"
+#include "timer/timer32.h"
 #include "adc/adc.h"
 
 extern volatile uint32_t timer32_0_counter; // In timer32.c
