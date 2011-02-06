@@ -43,6 +43,7 @@ static volatile uint16_t _adc_vals[ADC_PIN_CNT];
 	             ADC_AD0CR_EDGE_RISING);                  /* EDGE = 0 (CAP/MAT signal falling, trigger A/D conversion) */
 
 void adcSelectNextPin(void);
+void adcCtlSetSelectedPin(void);
 
 #define ADC_REGVAL(REG) ((REG >> 6) & 0x3FF)
 
@@ -83,10 +84,12 @@ void adcSelectNextPin(void)
 		if(_adc_selected_pin > ADC_MAX_PINVAL)
 			_adc_selected_pin = 1;
 	} while(!(_adc_selected_pin & _adc_selected_pins));
+
+	adcCtlSetSelectedPin();
 }
 
 /* Set ADC registers to read from selected pin */
-void adcCtlSetSelectedPin()
+void adcCtlSetSelectedPin(void)
 {
 	ADC_CTL_RESET
 	ADC_AD0CR |= _adc_selected_pin; /* This works...trust me */

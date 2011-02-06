@@ -97,8 +97,8 @@ int main(void)
 	                ESC_STARTUP_CYCLE);
 
 
-	adcInit(ADC_PIN0);
-	adcSelectPins(ADC_PIN0);
+	adcInit(ADC_PIN0 | ADC_PIN1);
+	adcSelectPins(ADC_PIN0 | ADC_PIN1);
 	adcStart();
 
 	uint16_t val = 0;
