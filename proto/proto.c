@@ -31,50 +31,78 @@
 
 #include "proto.h"
 #include "message.h"
+#include "../uart/uart.h"
 #include "../crypto/crc8.h"
 
-enum ProtoMsgGetcharRet // Return val for proto_msg_getchar
+typedef enum PROTO_PARSE_STATE_T
 {
-	PROTO_MSG_OK,
-	PROTO_MSG_IO_ERROR,
-	PROTO_MSG_INVALID,
-	PROTO_MSG_COMPLETE
-};
+	PROTO_PARSE_STATE_READ,
+	PROTO_PARSE_STATE_DISCARD
+} PROTO_PARSE_STATE_T;
 
-enum ProtoMsgParseState_t // State machine for msg parser
+static volatile PROTO_PARSE_STATE_T _proto_parse_state;
+static uint8_t _proto_parse_buff_offset;
+static uint8_t *_proto_parse_buff;
+
+void proto_reset(void)
 {
-	PROTO_MSG_PARSE_STATE_DISCARD, // Discard until footer tag
-	PROTO_MSG_PARSE_STATE_READ, // Read into msg buffer
-	PROTO_MSG_PARSE_STATE_COMPLETE // Complete, valid message stored
-};
-
-static volatile uint8_t proto_msg_buff[PROTO_MSG_MAXLENGTH];
-static volatile uint8_t proto_msg_buff_offset;
-static volatile int proto_msg_parse_state;
-
-void proto_msg_parse_init(void)
-{
-	proto_msg_parse_state = PROTO_MSG_PARSE_STATE_READ;
-	proto_msg_buff_offset = 0;
+	_proto_parse_state = PROTO_PARSE_STATE_DISCARD;
+	_proto_parse_buff_offset = 0;
+	_proto_parse_buff = uartGetPCB()->rxfifo.buf;
 }
 
-/* Validates msg buffer
-   Returns 0 on error, 1 on success. */
-int proto_msg_validate(void)
+void proto_init(void)
 {
-	uint8_t crc;
-	uint8_t len = proto_msg_buff[0];
-
-	// Footer tag check
-	if(proto_msg_buff[len-1] != PROTO_MSG_FOOTER_TAG)
-		return 0;
-
-	// CRC check
-	crc = crc8(proto_msg_buff, (int)len - 2);
-	if(crc != proto_msg_buff[len-2])
-		return 0;
-
-	return 1;
+	uartInit(CFG_UART_BAUDRATE);
+	proto_reset();
 }
 
+void proto_invalid_message(void)
+{
+	uartSendByte('!');
+}
 
+void proto_check_msg(void)
+{
+	int length;
+	uint8_t check_crc;
+	uint8_t real_crc;
+
+	length = (int)_proto_parse_buff[1];
+	check_crc = _proto_parse_buff[_proto_parse_buff_offset];
+	real_crc = crc8(_proto_parse_buff, length-1);
+	if(real_crc == check_crc)
+		message_handle(&_proto_parse_buff[1], length-2);
+	else
+		proto_invalid_message();
+}
+
+void proto_process(void)
+{
+	while (_proto_parse_buff_offset < uartGetPCB()->rxfifo.len)
+	{
+		// Handle next char in parse buffer
+		switch(_proto_parse_state)
+		{
+		case PROTO_PARSE_STATE_READ:
+			if(_proto_parse_buff_offset > 1 &&
+			   _proto_parse_buff_offset == _proto_parse_buff[1])
+			{
+				// At the end of message
+				proto_check_msg();
+				proto_reset();
+			}
+			_proto_parse_buff_offset++;
+			break;
+		case PROTO_PARSE_STATE_DISCARD:
+			if(_proto_parse_buff[_proto_parse_buff_offset] == PROTO_MSG_HEADER_TAG)
+			{
+				_proto_parse_state = PROTO_PARSE_STATE_READ;
+				_proto_parse_buff_offset++;
+			}
+			else
+				uartRxBufferClearFIFO();
+			break;
+		}
+	}
+}

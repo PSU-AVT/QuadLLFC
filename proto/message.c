@@ -30,3 +30,10 @@
 */
 
 #include "message.h"
+
+#include "../uart/uart.h"
+
+void message_handle(uint8_t *message, uint8_t length)
+{
+	uartSendByte('.');
+}

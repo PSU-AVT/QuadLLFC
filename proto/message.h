@@ -29,7 +29,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifdef _MESSAGE_H_
+#ifndef _MESSAGE_H_
 #define _MESSAGE_H_
+
+#include <stdint.h>
+
+void message_handle(uint8_t *message, uint8_t length);
 
 #endif

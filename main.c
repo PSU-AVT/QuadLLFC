@@ -79,85 +79,88 @@ int main(void)
 	cpuInit();
 	systickInit(1);
 
-	uartInit(9600);
-	uartSend("Arming\n", 7);
+	// Initialize ADC
+	adcInit(ADC_PIN0 | ADC_PIN1);
+	adcSelectPins(ADC_PIN0 | ADC_PIN1);
+	adcStart();
 
+	proto_init();
+
+	// Arm ESCs
+	uartSend("Arming\n", 7);
 	setupEscs();
 	uartSend("Armed\n", 6);
 
 	controller = escGetController();
 
-	escSetDutyCycle(&(controller->escs[0]),
-	                ESC_STARTUP_CYCLE);
-	escSetDutyCycle(&(controller->escs[1]),
-	                ESC_STARTUP_CYCLE);
-	escSetDutyCycle(&(controller->escs[2]),
-	                ESC_STARTUP_CYCLE);
-	escSetDutyCycle(&(controller->escs[3]),
-	                ESC_STARTUP_CYCLE);
+	// Get base gyro values
+	uint16_t gyro_base[2];
+	gyro_base[0] = adcGetVal(ADC_PIN1);
+	gyro_base[1] = adcGetVal(ADC_PIN0);
 
+	// Control loop
+	uint16_t motors[4];
+	uint16_t gyro_val;
+	int offset;
+	float reaction_factor = 0.42;
+	float reaction;
 
-	adcInit(ADC_PIN0 | ADC_PIN1);
-	adcSelectPins(ADC_PIN0 | ADC_PIN1);
-	adcStart();
+	uint16_t motor_base = ESC_STARTUP_CYCLE;
+	uint8_t cmd;
 
-	uint16_t val = 0;
-	uint8_t low, high;
+	motors[0] = motor_base;
+	motors[1] = motor_base;
+	motors[2] = motor_base;
+	motors[3] = motor_base;
 
 	while(1)
 	{
-		systickDelay(100);
-		uartSendByte('.');
-		val = adcGetVal(ADC_PIN0);
-		low = ((uint8_t*)(&val)[0]);
-		high = ((uint8_t*)(&val))[1];
-		uartSendByte(high);
-		uartSendByte(low);
-	}
-
-	int speed;
-	uint8_t read;
-	while(1)
-	{
-			while(uartRxBufferDataPending())
+		if(uartRxBufferDataPending())
+		{
+			cmd = uartRxBufferRead();
+			if(cmd == '.')
 			{
-				read = uartRxBufferRead();
-				if(read == '.')
-				{
-					speed = -400;
-				}
-				else if(read == '-')
-				{
-					speed = 400;
-				}
-				else
-				{
-					speed = 0;
-				}
-
-				if(speed)
-				{
-					escSetDutyCycle(&(controller->escs[0]),
-									controller->escs[0].duty_cycle+speed);
-					escSetDutyCycle(&(controller->escs[1]),
-									controller->escs[1].duty_cycle+speed);
-					escSetDutyCycle(&(controller->escs[2]),
-									controller->escs[2].duty_cycle+speed);
-					escSetDutyCycle(&(controller->escs[3]),
-									controller->escs[3].duty_cycle+speed);
-				}
-				else
-				{
-					escSetDutyCycle(&(controller->escs[0]),
-					                ESC_STARTUP_CYCLE);
-					escSetDutyCycle(&(controller->escs[1]),
-					                ESC_STARTUP_CYCLE);
-					escSetDutyCycle(&(controller->escs[2]),
-					                ESC_STARTUP_CYCLE);
-					escSetDutyCycle(&(controller->escs[3]),
-					                ESC_STARTUP_CYCLE);
-				}
+				motor_base -= 400;
+				uartSendByte('.');
 			}
+			else if(cmd == '-')
+			{
+				motor_base += 400;
+				uartSendByte('-');
+			}
+			motors[0] = motor_base;
+			motors[1] = motor_base;
+			motors[2] = motor_base;
+			motors[3] = motor_base;
+		}
+
+		gyro_val = adcGetVal(ADC_PIN1);
+		if(gyro_val != gyro_base[0])
+		{
+			offset = gyro_val - gyro_base[0];
+			reaction = reaction_factor * offset;
+			motors[0] = motor_base + reaction;
+			motors[3] = motor_base - reaction;
+
+		}
+		gyro_val = adcGetVal(ADC_PIN0);
+		if(gyro_val != gyro_base[1])
+		{
+			offset = gyro_val - gyro_base[1];
+			reaction = reaction_factor * offset;
+			motors[1] = motor_base - reaction;
+			motors[2] = motor_base + reaction;
+		}
+
+		escSetDutyCycle(&(controller->escs[0]),
+		                motors[0]);
+		escSetDutyCycle(&(controller->escs[1]),
+		                motors[1]);
+		escSetDutyCycle(&(controller->escs[2]),
+		                motors[2]);
+		escSetDutyCycle(&(controller->escs[3]),
+		                motors[3]);
 	}
+
 	return 0;
 }

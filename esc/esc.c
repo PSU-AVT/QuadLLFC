@@ -71,14 +71,16 @@ void escsInit(void)
 
 void escsArm(void)
 {
-	int i;
+	int i;;
 	for(i = 0;i < ESC_CNT;i++)
+	{
 		escSetDutyCycle(&_esc_control.escs[i], ESC_ARM_DCYCLE);
+	}
 
 	pwm16StartTimers(PWM16_TIMER0);
 	pwm16StartTimers(PWM16_TIMER1);
 
-	systickDelay(10000);
+	systickDelay(7000);
 }
 
 void escSetDutyCycle(struct esc_t *esc, uint16_t cycle)

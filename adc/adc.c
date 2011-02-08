@@ -63,7 +63,7 @@ uint16_t adcGetVal(uint16_t pin)
 void ADC_IRQHandler(void)
 {
 	if(ADC_AD0STAT & ADC_PIN0) // This works...trust me
-		_adc_vals[0] = ADC_REGVAL(ADC_AD0DR0);
+		_adc_vals[0] = ADC_AD0DR0;
 	if(ADC_AD0STAT & ADC_PIN1)
 		_adc_vals[1] = ADC_AD0DR1;
 	if(ADC_AD0STAT & ADC_PIN2)
