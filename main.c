@@ -106,6 +106,7 @@ int main(void)
 	float reaction;
 
 	uint16_t motor_base = ESC_STARTUP_CYCLE;
+	int16_t mod;
 	uint8_t cmd;
 
 	motors[0] = motor_base;
@@ -120,18 +121,18 @@ int main(void)
 			cmd = uartRxBufferRead();
 			if(cmd == '.')
 			{
-				motor_base -= 400;
+				mod = -400;
 				uartSendByte('.');
 			}
 			else if(cmd == '-')
 			{
-				motor_base += 400;
+				motor_base = 400;
 				uartSendByte('-');
 			}
-			motors[0] = motor_base;
-			motors[1] = motor_base;
-			motors[2] = motor_base;
-			motors[3] = motor_base;
+			motors[0] += mod;
+			motors[1] += mod;
+			motors[2] += mod;
+			motors[3] += mod;
 		}
 
 		gyro_val = adcGetVal(ADC_PIN1);
@@ -139,8 +140,8 @@ int main(void)
 		{
 			offset = gyro_val - gyro_base[0];
 			reaction = reaction_factor * offset;
-			motors[0] = motor_base + reaction;
-			motors[3] = motor_base - reaction;
+			motors[0] += reaction;
+			motors[3] -= reaction;
 
 		}
 		gyro_val = adcGetVal(ADC_PIN0);
@@ -148,8 +149,8 @@ int main(void)
 		{
 			offset = gyro_val - gyro_base[1];
 			reaction = reaction_factor * offset;
-			motors[1] = motor_base - reaction;
-			motors[2] = motor_base + reaction;
+			motors[1] -= reaction;
+			motors[2] += reaction;
 		}
 
 		escSetDutyCycle(&(controller->escs[0]),
