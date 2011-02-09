@@ -120,10 +120,13 @@ int main(void)
 
 	// Accelerometer init;
 	struct accelero3d_t accelero;
+	accelero3dInit(&accelero, ADC_PIN3, ADC_PIN5, ADC_PIN6);
 
 	sensorsStart();
 
-	while(1);
+	while(1)
+	{
+	}
 
 	controller = escGetController();
 
