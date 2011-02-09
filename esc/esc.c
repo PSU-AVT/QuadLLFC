@@ -80,7 +80,7 @@ void escsArm(void)
 	pwm16StartTimers(PWM16_TIMER0);
 	pwm16StartTimers(PWM16_TIMER1);
 
-	systickDelay(7000000);
+	systickDelay(7000);
 }
 
 void escSetDutyCycle(struct esc_t *esc, uint16_t cycle)

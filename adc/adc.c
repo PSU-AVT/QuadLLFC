@@ -35,8 +35,10 @@ static volatile int _adc_selected_pins;
 static volatile int _adc_selected_pin;
 static volatile uint16_t _adc_vals[ADC_PIN_CNT];
 
+static int adc_clkdiv;
+
 #define ADC_CTL_RESET /* Puts ADC into state where only pin needs to be set */\
-	ADC_AD0CR = ((((CFG_CPU_CCLK / SCB_SYSAHBCLKDIV) / 1000 - 1 ) << 8) |   /* CLKDIV = Fpclk / 1000000 - 1 */\
+	ADC_AD0CR = ((adc_clkdiv) |   /* CLKDIV = Fpclk / 1000000 - 1 */\
 	             ADC_AD0CR_BURST_SWMODE |                 /* BURST = 0, no BURST, software controlled */\
 	             ADC_AD0CR_CLKS_10BITS |                  /* CLKS = 0, 11 clocks/10 bits */\
 	             ADC_AD0CR_START_NOSTART |                /* START = 0 A/D conversion stops */\
@@ -44,8 +46,6 @@ static volatile uint16_t _adc_vals[ADC_PIN_CNT];
 
 void adcSelectNextPin(void);
 void adcCtlSetSelectedPin(void);
-
-#define ADC_REGVAL(REG) ((REG >> 6) & 0x3FF)
 
 uint16_t adcGetVal(uint16_t pin)
 {
@@ -60,6 +60,11 @@ uint16_t adcGetVal(uint16_t pin)
 	return _adc_vals[i];
 }
 
+uint16_t adcGetNdxVal(uint8_t ndx)
+{
+	return _adc_vals[ndx];
+}
+
 void ADC_IRQHandler(void)
 {
 	if(ADC_AD0STAT & ADC_PIN0) // This works...trust me
@@ -70,6 +75,12 @@ void ADC_IRQHandler(void)
 		_adc_vals[2] = ADC_AD0DR2;
 	if(ADC_AD0STAT & ADC_PIN3)
 		_adc_vals[3] = ADC_AD0DR3;
+	if(ADC_AD0STAT & ADC_PIN4)
+		_adc_vals[4] = ADC_AD0DR4;
+	if(ADC_AD0STAT & ADC_PIN5)
+		_adc_vals[5] = ADC_AD0DR5;
+	if(ADC_AD0STAT & ADC_PIN6)
+		_adc_vals[6] = ADC_AD0DR6;
 
 	adcSelectNextPin();
 	ADC_AD0CR |= ADC_AD0CR_START_STARTNOW;
@@ -123,6 +134,8 @@ void adcSelectPins(int pins)
 
 void adcInit(int pins)
 {
+	adc_clkdiv = ((CFG_CPU_CCLK / SCB_SYSAHBCLKDIV) / 1000000 - 1 ) << 8;
+
 	/* Enable power to ADC */
 	SCB_PDRUNCFG &= ~(SCB_PDRUNCFG_ADC);
 
@@ -144,6 +157,42 @@ void adcInit(int pins)
 		                            IOCON_JTAG_TMS_PIO1_0_MODE_MASK);
 		IOCON_JTAG_TMS_PIO1_0 |=   (IOCON_JTAG_TMS_PIO1_0_FUNC_AD1 &
 		                            IOCON_JTAG_TMS_PIO1_0_ADMODE_ANALOG);
+	}
+	if(pins & ADC_PIN2)
+	{
+		IOCON_JTAG_TDO_PIO1_1 &=  ~(IOCON_JTAG_TDO_PIO1_1_ADMODE_MASK |
+		                            IOCON_JTAG_TDO_PIO1_1_FUNC_MASK |
+		                            IOCON_JTAG_TDO_PIO1_1_MODE_MASK);
+		IOCON_JTAG_TDO_PIO1_1 |=   (IOCON_JTAG_TDO_PIO1_1_FUNC_AD2 &
+		                            IOCON_JTAG_TDO_PIO1_1_ADMODE_ANALOG);
+	}
+	if(pins & ADC_PIN3)
+	{
+		IOCON_JTAG_nTRST_PIO1_2 &=  ~(IOCON_JTAG_nTRST_PIO1_2_ADMODE_MASK |
+		                              IOCON_JTAG_nTRST_PIO1_2_FUNC_MASK |
+		                              IOCON_JTAG_nTRST_PIO1_2_MODE_MASK);
+		IOCON_JTAG_nTRST_PIO1_2 |=   (IOCON_JTAG_nTRST_PIO1_2_FUNC_AD3 &
+		                              IOCON_JTAG_nTRST_PIO1_2_ADMODE_ANALOG);
+	}
+	if(pins & ADC_PIN4)
+	{
+		// SWD pin
+	}
+	if(pins & ADC_PIN5)
+	{
+		IOCON_PIO1_4 &=  ~(IOCON_PIO1_4_ADMODE_MASK |
+		                   IOCON_PIO1_4_FUNC_MASK |
+		                   IOCON_PIO1_4_MODE_MASK);
+		IOCON_PIO1_4 |=   (IOCON_PIO1_4_FUNC_AD5 &
+		                   IOCON_PIO1_4_ADMODE_ANALOG);
+	}
+	if(pins & ADC_PIN6)
+	{
+		IOCON_PIO1_10 &=  ~(IOCON_PIO1_10_ADMODE_MASK |
+		                    IOCON_PIO1_10_FUNC_MASK |
+		                    IOCON_PIO1_10_MODE_MASK);
+		IOCON_PIO1_10 |=   (IOCON_PIO1_10_FUNC_AD6 &
+		                    IOCON_PIO1_10_ADMODE_ANALOG);
 	}
 
 	// Enable ADC Interrupts

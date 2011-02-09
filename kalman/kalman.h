@@ -3,7 +3,7 @@
  *
  * Software License Agreement (BSD License)
  *
- * Copyright (c) 2011, Gregory Haynes
+ * Copyright (c) 2010, Gregory Haynes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,31 +29,29 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-/**
- * This ADC module multiplexes across selected pins using the ADC interrupt
- */
+#ifndef KALMAN_H
+#define KALMAN_H
 
-#include "../config.h"
-
-enum ADC_PIN_T
+struct kalman1d_t
 {
-	ADC_PIN0 = 1,
-	ADC_PIN1 = 2,
-	ADC_PIN2 = 4,
-	ADC_PIN3 = 8,
-	ADC_PIN4 = 16,
-	ADC_PIN5 = 32,
-	ADC_PIN6 = 64
+	// State
+	float angle,
+	      bias;
+
+	// Error covariance matrix
+	float p_00, p_01,
+	      p_10, p_11;
+
+	// Covariance
+	float q_angle,
+	      q_gyro;
+
+	// Observation noise covariance
+	float r_angle;
 };
 
-#define ADC_PIN_CNT 7
-#define ADC_MAX_PINVAL (1 << ADC_PIN_CNT)
-#define ADC_RESULT_INVALID 2048
+void kalman1d_init(struct kalman1d_t*, float q_angle, float q_gyro, float r_angle);
+void kalman1d_predict(struct kalman1d_t *k, float gyro, float dt);
+void kalman1d_update(struct kalman1d_t *k, float angle);
 
-#define adcIsResultValid(VAL) (VAL & ADC_RESULT_INVALID)
-
-uint16_t adcGetVal(uint16_t pin);
-uint16_t adcGetNdxVal(uint8_t ndx);
-void adcStart(void);
-void adcSelectPins(int pin);
-void adcInit(int pins);
+#endif

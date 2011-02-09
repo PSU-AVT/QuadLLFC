@@ -110,8 +110,8 @@ int main(void)
 	systickInit(1);
 
 	// Initialize ADC
-	adcInit(ADC_PIN0 | ADC_PIN1);
-	adcSelectPins(ADC_PIN0 | ADC_PIN1);
+	adcInit(ADC_PIN0 | ADC_PIN1 | ADC_PIN2 | ADC_PIN3 |  ADC_PIN5 | ADC_PIN6);
+	adcSelectPins(ADC_PIN0 | ADC_PIN1 | ADC_PIN2 | ADC_PIN3 |  ADC_PIN5 | ADC_PIN6);
 	adcStart();
 
 	proto_init();
@@ -121,122 +121,34 @@ int main(void)
 	setupEscs();
 	uartSend("Armed\n", 6);
 
-	controller = escGetController();
+	uint32_t last_acc_update;
+	uint32_t last_gyro_update;
 
-	// Get base gyro values
-	uint8_t gyro_smooth_cnt = 3;
-	uint16_t gyro_vals[2][gyro_smooth_cnt];
-	uint16_t gyros_base[2];
-	uint16_t gyro_prev_vals[2];
-	uint8_t gyro_cnt;
+	uint16_t gyro_vals[3];
+	uint16_t accel_vals[3];
+	uint16_t motors[4];
 
-	// Get gyro base vals
-	for(gyro_cnt=0;gyro_cnt < gyro_smooth_cnt;gyro_cnt++)
-	{
-		gyro_vals[0][gyro_cnt] = adcGetVal(ADC_PIN1);
-		gyro_vals[1][gyro_cnt] = adcGetVal(ADC_PIN0);
-//		systickDelay(20);
-
-
-	}
-	gyros_base[0] = median3(gyro_vals[0]);
-	gyros_base[1] = median3(gyro_vals[1]);
-	gyro_prev_vals[0] = gyros_base[0];
-	gyro_prev_vals[1] = gyros_base[1];
-
-	// Control loop
-	float motors[4];
-	uint16_t gyro_val;
-	int offset;
-	float reaction_p_factor = 0.00004;
-	float reaction_d_factor = .06;
-	float reaction;
-
-	uint16_t motor_base = ESC_STARTUP_CYCLE;
-	int16_t mod;
-	uint8_t cmd;
-
-	motors[0] = motor_base;
-	motors[1] = motor_base;
-	motors[2] = motor_base;
-	motors[3] = motor_base;
+	uint16_t gyro_bias[3];
 
 	while(1)
 	{
-		//systickDelay(1);
-		if(uartRxBufferDataPending())
-		{
-			cmd = uartRxBufferRead();
-			if(cmd == '.')
-			{
-				mod = -400;
-				uartSendByte('.');
-			}
-			else if(cmd == '-')
-			{
-				mod = 400;
-				uartSendByte('-');
-			}
-			else
-				mod = 0;
-			motors[0] += mod;
-			motors[1] += mod;
-			motors[2] += mod;
-			motors[3] += mod;
-		}
+		systickDelay(5);
 
-		if(gyro_cnt >= 3)
-			gyro_cnt = 0;
-		gyro_vals[0][gyro_cnt] = adcGetVal(ADC_PIN1);
-		gyro_vals[1][gyro_cnt] = adcGetVal(ADC_PIN0);
-		gyro_cnt++;
-		gyro_val = median3(gyro_vals[0]);
 
-		// P gyro 1
-		if(gyro_val != gyros_base[0])
-		{
-			offset = gyro_val - gyros_base[0];
-			reaction = offset >> 13; // P factor
-			reaction = 0;
-			motors[0] -= reaction;
-			motors[3] += reaction;
+		// Grab gyro vals
+		gyro_vals[0] = adcGetNdxVal(0);
+		gyro_vals[1] = adcGetNdxVal(1);
+		gyro_vals[2] = adcGetNdxVal(2);
 
-		}
+		// Grab accelerometer vals
+		accel_vals[0] = adcGetNdxVal(3);
+		accel_vals[1] = adcGetNdxVal(5);
+		accel_vals[2] = adcGetNdxVal(6);
 
-		// D gyro 1
-		offset = gyro_val - gyro_prev_vals[0];
-		reaction = offset >> 3; // D factor
-		motors[0] -= reaction;
-		motors[3] += reaction;
-		gyro_prev_vals[0] = gyro_val;
 
-		// P gyro 2
-		gyro_val = median3(gyro_vals[1]);
-		if(gyro_val != gyros_base[1])
-		{
-			offset = gyro_val - gyros_base[1];
-			reaction = offset >> 13; // P factor
-			reaction = 0;
-			motors[1] -= reaction;
-			motors[2] += reaction;
-		}
-
-		// D gyro 1
-		offset = gyro_val - gyro_prev_vals[1];
-		reaction = offset >> 3; // D Factor
-		motors[1] -= reaction;
-		motors[2] += reaction;
-		gyro_prev_vals[1] = gyro_val;
-
-		escSetDutyCycle(&(controller->escs[0]),
-		                motors[0]);
-		escSetDutyCycle(&(controller->escs[1]),
-		                motors[1]);
-		escSetDutyCycle(&(controller->escs[2]),
-		                motors[2]);
-		escSetDutyCycle(&(controller->escs[3]),
-		                motors[3]);
 	}
+
+	controller = escGetController();
 
 	return 0;
 }

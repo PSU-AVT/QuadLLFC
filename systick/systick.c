@@ -144,7 +144,7 @@ static uint32_t systickConfig(uint32_t ticks)
 /**************************************************************************/
 void systickInit (uint32_t delayMs)
 {
-  systickConfig ((CFG_CPU_CCLK / 1000000) * delayMs);
+  systickConfig ((CFG_CPU_CCLK / 1000) * delayMs);
 }
 
 /**************************************************************************/

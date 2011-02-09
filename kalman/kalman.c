@@ -3,7 +3,7 @@
  *
  * Software License Agreement (BSD License)
  *
- * Copyright (c) 2011, Gregory Haynes
+ * Copyright (c) 2010, Gregory Haynes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,31 +29,37 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-/**
- * This ADC module multiplexes across selected pins using the ADC interrupt
- */
+#include "kalman.h"
 
-#include "../config.h"
-
-enum ADC_PIN_T
+void kalman1d_init(struct kalman1d_t *k, float q_angle, float q_gyro, float r_angle)
 {
-	ADC_PIN0 = 1,
-	ADC_PIN1 = 2,
-	ADC_PIN2 = 4,
-	ADC_PIN3 = 8,
-	ADC_PIN4 = 16,
-	ADC_PIN5 = 32,
-	ADC_PIN6 = 64
-};
+	k->q_angle = q_angle;
+	k->q_gyro = q_gyro;
+	k->r_angle = r_angle;
+}
 
-#define ADC_PIN_CNT 7
-#define ADC_MAX_PINVAL (1 << ADC_PIN_CNT)
-#define ADC_RESULT_INVALID 2048
+void kalman1d_predict(struct kalman1d_t *k, float gyro, float dt)
+{
+	k->angle = dt * (gyro - k->bias);
+	k->p_00 = - dt * (k->p_10 + k->p_01) + k->q_angle * dt;
+	k->p_01 +=  - dt * k->p_11;
+	k->p_10 +=  - dt * k->p_11;
+	k->p_11 +=  + k->q_gyro * dt;
+}
 
-#define adcIsResultValid(VAL) (VAL & ADC_RESULT_INVALID)
+void kalman1d_update(struct kalman1d_t *k, float angle)
+{
+	const float y = angle - k->angle;
 
-uint16_t adcGetVal(uint16_t pin);
-uint16_t adcGetNdxVal(uint8_t ndx);
-void adcStart(void);
-void adcSelectPins(int pin);
-void adcInit(int pins);
+	const float S = k->p_00 + k->r_angle;
+	const float K_0 = k->p_00 / S;
+	const float K_1 = k->p_10 / S;
+
+	k->angle +=  K_0 * y;
+	k->bias  +=  K_1 * y;
+
+	k->p_00 -= K_0 * k->p_00;
+	k->p_01 -= K_0 * k->p_01;
+	k->p_10 -= K_1 * k->p_00;
+	k->p_11 -= K_1 * k->p_01;
+}
