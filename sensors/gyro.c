@@ -29,37 +29,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "kalman.h"
+#include "gyro.h"
 
-void kalman1d_init(struct kalman1d_t *k, float q_angle, float q_gyro, float r_angle)
+void gyroInit(struct gyro_t *g, uint16_t adc_pin)
 {
-	k->q_angle = q_angle;
-	k->q_gyro = q_gyro;
-	k->r_angle = r_angle;
+	sensorInit(&g->sensor, adc_pin);
 }
 
-void kalman1d_predict(struct kalman1d_t *k, float gyro, float dt)
+void gyro3dInit(struct gyro3d_t *g, uint16_t x_adc_pin,
+                uint16_t y_adc_pin,
+                uint16_t z_adc_pin)
 {
-	k->angle = dt * (gyro - k->bias);
-	k->p_00 = - dt * (k->p_10 + k->p_01) + k->q_angle * dt;
-	k->p_01 +=  - dt * k->p_11;
-	k->p_10 +=  - dt * k->p_11;
-	k->p_11 +=  + k->q_gyro * dt;
-}
-
-void kalman1d_update(struct kalman1d_t *k, float angle)
-{
-	const float y = angle - k->angle;
-
-	const float S = k->p_00 + k->r_angle;
-	const float K_0 = k->p_00 / S;
-	const float K_1 = k->p_10 / S;
-
-	k->angle +=  K_0 * y;
-	k->bias  +=  K_1 * y;
-
-	k->p_00 -= K_0 * k->p_00;
-	k->p_01 -= K_0 * k->p_01;
-	k->p_10 -= K_1 * k->p_00;
-	k->p_11 -= K_1 * k->p_01;
+	gyroInit(&g->x, x_adc_pin);
+	gyroInit(&g->y, y_adc_pin);
+	gyroInit(&g->z, z_adc_pin);
 }

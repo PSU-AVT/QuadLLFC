@@ -40,8 +40,8 @@
 #include "pwm/pwm16.h"
 #include "esc/esc.h"
 #include "uart/uart.h"
-#include "timer/timer32.h"
 #include "adc/adc.h"
+#include "sensors/gyro.h"
 
 extern volatile uint32_t timer32_0_counter; // In timer32.c
 
@@ -109,44 +109,21 @@ int main(void)
 	cpuInit();
 	systickInit(1);
 
-	// Initialize ADC
-	adcInit(ADC_PIN0 | ADC_PIN1 | ADC_PIN2 | ADC_PIN3 |  ADC_PIN5 | ADC_PIN6);
-	adcSelectPins(ADC_PIN0 | ADC_PIN1 | ADC_PIN2 | ADC_PIN3 |  ADC_PIN5 | ADC_PIN6);
-	adcStart();
-
-	proto_init();
-
 	// Arm ESCs
 	uartSend("Arming\n", 7);
 	setupEscs();
 	uartSend("Armed\n", 6);
 
-	uint32_t last_acc_update;
-	uint32_t last_gyro_update;
+	// gyro init
+	struct gyro3d_t gyro;
+	gyro3dInit(&gyro, ADC_PIN0, ADC_PIN1, ADC_PIN2);
 
-	uint16_t gyro_vals[3];
-	uint16_t accel_vals[3];
-	uint16_t motors[4];
+	// Accelerometer init;
+	struct accelero3d_t accelero;
 
-	uint16_t gyro_bias[3];
+	sensorsStart();
 
-	while(1)
-	{
-		systickDelay(5);
-
-
-		// Grab gyro vals
-		gyro_vals[0] = adcGetNdxVal(0);
-		gyro_vals[1] = adcGetNdxVal(1);
-		gyro_vals[2] = adcGetNdxVal(2);
-
-		// Grab accelerometer vals
-		accel_vals[0] = adcGetNdxVal(3);
-		accel_vals[1] = adcGetNdxVal(5);
-		accel_vals[2] = adcGetNdxVal(6);
-
-
-	}
+	while(1);
 
 	controller = escGetController();
 

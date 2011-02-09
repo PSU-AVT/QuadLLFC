@@ -47,7 +47,7 @@ static int adc_clkdiv;
 void adcSelectNextPin(void);
 void adcCtlSetSelectedPin(void);
 
-uint16_t adcGetVal(uint16_t pin)
+uint8_t adcPinToNdx(uint16_t pin)
 {
 	int i = -1;
 	if(!pin)
@@ -57,6 +57,12 @@ uint16_t adcGetVal(uint16_t pin)
 		i++;
 		pin = pin >> 1;
 	}
+	return i;
+}
+
+uint16_t adcGetVal(uint16_t pin)
+{
+	uint8_t i = adcPinToNdx(pin);
 	return _adc_vals[i];
 }
 
@@ -127,9 +133,7 @@ void adcStart()
 
 void adcSelectPins(int pins)
 {
-	ADC_CTL_RESET
-
-	_adc_selected_pins = pins;
+	_adc_selected_pins |= pins;
 }
 
 void adcInit(int pins)
