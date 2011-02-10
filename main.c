@@ -73,36 +73,6 @@ void setupEscs(void)
 	escsArm();
 }
 
-uint16_t median3(uint16_t *arr)
-{
-	uint8_t max, min, i;
-	max = 0;
-	for(i = 1;i < 3;i++)
-	{
-		if(arr[i] > arr[max])
-			max = i;
-	}
-
-	min = 0;
-	for(i =1;i < 3;i++)
-	{
-		if(arr[i] < arr[min])
-			min = 1;
-	}
-
-	switch(min + max)
-	{
-	case 0:
-	case 1:
-		return arr[2];
-	case 2:
-		return arr[1];
-	case 3:
-	default:
-		return arr[0];
-	}
-}
-
 int main(void)
 {
 	struct esc_controller_t *controller;
