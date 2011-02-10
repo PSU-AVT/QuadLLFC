@@ -50,9 +50,9 @@ struct gyro_t
 
 struct gyro3d_t
 {
-	struct gyro_t x,
-	              y,
-	              z;
+	struct gyro_t roll,
+	              pitch,
+	              yaw;
 };
 
 void gyroInit(struct gyro_t *gyro, uint16_t adc_pin);
@@ -62,9 +62,9 @@ void gyroInit(struct gyro_t *gyro, uint16_t adc_pin);
  */
 void gyroStart(struct gyro_t *gyro);
 
-void gyro3dInit(struct gyro3d_t *gyro, uint16_t x_adc_pin,
-                uint16_t y_adc_pin,
-                uint16_t z_adc_pin);
+void gyro3dInit(struct gyro3d_t *gyro, uint16_t r_adc_pin,
+                uint16_t p_adc_pin,
+                uint16_t y_adc_pin);
 
 void gyro3dStart(struct gyro3d_t *gyro);
 

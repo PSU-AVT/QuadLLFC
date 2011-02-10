@@ -43,20 +43,20 @@ void gyroStart(struct gyro_t *g)
 	while((g->base_val = sensorGetAdcVal(&g->sensor)) == ADC_RESULT_INVALID);
 }
 
-void gyro3dInit(struct gyro3d_t *g, uint16_t x_adc_pin,
-                uint16_t y_adc_pin,
-                uint16_t z_adc_pin)
+void gyro3dInit(struct gyro3d_t *g, uint16_t r_adc_pin,
+                uint16_t p_adc_pin,
+                uint16_t y_adc_pin)
 {
-	gyroInit(&g->x, x_adc_pin);
-	gyroInit(&g->y, y_adc_pin);
-	gyroInit(&g->z, z_adc_pin);
+	gyroInit(&g->roll, r_adc_pin);
+	gyroInit(&g->pitch, p_adc_pin);
+	gyroInit(&g->yaw, y_adc_pin);
 }
 
 void gyro3dStart(struct gyro3d_t *g)
 {
-	gyroStart(&g->x);
-	gyroStart(&g->y);
-	gyroStart(&g->z);
+	gyroStart(&g->roll);
+	gyroStart(&g->pitch);
+	gyroStart(&g->yaw);
 }
 
 float gyroGetAngVel(struct gyro_t *g)

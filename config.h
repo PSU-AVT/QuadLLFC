@@ -12,7 +12,7 @@
 #define CFG_UART_BAUDRATE           (9600)
 #define CFG_UART_BUFSIZE            (512)
 
-#define CFG_CTL_GYRO_UPDATE         (5)
-#define CFG_CTL_ACC_UPDATE          (20)
+#define CFG_CTL_K_PREDICT           (5)
+#define CFG_CTL_K_UPDATE            (20)
 
 #endif

@@ -43,10 +43,9 @@
 #include "adc/adc.h"
 #include "sensors/gyro.h"
 #include "sensors/accelero.h"
+#include "kalman/kalman.h"
 
 extern volatile uint32_t timer32_0_counter; // In timer32.c
-
-#define ESC_STARTUP_CYCLE 35000
 
 void setupEscs(void)
 {
@@ -86,18 +85,45 @@ int main(void)
 	uartSend("Armed\n", 6);
 
 	// gyro init
-	struct gyro3d_t gyro;
-	gyro3dInit(&gyro, ADC_PIN0, ADC_PIN1, ADC_PIN2);
+	struct gyro3d_t gyros;
+	gyro3dInit(&gyros, ADC_PIN0, ADC_PIN1, ADC_PIN2);
 
-	// Accelerometer init;
+	// Accelerometer init
 	struct accelero3d_t accelero;
 	accelero3dInit(&accelero, ADC_PIN3, ADC_PIN5, ADC_PIN6);
 
+	// Kalman filters init
+	struct kalman1d_t k_roll, k_pitch;
+	kalman1d_init(&k_roll, 0.0001, 0.0003, 0.69);
+	kalman1d_init(&k_pitch, 0.0001, 0.0003, 0.69);
+
 	sensorsStart();
-	gyro3dStart(&gyro);
+	gyro3dStart(&gyros);
+
+	uint32_t last_predict = systickGetTicks();
+	uint32_t last_update = systickGetTicks();
+	uint32_t cur_ticks;
+	float dt;
 
 	while(1)
 	{
+		cur_ticks = systickGetTicks();
+
+		// Check for predict timer
+		if((dt = (cur_ticks - last_predict)) >= CFG_CTL_K_PREDICT)
+		{
+			dt *= .001; // Ticks are in MS
+			kalman1d_predict(&k_roll, gyroGetAngVel(&gyros.roll), dt);
+			kalman1d_predict(&k_pitch, gyroGetAngVel(&gyros.pitch), dt);
+		}
+
+		// Check for update timer
+		if((dt = (cur_ticks - last_update)) >= CFG_CTL_K_UPDATE)
+		{
+			dt *= .001; // Ticks are in MS
+			// determine roll, pitch from accelerometers
+			// run kalman1d_update
+		}
 	}
 
 	controller = escGetController();
