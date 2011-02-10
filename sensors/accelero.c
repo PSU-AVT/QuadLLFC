@@ -30,12 +30,19 @@
 */
 
 #include "accelero.h"
+#include "../adc/adc.h"
 
 #include <math.h>
 
 void acceleroInit(struct accelero_t *a, uint16_t adc_pin)
 {
 	sensorInit(&a->sensor, adc_pin);
+}
+
+void acceleroStart(struct accelero_t *a)
+{
+	// Block until we get a valid base accelero value
+	while((a->base_val = sensorGetAdcVal(&a->sensor)) == ADC_RESULT_INVALID);
 }
 
 void accelero3dInit(struct accelero3d_t *a, uint16_t x_adc_pin,
@@ -47,10 +54,17 @@ void accelero3dInit(struct accelero3d_t *a, uint16_t x_adc_pin,
 	acceleroInit(&a->z, z_adc_pin);
 }
 
+void accelero3dStart(struct accelero3d_t *a)
+{
+	acceleroStart(&a->x);
+	acceleroStart(&a->y);
+	acceleroStart(&a->z);
+}
+
 float accelero3dRoll(struct accelero3d_t *a)
 {
-	float val = sensorGetAdcVal(&a->z.sensor);
-	val = atan(sensorGetAdcVal(&a->y.sensor) / val); // Get deg
+	float val = sensorGetAdcVal(&a->z.sensor) - a->z.base_val;
+	val = atan((sensorGetAdcVal(&a->y.sensor) - a->y.base_val) / val); // Get deg
 	val *= .0174; // Convert to rads
 	return val;
 }

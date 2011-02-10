@@ -37,17 +37,23 @@
 struct accelero_t
 {
 	struct sensor_t sensor;
+	uint16_t base_val;
 };
 
 struct accelero3d_t
 {
-	struct accelero_t x, y, z;
+	struct accelero_t x,
+	                  y,
+	                  z;
 };
 
 void acceleroInit(struct accelero_t *accelero, uint16_t adc_pin);
+void acceleroStart(struct accelero_t *accelero);
+
 void accelero3dInit(struct accelero3d_t *accelero, uint16_t x_adc_pin,
                     uint16_t y_adc_pin,
                     uint16_t z_adc_pin);
+void accelero3dStart(struct accelero3d_t *accelero);
 
 // Around the x axis
 float accelero3dRoll(struct accelero3d_t *accelro);

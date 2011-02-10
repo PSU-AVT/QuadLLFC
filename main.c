@@ -99,10 +99,13 @@ int main(void)
 
 	sensorsStart();
 	gyro3dStart(&gyros);
+	accelero3dStart(&accelero);
 
 	uint32_t last_predict = systickGetTicks();
 	uint32_t last_update = systickGetTicks();
 	uint32_t cur_ticks;
+	float predict_dt = .001 * CFG_CTL_K_PREDICT;
+	float update_dt = .001 * CFG_CTL_K_UPDATE;
 	float dt;
 
 	while(1)
@@ -112,7 +115,7 @@ int main(void)
 		// Check for predict timer
 		if((dt = (cur_ticks - last_predict)) >= CFG_CTL_K_PREDICT)
 		{
-			dt *= .001; // Ticks are in MS
+			dt *= predict_dt ; // Ticks are in MS
 			kalman1d_predict(&k_roll, gyroGetAngVel(&gyros.roll), dt);
 			kalman1d_predict(&k_pitch, gyroGetAngVel(&gyros.pitch), dt);
 		}
@@ -120,9 +123,9 @@ int main(void)
 		// Check for update timer
 		if((dt = (cur_ticks - last_update)) >= CFG_CTL_K_UPDATE)
 		{
-			dt *= .001; // Ticks are in MS
-			// determine roll, pitch from accelerometers
-			// run kalman1d_update
+			dt *= update_dt; // Ticks are in MS
+			kalman1d_update(&k_roll, accelero3dRoll(&accelero));
+			kalman1d_update(&k_pitch, accelero3dPitch(&accelero));
 		}
 	}
 
