@@ -31,6 +31,8 @@
 
 #include "accelero.h"
 
+#include <math.h>
+
 void acceleroInit(struct accelero_t *a, uint16_t adc_pin)
 {
 	sensorInit(&a->sensor, adc_pin);
@@ -43,4 +45,20 @@ void accelero3dInit(struct accelero3d_t *a, uint16_t x_adc_pin,
 	acceleroInit(&a->x, x_adc_pin);
 	acceleroInit(&a->y, y_adc_pin);
 	acceleroInit(&a->z, z_adc_pin);
+}
+
+float accelero3dRoll(struct accelero3d_t *a)
+{
+	float val = sensorGetAdcVal(&a->z.sensor);
+	val = atan(sensorGetAdcVal(&a->y.sensor) / val); // Get deg
+	val *= .0174; // Convert to rads
+	return val;
+}
+
+float accelero3dPitch(struct accelero3d_t *a)
+{
+	float val = sensorGetAdcVal(&a->z.sensor);
+	val = atan(sensorGetAdcVal(&a->x.sensor) / val); // Get deg
+	val *= .0174; // Convert to rads
+	return val;
 }
