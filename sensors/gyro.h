@@ -29,6 +29,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+/**
+ * Typical gyro usage:
+ *  gyro_t gyro;
+ *  gyroInit(&gyro, ADC_PIN0);
+ *  sensorsStart();
+ *  gyroStart(&gyro);
+ */
+
 #ifndef GYRO_H
 #define GYRO_H
 
@@ -37,6 +45,7 @@
 struct gyro_t
 {
 	struct sensor_t sensor;
+	uint16_t base_val;
 };
 
 struct gyro3d_t
@@ -48,8 +57,19 @@ struct gyro3d_t
 
 void gyroInit(struct gyro_t *gyro, uint16_t adc_pin);
 
+/*
+ * call after sensorsStart (or adcStart()) is called
+ */
+void gyroStart(struct gyro_t *gyro);
+
 void gyro3dInit(struct gyro3d_t *gyro, uint16_t x_adc_pin,
                 uint16_t y_adc_pin,
                 uint16_t z_adc_pin);
+
+void gyro3dStart(struct gyro3d_t *gyro);
+
+/* Returns last measured angular velocity of gyro
+ * units are deg / s */
+float gyroGetAngVel(struct gyro_t *gyro);
 
 #endif

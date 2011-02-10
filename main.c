@@ -42,6 +42,7 @@
 #include "uart/uart.h"
 #include "adc/adc.h"
 #include "sensors/gyro.h"
+#include "sensors/accelero.h"
 
 extern volatile uint32_t timer32_0_counter; // In timer32.c
 
@@ -123,6 +124,7 @@ int main(void)
 	accelero3dInit(&accelero, ADC_PIN3, ADC_PIN5, ADC_PIN6);
 
 	sensorsStart();
+	gyro3dStart(&gyro);
 
 	while(1)
 	{

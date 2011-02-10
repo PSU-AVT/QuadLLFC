@@ -31,9 +31,12 @@
 
 #include "esc.h"
 #include "../systick/systick.h"
+#include "../uart/uart.h"
 
 static struct esc_controller_t _esc_control;
 static int _escs_initialized;
+
+#define ESC_ARM_SECS 7
 
 static const unsigned int ESC_PWM_FREQUENCY = 60000;
 #define ESC_PWM_PRESCALE 2
@@ -71,7 +74,7 @@ void escsInit(void)
 
 void escsArm(void)
 {
-	int i;;
+	int i;
 	for(i = 0;i < ESC_CNT;i++)
 	{
 		escSetDutyCycle(&_esc_control.escs[i], ESC_ARM_DCYCLE);
@@ -80,7 +83,11 @@ void escsArm(void)
 	pwm16StartTimers(PWM16_TIMER0);
 	pwm16StartTimers(PWM16_TIMER1);
 
-	systickDelay(7000);
+	for(i = 0;i < ESC_ARM_SECS;i++)
+	{
+		systickDelay(1000);
+		uartSendByte('.');
+	}
 }
 
 void escSetDutyCycle(struct esc_t *esc, uint16_t cycle)

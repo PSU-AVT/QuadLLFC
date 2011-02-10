@@ -30,10 +30,19 @@
 */
 
 #include "gyro.h"
+#include "../adc/adc.h"
+
+#define GYRO_ADC_ANGVEL_FACTOR .5
 
 void gyroInit(struct gyro_t *g, uint16_t adc_pin)
 {
 	sensorInit(&g->sensor, adc_pin);
+}
+
+void gyroStart(struct gyro_t *g)
+{
+	// Block until we get a valid base gyro value
+	while((g->base_val = sensorGetAdcVal(&g->sensor)) == ADC_RESULT_INVALID);
 }
 
 void gyro3dInit(struct gyro3d_t *g, uint16_t x_adc_pin,
@@ -43,4 +52,16 @@ void gyro3dInit(struct gyro3d_t *g, uint16_t x_adc_pin,
 	gyroInit(&g->x, x_adc_pin);
 	gyroInit(&g->y, y_adc_pin);
 	gyroInit(&g->z, z_adc_pin);
+}
+
+void gyro3dStart(struct gyro3d_t *g)
+{
+	gyroStart(&g->x);
+	gyroStart(&g->y);
+	gyroStart(&g->z);
+}
+
+float gyroGetAngVel(struct gyro_t *g)
+{
+	return (g->base_val - sensorGetAdcVal(&g->sensor))  * GYRO_ADC_ANGVEL_FACTOR;
 }
