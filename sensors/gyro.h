@@ -69,7 +69,7 @@ void gyro3dInit(struct gyro3d_t *gyro, uint16_t r_adc_pin,
 void gyro3dStart(struct gyro3d_t *gyro);
 
 /* Returns last measured angular velocity of gyro
- * units are deg / s */
+ * units are rad / s */
 float gyroGetAngVel(struct gyro_t *gyro);
 
 #endif
