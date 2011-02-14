@@ -56,23 +56,30 @@ void accelero3dInit(struct accelero3d_t *a, uint16_t x_adc_pin,
 
 void accelero3dStart(struct accelero3d_t *a)
 {
-	acceleroStart(&a->x);
-	acceleroStart(&a->y);
-	acceleroStart(&a->z);
+	//acceleroStart(&a->x);
+	//acceleroStart(&a->y);
+	//acceleroStart(&a->z);
+	a->x.base_val = 444;
+	a->y.base_val = 526;
+	a->z.base_val = 510;
 }
 
-float accelero3dRoll(struct accelero3d_t *a)
+float accelero3dGetRoll(struct accelero3d_t *a)
 {
-	float val = sensorGetAdcVal(&a->z.sensor) - a->z.base_val;
-	val = atan((sensorGetAdcVal(&a->y.sensor) - a->y.base_val) / val); // Get deg
-	val *= .0174; // Convert to rads
-	return val;
+	float y = sensorGetAdcVal(&a->y.sensor);
+	y -= a->y.base_val;
+	float z = sensorGetAdcVal(&a->z.sensor);
+	z -= a->z.base_val;
+	z = -z;
+	if(!z)
+		return 0;
+	return atan2f(y, z);
 }
 
-float accelero3dPitch(struct accelero3d_t *a)
+float accelero3dGetPitch(struct accelero3d_t *a)
 {
-	float val = sensorGetAdcVal(&a->z.sensor);
-	val = atan(sensorGetAdcVal(&a->x.sensor) / val); // Get deg
+	float val = sensorGetAdcVal(&a->x.sensor) - a->x.base_val;
+	val = atan((sensorGetAdcVal(&a->x.sensor)) / val); // Get deg
 	val *= .0174; // Convert to rads
 	return val;
 }

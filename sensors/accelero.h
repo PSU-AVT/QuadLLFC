@@ -56,9 +56,9 @@ void accelero3dInit(struct accelero3d_t *accelero, uint16_t x_adc_pin,
 void accelero3dStart(struct accelero3d_t *accelero);
 
 // Around the x axis
-float accelero3dRoll(struct accelero3d_t *accelro);
+float accelero3dGetRoll(struct accelero3d_t *accelro);
 
 // Around the y axis
-float accelero3dPitch(struct accelero3d_t *accelero);
+float accelero3dGetPitch(struct accelero3d_t *accelero);
 
 #endif

@@ -61,6 +61,6 @@ void gyro3dStart(struct gyro3d_t *g)
 
 float gyroGetAngVel(struct gyro_t *g)
 {
-	float offset = (g->base_val - sensorGetAdcVal(&g->sensor));
-	return offset * 10.47; // Convert to rad / s
+	float offset = (sensorGetAdcVal(&g->sensor) - g->base_val);
+	return offset * 0.01; // Convert to rad / s
 }

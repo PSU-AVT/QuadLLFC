@@ -43,10 +43,11 @@ enum ADC_PIN_T
 	ADC_PIN3 = 8,
 	ADC_PIN4 = 16,
 	ADC_PIN5 = 32,
-	ADC_PIN6 = 64
+	ADC_PIN6 = 64,
+	ADC_PIN7 = 128
 };
 
-#define ADC_PIN_CNT 7
+#define ADC_PIN_CNT 8
 #define ADC_MAX_PINVAL (1 << ADC_PIN_CNT)
 #define ADC_RESULT_INVALID 2048
 

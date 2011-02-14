@@ -78,6 +78,7 @@ int main(void)
 
 	cpuInit();
 	systickInit(1);
+	uartInit(9600);
 
 	// Arm ESCs
 	uartSend("Arming\n", 7);
@@ -90,7 +91,7 @@ int main(void)
 
 	// Accelerometer init
 	struct accelero3d_t accelero;
-	accelero3dInit(&accelero, ADC_PIN3, ADC_PIN5, ADC_PIN6);
+	accelero3dInit(&accelero, ADC_PIN3, ADC_PIN5, ADC_PIN7);
 
 	// Kalman filters init
 	struct kalman1d_t k_roll, k_pitch;
@@ -98,6 +99,7 @@ int main(void)
 	kalman1d_init(&k_pitch, 0.0001, 0.0003, 0.69);
 
 	sensorsStart();
+	systickDelay(5000);
 	gyro3dStart(&gyros);
 	accelero3dStart(&accelero);
 
@@ -107,7 +109,19 @@ int main(void)
 	float predict_dt = .001 * CFG_CTL_K_PREDICT;
 	float update_dt = .001 * CFG_CTL_K_UPDATE;
 	float dt;
+	uint16_t d;
+	char buff[150];
 
+	while(1)
+	{
+		systickDelay(100);
+		sprintf(buff, "%d %d %d %f\r\n",
+				sensorGetAdcVal(&accelero.x.sensor),
+				sensorGetAdcVal(&accelero.y.sensor),
+				sensorGetAdcVal(&accelero.z.sensor),
+				accelero3dGetRoll(&accelero));
+		uartSend(buff, strlen(buff));
+	}
 	while(1)
 	{
 		cur_ticks = systickGetTicks();
@@ -118,14 +132,16 @@ int main(void)
 			dt *= predict_dt ; // Ticks are in MS
 			kalman1d_predict(&k_roll, gyroGetAngVel(&gyros.roll), dt);
 			kalman1d_predict(&k_pitch, gyroGetAngVel(&gyros.pitch), dt);
+			d = k_roll.angle;
+			uartSendByte(d);
 		}
 
 		// Check for update timer
 		if((dt = (cur_ticks - last_update)) >= CFG_CTL_K_UPDATE)
 		{
 			dt *= update_dt; // Ticks are in MS
-			kalman1d_update(&k_roll, accelero3dRoll(&accelero));
-			kalman1d_update(&k_pitch, accelero3dPitch(&accelero));
+			kalman1d_update(&k_roll, accelero3dGetRoll(&accelero));
+			kalman1d_update(&k_pitch, accelero3dGetPitch(&accelero));
 		}
 	}
 

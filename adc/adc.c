@@ -44,6 +44,8 @@ static int adc_clkdiv;
 	             ADC_AD0CR_START_NOSTART |                /* START = 0 A/D conversion stops */\
 	             ADC_AD0CR_EDGE_RISING);                  /* EDGE = 0 (CAP/MAT signal falling, trigger A/D conversion) */
 
+#define ADC_GET_VAL(X) ((X >> 6) & 0x3FF)
+
 void adcSelectNextPin(void);
 void adcCtlSetSelectedPin(void);
 
@@ -74,19 +76,21 @@ uint16_t adcGetNdxVal(uint8_t ndx)
 void ADC_IRQHandler(void)
 {
 	if(ADC_AD0STAT & ADC_PIN0) // This works...trust me
-		_adc_vals[0] = ADC_AD0DR0;
+		_adc_vals[0] = ADC_GET_VAL(ADC_AD0DR0);
 	if(ADC_AD0STAT & ADC_PIN1)
-		_adc_vals[1] = ADC_AD0DR1;
+		_adc_vals[1] = ADC_GET_VAL(ADC_AD0DR1);
 	if(ADC_AD0STAT & ADC_PIN2)
-		_adc_vals[2] = ADC_AD0DR2;
+		_adc_vals[2] = ADC_GET_VAL(ADC_AD0DR2);
 	if(ADC_AD0STAT & ADC_PIN3)
-		_adc_vals[3] = ADC_AD0DR3;
+		_adc_vals[3] = ADC_GET_VAL(ADC_AD0DR3);
 	if(ADC_AD0STAT & ADC_PIN4)
-		_adc_vals[4] = ADC_AD0DR4;
+		_adc_vals[4] = ADC_GET_VAL(ADC_AD0DR4);
 	if(ADC_AD0STAT & ADC_PIN5)
-		_adc_vals[5] = ADC_AD0DR5;
+		_adc_vals[5] = ADC_GET_VAL(ADC_AD0DR5);
 	if(ADC_AD0STAT & ADC_PIN6)
-		_adc_vals[6] = ADC_AD0DR6;
+		_adc_vals[6] = ADC_GET_VAL(ADC_AD0DR6);
+	if(ADC_AD0STAT & ADC_PIN7)
+		_adc_vals[7] = ADC_GET_VAL(ADC_AD0DR7);
 
 	adcSelectNextPin();
 	ADC_AD0CR |= ADC_AD0CR_START_STARTNOW;
@@ -197,6 +201,14 @@ void adcInit(int pins)
 		                    IOCON_PIO1_10_MODE_MASK);
 		IOCON_PIO1_10 |=   (IOCON_PIO1_10_FUNC_AD6 &
 		                    IOCON_PIO1_10_ADMODE_ANALOG);
+	}
+	if(pins & ADC_PIN7)
+	{
+		IOCON_PIO1_11 &=  ~(IOCON_PIO1_11_ADMODE_MASK |
+		                    IOCON_PIO1_11_FUNC_MASK |
+		                    IOCON_PIO1_11_MODE_MASK);
+		IOCON_PIO1_11 |=   (IOCON_PIO1_11_FUNC_AD7 &
+		                    IOCON_PIO1_11_ADMODE_ANALOG);
 	}
 
 	// Enable ADC Interrupts
