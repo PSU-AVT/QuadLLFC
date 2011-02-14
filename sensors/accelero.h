@@ -29,11 +29,36 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "message.h"
+#ifndef ACCELERO_H
+#define ACCELERO_H
 
-#include "../uart/uart.h"
+#include "sensor.h"
 
-void message_handle(uint8_t *message, uint8_t length)
+struct accelero_t
 {
-	uartSendByte('.');
-}
+	struct sensor_t sensor;
+	uint16_t base_val;
+};
+
+struct accelero3d_t
+{
+	struct accelero_t x,
+	                  y,
+	                  z;
+};
+
+void acceleroInit(struct accelero_t *accelero, uint16_t adc_pin);
+void acceleroStart(struct accelero_t *accelero);
+
+void accelero3dInit(struct accelero3d_t *accelero, uint16_t x_adc_pin,
+                    uint16_t y_adc_pin,
+                    uint16_t z_adc_pin);
+void accelero3dStart(struct accelero3d_t *accelero);
+
+// Around the x axis
+float accelero3dGetRoll(struct accelero3d_t *accelro);
+
+// Around the y axis
+float accelero3dGetPitch(struct accelero3d_t *accelero);
+
+#endif

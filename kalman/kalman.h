@@ -29,11 +29,29 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "message.h"
+#ifndef KALMAN_H
+#define KALMAN_H
 
-#include "../uart/uart.h"
-
-void message_handle(uint8_t *message, uint8_t length)
+struct kalman1d_t
 {
-	uartSendByte('.');
-}
+	// State
+	float angle,
+	      bias;
+
+	// Error covariance matrix
+	float p_00, p_01,
+	      p_10, p_11;
+
+	// Covariance
+	float q_angle,
+	      q_gyro;
+
+	// Observation noise covariance
+	float r_angle;
+};
+
+void kalman1d_init(struct kalman1d_t*, float q_angle, float q_gyro, float r_angle);
+void kalman1d_predict(struct kalman1d_t *k, float gyro, float dt);
+void kalman1d_update(struct kalman1d_t *k, float angle);
+
+#endif

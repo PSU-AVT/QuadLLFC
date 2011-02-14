@@ -33,63 +33,130 @@
 #include "LPC13xx.h"
 #endif
 
+#include <stdint.h>
+
 #include "cpu/cpu.h"
 #include "systick/systick.h"
 #include "pwm/pwm16.h"
 #include "esc/esc.h"
+#include "uart/uart.h"
+#include "adc/adc.h"
+#include "sensors/gyro.h"
+#include "sensors/accelero.h"
+#include "kalman/kalman.h"
+#include "control/motor.h"
 
-void setupEscs(void)
-{
-	struct esc_controller_t *controller;
-
-	controller = escGetController();
-	ESC_SETUP(controller->escs[0],
-	          ESC_0_PWM_PIN,
-	          ESC_0_PWM_TIMER,
-	          0)
-	ESC_SETUP(controller->escs[1],
-	          ESC_1_PWM_PIN,
-	          ESC_1_PWM_TIMER,
-	          0)
-	ESC_SETUP(controller->escs[2],
-	          ESC_2_PWM_PIN,
-	          ESC_2_PWM_TIMER,
-	          0)
-	ESC_SETUP(controller->escs[3],
-	          ESC_3_PWM_PIN,
-	          ESC_3_PWM_TIMER,
-	          0)
-	escsInit();
-	escsArm();
-}
+extern volatile uint32_t timer32_0_counter; // In timer32.c
 
 int main(void)
 {
-	cpuInit();
-	systickInit(1);
-
 	struct esc_controller_t *controller;
 
-	controller = escGetController();
+	cpuInit();
+	systickInit(1);
+	uartInit(9600);
 
-	/*
-	pwm16InitPins(PWM16_PIN1_0);
-	pwm16InitTimers(PWM16_TIMER1);
-	pwm16SetFrequencyInTicks(PWM16_TIMER1, 60000);
-	pwm16SetDutyCycleInTicks(PWM16_PIN1_0, 30000);
-	pwm16SetTimerPrescaler(PWM16_TIMER1, 2);
-	pwm16StartTimers(PWM16_TIMER1);
-	*/
+	motorsInit();
 
-	setupEscs();
+	// gyro init
+	struct gyro3d_t gyros;
+	gyro3dInit(&gyros, ADC_PIN0, ADC_PIN1, ADC_PIN2);
+
+	// Accelerometer init
+	struct accelero3d_t accelero;
+	accelero3dInit(&accelero, ADC_PIN3, ADC_PIN5, ADC_PIN7);
+
+	// Kalman filters init
+	struct kalman1d_t k_roll, k_pitch;
+	kalman1d_init(&k_roll, 0.0001, 0.0003, 0.69);
+	kalman1d_init(&k_pitch, 0.0001, 0.0003, 0.69);
+
+	sensorsStart();
+	systickDelay(1000); // Let adc settle
+	gyro3dStart(&gyros);
+	accelero3dStart(&accelero);
+
+	motorsStart();
+
+	uint32_t last_predict = systickGetTicks();
+	uint32_t last_update = systickGetTicks();
+	uint32_t cur_ticks;
+	float predict_dt = .001 * CFG_CTL_K_PREDICT;
+	float update_dt = .001 * CFG_CTL_K_UPDATE;
+	float dt;
+	char buff[150];
+
+#if 0 // TEST ADC VALS
+	while(1)
+	{
+		systickDelay(100);
+		sprintf(buff, "%d %d %d %f %f\r\n",
+				sensorGetAdcVal(&accelero.x.sensor),
+				sensorGetAdcVal(&accelero.y.sensor),
+				sensorGetAdcVal(&accelero.z.sensor),
+				accelero3dGetRoll(&accelero),
+				accelero3dGetPitch(&accelero));
+		uartSend(buff, strlen(buff));
+	}
+#endif
+
+	uint8_t ch;
 
 	while(1)
 	{
-		systickDelay(10);
-		escSetDutyCycle(&(controller->escs[0]),
-		                controller->escs[0].duty_cycle+1);
-		escSetDutyCycle(&(controller->escs[1]),
-                        controller->escs[1].duty_cycle+1);
+		cur_ticks = systickGetTicks();
+
+		if(uartRxBufferDataPending())
+		{
+			ch = uartRxBufferRead();
+			if(ch == '.')
+			{
+				uartSend(" --- GOT . ---", strlen(" --- GOT . ---"));
+				motorsThrustIncreaseAll(100);
+			}
+			else if(ch == '-')
+			{
+				uartSend(" --- GOT - ---", strlen(" --- GOT - ---"));
+				motorsThrustIncreaseAll(-100);
+			}
+
+			motorsSyncDutyCycle();
+		}
+
+		// Check for update timer
+		if((dt = (cur_ticks - last_update)) >= CFG_CTL_K_UPDATE)
+		{
+			float roll = accelero3dGetRoll(&accelero);
+			float pitch = accelero3dGetPitch(&accelero);
+			float val;
+/*
+			val = motors[0] + (roll * ROLL_FACTOR);
+			if(!(val < MOTOR_MIN || val > MOTOR_MAX))
+				motors[0] = val;
+			val = motors[1] - (roll * ROLL_FACTOR);
+			if(!(val < MOTOR_MIN || val > MOTOR_MAX))
+				motors[1] = val;
+
+			val = motors[2] - (pitch * ROLL_FACTOR);
+			if(!(val < MOTOR_MIN || val > MOTOR_MAX))
+				motors[2] = val;
+			val = motors[3] + (pitch * ROLL_FACTOR);
+			if(!(val < MOTOR_MIN || val > MOTOR_MAX))
+				motors[3] = val;
+				*/
+
+			/*
+			sprintf(buff, "%f %f %f %f %f\r\n",
+					motors[0],
+					motors[1],
+					motors[2],
+					motors[3],
+					roll);
+			uartSend(buff, strlen(buff));
+			*/
+
+			last_update = cur_ticks;
+		}
 	}
 
 	return 0;

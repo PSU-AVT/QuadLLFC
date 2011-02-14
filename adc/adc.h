@@ -40,15 +40,22 @@ enum ADC_PIN_T
 	ADC_PIN0 = 1,
 	ADC_PIN1 = 2,
 	ADC_PIN2 = 4,
-	ADC_PIN3 = 8
+	ADC_PIN3 = 8,
+	ADC_PIN4 = 16,
+	ADC_PIN5 = 32,
+	ADC_PIN6 = 64,
+	ADC_PIN7 = 128
 };
 
-#define ADC_PIN_CNT 4
+#define ADC_PIN_CNT 8
 #define ADC_MAX_PINVAL (1 << ADC_PIN_CNT)
 #define ADC_RESULT_INVALID 2048
 
 #define adcIsResultValid(VAL) (VAL & ADC_RESULT_INVALID)
 
+uint16_t adcGetVal(uint16_t pin);
+uint8_t adcPinToNdx(uint16_t pin);
+uint16_t adcGetNdxVal(uint8_t ndx);
 void adcStart(void);
 void adcSelectPins(int pin);
 void adcInit(int pins);

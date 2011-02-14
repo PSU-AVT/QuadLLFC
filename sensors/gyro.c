@@ -29,11 +29,38 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "message.h"
+#include "gyro.h"
+#include "../adc/adc.h"
 
-#include "../uart/uart.h"
-
-void message_handle(uint8_t *message, uint8_t length)
+void gyroInit(struct gyro_t *g, uint16_t adc_pin)
 {
-	uartSendByte('.');
+	sensorInit(&g->sensor, adc_pin);
+}
+
+void gyroStart(struct gyro_t *g)
+{
+	// Block until we get a valid base gyro value
+	while((g->base_val = sensorGetAdcVal(&g->sensor)) == ADC_RESULT_INVALID);
+}
+
+void gyro3dInit(struct gyro3d_t *g, uint16_t r_adc_pin,
+                uint16_t p_adc_pin,
+                uint16_t y_adc_pin)
+{
+	gyroInit(&g->roll, r_adc_pin);
+	gyroInit(&g->pitch, p_adc_pin);
+	gyroInit(&g->yaw, y_adc_pin);
+}
+
+void gyro3dStart(struct gyro3d_t *g)
+{
+	gyroStart(&g->roll);
+	gyroStart(&g->pitch);
+	gyroStart(&g->yaw);
+}
+
+float gyroGetAngVel(struct gyro_t *g)
+{
+	float offset = (sensorGetAdcVal(&g->sensor) - g->base_val);
+	return offset * 0.01; // Convert to rad / s
 }

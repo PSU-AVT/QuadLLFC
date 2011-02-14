@@ -29,11 +29,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "message.h"
+#ifndef SENSOR_H
+#define SENSOR_H
 
-#include "../uart/uart.h"
+#include <stdint.h>
 
-void message_handle(uint8_t *message, uint8_t length)
+struct sensor_t
 {
-	uartSendByte('.');
-}
+	uint16_t adc_ndx;
+};
+
+void sensorInit(struct sensor_t*, uint16_t adc_pin);
+uint16_t sensorGetAdcVal(struct sensor_t*);
+void sensorsStart(void);
+
+#endif

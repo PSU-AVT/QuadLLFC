@@ -29,11 +29,22 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "message.h"
+#include "sensor.h"
+#include "../adc/adc.h"
 
-#include "../uart/uart.h"
-
-void message_handle(uint8_t *message, uint8_t length)
+void sensorInit(struct sensor_t *g, uint16_t adc_pin)
 {
-	uartSendByte('.');
+	g->adc_ndx = adcPinToNdx(adc_pin);
+	adcInit(adc_pin);
+	adcSelectPins(adc_pin);
+}
+
+uint16_t sensorGetAdcVal(struct sensor_t *g)
+{
+	return adcGetNdxVal(g->adc_ndx);
+}
+
+void sensorsStart(void)
+{
+	adcStart();
 }

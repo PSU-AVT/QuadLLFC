@@ -29,11 +29,34 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "message.h"
+#ifndef MOTOR_H
+#define MOTOR_H
 
-#include "../uart/uart.h"
+#include "../config.h"
 
-void message_handle(uint8_t *message, uint8_t length)
+#include <stdint.h>
+
+struct motor_t
 {
-	uartSendByte('.');
-}
+	float duty_cycle;
+	float thrust_proportion;
+	uint16_t thrust_min;
+	uint16_t thrust_max;
+};
+
+struct motor_controller_t
+{
+	struct motor_t motors[CFG_MOTOR_CNT];
+};
+
+struct motor_controller_t *motorControllerGet(void);
+void motorsInit(void);
+void motorsArm(void);
+
+/* Must call this to apply duty cycles to hardware */
+void motorsSyncDutyCycle(void);
+
+void motorThrustIncrease(struct motor_t *motor, float value);
+void motorsThrustIncreaseAll(float value);
+
+#endif
