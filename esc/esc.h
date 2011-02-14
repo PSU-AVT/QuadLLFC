@@ -43,13 +43,8 @@
 
 #include <stdint.h>
 
+#include "../config.h"
 #include "../pwm/pwm16.h"
-
-#define ESC_CNT 4
-#define ESC_LEFT_FRONT 0
-#define ESC_LEFT_REAR 1
-#define ESC_RIGHT_FRONT 2
-#define ESC_RIGHT_REAR 3
 
 #define ESC_0_PWM_PIN PWM16_PIN0_0
 #define ESC_1_PWM_PIN PWM16_PIN0_1
@@ -70,7 +65,7 @@ struct esc_t
 
 struct esc_controller_t
 {
-	struct esc_t escs[ESC_CNT];
+	struct esc_t escs[CFG_ESC_CNT];
 };
 
 #define ESC_SETUP(ESC, PIN, TIMER, CYCLE) \

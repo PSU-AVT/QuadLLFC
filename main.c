@@ -44,33 +44,9 @@
 #include "sensors/gyro.h"
 #include "sensors/accelero.h"
 #include "kalman/kalman.h"
+#include "control/motor.h"
 
 extern volatile uint32_t timer32_0_counter; // In timer32.c
-
-void setupEscs(void)
-{
-	struct esc_controller_t *controller;
-
-	controller = escGetController();
-	ESC_SETUP(controller->escs[0],
-	          ESC_0_PWM_PIN,
-	          ESC_0_PWM_TIMER,
-	          0)
-	ESC_SETUP(controller->escs[1],
-	          ESC_1_PWM_PIN,
-	          ESC_1_PWM_TIMER,
-	          0)
-	ESC_SETUP(controller->escs[2],
-	          ESC_2_PWM_PIN,
-	          ESC_2_PWM_TIMER,
-	          0)
-	ESC_SETUP(controller->escs[3],
-	          ESC_3_PWM_PIN,
-	          ESC_3_PWM_TIMER,
-	          0)
-	escsInit();
-	escsArm();
-}
 
 int main(void)
 {
@@ -80,10 +56,7 @@ int main(void)
 	systickInit(1);
 	uartInit(9600);
 
-	// Arm ESCs
-	uartSend("Arming\n", 7);
-	setupEscs();
-	uartSend("Armed\n", 6);
+	motorsInit();
 
 	// gyro init
 	struct gyro3d_t gyros;
@@ -99,9 +72,11 @@ int main(void)
 	kalman1d_init(&k_pitch, 0.0001, 0.0003, 0.69);
 
 	sensorsStart();
-	systickDelay(5000);
+	systickDelay(1000); // Let adc settle
 	gyro3dStart(&gyros);
 	accelero3dStart(&accelero);
+
+	motorsStart();
 
 	uint32_t last_predict = systickGetTicks();
 	uint32_t last_update = systickGetTicks();
@@ -109,43 +84,80 @@ int main(void)
 	float predict_dt = .001 * CFG_CTL_K_PREDICT;
 	float update_dt = .001 * CFG_CTL_K_UPDATE;
 	float dt;
-	uint16_t d;
 	char buff[150];
 
+#if 0 // TEST ADC VALS
 	while(1)
 	{
 		systickDelay(100);
-		sprintf(buff, "%d %d %d %f\r\n",
+		sprintf(buff, "%d %d %d %f %f\r\n",
 				sensorGetAdcVal(&accelero.x.sensor),
 				sensorGetAdcVal(&accelero.y.sensor),
 				sensorGetAdcVal(&accelero.z.sensor),
-				accelero3dGetRoll(&accelero));
+				accelero3dGetRoll(&accelero),
+				accelero3dGetPitch(&accelero));
 		uartSend(buff, strlen(buff));
 	}
+#endif
+
+	uint8_t ch;
+
 	while(1)
 	{
 		cur_ticks = systickGetTicks();
 
-		// Check for predict timer
-		if((dt = (cur_ticks - last_predict)) >= CFG_CTL_K_PREDICT)
+		if(uartRxBufferDataPending())
 		{
-			dt *= predict_dt ; // Ticks are in MS
-			kalman1d_predict(&k_roll, gyroGetAngVel(&gyros.roll), dt);
-			kalman1d_predict(&k_pitch, gyroGetAngVel(&gyros.pitch), dt);
-			d = k_roll.angle;
-			uartSendByte(d);
+			ch = uartRxBufferRead();
+			if(ch == '.')
+			{
+				uartSend(" --- GOT . ---", strlen(" --- GOT . ---"));
+				motorsThrustIncreaseAll(100);
+			}
+			else if(ch == '-')
+			{
+				uartSend(" --- GOT - ---", strlen(" --- GOT - ---"));
+				motorsThrustIncreaseAll(-100);
+			}
+
+			motorsSyncDutyCycle();
 		}
 
 		// Check for update timer
 		if((dt = (cur_ticks - last_update)) >= CFG_CTL_K_UPDATE)
 		{
-			dt *= update_dt; // Ticks are in MS
-			kalman1d_update(&k_roll, accelero3dGetRoll(&accelero));
-			kalman1d_update(&k_pitch, accelero3dGetPitch(&accelero));
+			float roll = accelero3dGetRoll(&accelero);
+			float pitch = accelero3dGetPitch(&accelero);
+			float val;
+/*
+			val = motors[0] + (roll * ROLL_FACTOR);
+			if(!(val < MOTOR_MIN || val > MOTOR_MAX))
+				motors[0] = val;
+			val = motors[1] - (roll * ROLL_FACTOR);
+			if(!(val < MOTOR_MIN || val > MOTOR_MAX))
+				motors[1] = val;
+
+			val = motors[2] - (pitch * ROLL_FACTOR);
+			if(!(val < MOTOR_MIN || val > MOTOR_MAX))
+				motors[2] = val;
+			val = motors[3] + (pitch * ROLL_FACTOR);
+			if(!(val < MOTOR_MIN || val > MOTOR_MAX))
+				motors[3] = val;
+				*/
+
+			/*
+			sprintf(buff, "%f %f %f %f %f\r\n",
+					motors[0],
+					motors[1],
+					motors[2],
+					motors[3],
+					roll);
+			uartSend(buff, strlen(buff));
+			*/
+
+			last_update = cur_ticks;
 		}
 	}
-
-	controller = escGetController();
 
 	return 0;
 }

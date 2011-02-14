@@ -78,8 +78,12 @@ float accelero3dGetRoll(struct accelero3d_t *a)
 
 float accelero3dGetPitch(struct accelero3d_t *a)
 {
-	float val = sensorGetAdcVal(&a->x.sensor) - a->x.base_val;
-	val = atan((sensorGetAdcVal(&a->x.sensor)) / val); // Get deg
-	val *= .0174; // Convert to rads
-	return val;
+	float x = sensorGetAdcVal(&a->x.sensor);
+	x -= a->x.base_val;
+	float z = sensorGetAdcVal(&a->z.sensor);
+	z -= a->z.base_val;
+	z = -z;
+	if(!z)
+		return 0;
+	return atan2f(x, z);
 }

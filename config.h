@@ -13,6 +13,14 @@
 #define CFG_UART_BUFSIZE            (512)
 
 #define CFG_CTL_K_PREDICT           (10)
-#define CFG_CTL_K_UPDATE            (50)
+#define CFG_CTL_K_UPDATE            (2)
+
+#define ROLL_FACTOR -300
+
+#define CFG_ESC_CNT 4
+#define CFG_MOTOR_CNT CFG_ESC_CNT
+#define CFG_MOTOR_DEFAULT_MAX_THRUST 5000
+#define CFG_MOTOR_DEFAULT_MIN_THRUST 3600
+#define CFG_MOTOR_DEFAULT_DUTY_CYCLE CFG_MOTOR_DEFAULT_MIN_THRUST
 
 #endif
