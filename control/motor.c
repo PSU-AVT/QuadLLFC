@@ -113,3 +113,9 @@ void motorsThrustIncreaseAll(float value)
 		                      value);
 	}
 }
+
+float motorsGetThrust(void)
+{
+	return 1;
+}
+

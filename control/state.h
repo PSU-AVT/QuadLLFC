@@ -29,37 +29,32 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef MOTOR_H
-#define MOTOR_H
+#ifndef STATE_H
+#define STATE_H
 
-#include "../config.h"
-
-#include <stdint.h>
-
-struct motor_t
+struct state1d_t
 {
-	float duty_cycle;
-	float thrust_proportion;
-	uint16_t thrust_min;
-	uint16_t thrust_max;
+	float angle_vel;
+	float angle;
+	float accel;
+	float vel;
+	float pos;
+}
+
+struct stateController
+{
+	struct state1d_t x,
+	                 y,
+                     z;
 };
 
-struct motor_controller_t
-{
-	struct motor_t motors[CFG_MOTOR_CNT];
-};
+struct stateController *stateControllerGet(void);
 
-struct motor_controller_t *motorControllerGet(void);
-void motorsInit(void);
-void motorsStart(void);
+/* Initialize the state controller */
+void stateInit(void);
 
-/* Must call this to apply duty cycles to hardware */
-void motorsSyncDutyCycle(void);
-
-void motorThrustIncrease(struct motor_t *motor, float value);
-void motorsThrustIncreaseAll(float value);
-
-/* Get current thrust in M/S */
-float motorsGetThrust(void);
+/* Update state from gyros */
+void stateUpdateFromGyros(struct gyro3d_t *g, float dt);
 
 #endif
+

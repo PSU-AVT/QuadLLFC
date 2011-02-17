@@ -29,37 +29,38 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef MOTOR_H
-#define MOTOR_H
+#include "state.h"
+#include "../sensors/gyro.h"
+#include "../control/motor.h"
 
-#include "../config.h"
+#include <math.h>
 
-#include <stdint.h>
+static stateController _stateController;
 
-struct motor_t
+struct stateController *stateControllerGet(void)
 {
-	float duty_cycle;
-	float thrust_proportion;
-	uint16_t thrust_min;
-	uint16_t thrust_max;
-};
+	return &_stateController;
+}
 
-struct motor_controller_t
+void stateInit(void)
 {
-	struct motor_t motors[CFG_MOTOR_CNT];
-};
+}
 
-struct motor_controller_t *motorControllerGet(void);
-void motorsInit(void);
-void motorsStart(void);
+void stateUpdateFromGyro1d(struct state1d_t *state,
+                           struct gyro1d_t *g,
+                           float dt)
+{
+	state->ang_vel = gyroGetAngVel(g);
+	state->angle += state->ang_vel * dt;
+	state->accel = motorsGetThrust() * sinf(state->angle);
+	state->vel += accel * dt;
+	state->pos += vel * dt;
+}
 
-/* Must call this to apply duty cycles to hardware */
-void motorsSyncDutyCycle(void);
+void stateUpdateFromGyros(struct gyror31d_t *g, float dt)
+{
+	stateUpdateFromGyro1d(&(g->x), dt);
+	stateUpdateFromGyro1d(&(g->y), dt);
+	stateUpdateFromGyro1d(&(g->z), dt);
+}
 
-void motorThrustIncrease(struct motor_t *motor, float value);
-void motorsThrustIncreaseAll(float value);
-
-/* Get current thrust in M/S */
-float motorsGetThrust(void);
-
-#endif
