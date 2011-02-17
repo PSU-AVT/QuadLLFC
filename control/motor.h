@@ -51,7 +51,7 @@ struct motor_controller_t
 
 struct motor_controller_t *motorControllerGet(void);
 void motorsInit(void);
-void motorsArm(void);
+void motorsStart(void);
 
 /* Must call this to apply duty cycles to hardware */
 void motorsSyncDutyCycle(void);

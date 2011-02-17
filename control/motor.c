@@ -76,7 +76,14 @@ void motorsInit(void)
 
 void motorsStart(void)
 {
+	uint8_t i;
+
 	escsArm();
+	for(i = 0;i < CFG_MOTOR_CNT;i++)
+	{
+		_motor_controller.motors[i].duty_cycle = _motor_controller.motors[i].thrust_min;
+	}
+	motorsSyncDutyCycle();
 }
 
 void motorsSyncDutyCycle(void)
