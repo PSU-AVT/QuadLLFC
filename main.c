@@ -48,6 +48,50 @@
 
 extern volatile uint32_t timer32_0_counter; // In timer32.c
 
+#define DEBUG 1
+
+int main(void)
+{
+	struct motor_controller_t *mc = motorControllerGet();
+
+	cpuInit();
+	systickInit(1);
+	uartInit(9600);
+
+	motorsInit();
+	motorsStart();
+
+	uint8_t ch;
+	char buff[512];
+	while(1)
+	{
+		if(uartRxBufferDataPending())
+		{
+			ch = uartRxBufferRead();
+			if(ch == '.')
+			{
+#if DEBUG
+				sprintf(buff, "%f\r\n", mc->motors[1].duty_cycle);
+				uartSend(buff, strlen(buff));
+#endif
+				motorsThrustIncreaseAll(100);
+			}
+			else if(ch == '-')
+			{
+#if DEBUG
+				sprintf(buff, "%f\r\n", mc->motors[1].duty_cycle);
+				uartSend(buff, strlen(buff));
+#endif
+				motorsThrustIncreaseAll(-100);
+			}
+
+			motorsSyncDutyCycle();
+		}
+	}
+
+}
+
+#if 0 // Real control loop
 int main(void)
 {
 	struct esc_controller_t *controller;
@@ -85,20 +129,6 @@ int main(void)
 	float update_dt = .001 * CFG_CTL_K_UPDATE;
 	float dt;
 	char buff[150];
-
-#if 0 // TEST ADC VALS
-	while(1)
-	{
-		systickDelay(100);
-		sprintf(buff, "%d %d %d %f %f\r\n",
-				sensorGetAdcVal(&accelero.x.sensor),
-				sensorGetAdcVal(&accelero.y.sensor),
-				sensorGetAdcVal(&accelero.z.sensor),
-				accelero3dGetRoll(&accelero),
-				accelero3dGetPitch(&accelero));
-		uartSend(buff, strlen(buff));
-	}
-#endif
 
 	uint8_t ch;
 
@@ -161,3 +191,4 @@ int main(void)
 
 	return 0;
 }
+#endif

@@ -30,14 +30,13 @@
 */
 
 #include "state.h"
-#include "../sensors/gyro.h"
 #include "../control/motor.h"
 
 #include <math.h>
 
-static stateController _stateController;
+static struct state_controller_t _stateController;
 
-struct stateController *stateControllerGet(void)
+struct state_controller_t *stateControllerGet(void)
 {
 	return &_stateController;
 }
@@ -50,17 +49,17 @@ void stateUpdateFromGyro1d(struct state1d_t *state,
                            struct gyro1d_t *g,
                            float dt)
 {
-	state->ang_vel = gyroGetAngVel(g);
-	state->angle += state->ang_vel * dt;
+	state->angle_vel = gyroGetAngVel(g);
+	state->angle += state->angle_vel * dt;
 	state->accel = motorsGetThrust() * sinf(state->angle);
-	state->vel += accel * dt;
-	state->pos += vel * dt;
+	state->vel += state->accel * dt;
+	state->pos += state->vel * dt;
 }
 
-void stateUpdateFromGyros(struct gyror31d_t *g, float dt)
+void stateUpdateFromGyros(struct gyro3d_t *g, float dt)
 {
-	stateUpdateFromGyro1d(&(g->x), dt);
-	stateUpdateFromGyro1d(&(g->y), dt);
-	stateUpdateFromGyro1d(&(g->z), dt);
+	stateUpdateFromGyro1d(&(_stateController.x), &(g->roll), dt);
+	stateUpdateFromGyro1d(&(_stateController.y), &(g->pitch), dt);
+	stateUpdateFromGyro1d(&(_stateController.z), &(g->yaw), dt);
 }
 

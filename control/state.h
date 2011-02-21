@@ -32,6 +32,8 @@
 #ifndef STATE_H
 #define STATE_H
 
+#include "../sensors/gyro.h"
+
 struct state1d_t
 {
 	float angle_vel;
@@ -39,16 +41,16 @@ struct state1d_t
 	float accel;
 	float vel;
 	float pos;
-}
+};
 
-struct stateController
+struct state_controller_t
 {
 	struct state1d_t x,
 	                 y,
                      z;
 };
 
-struct stateController *stateControllerGet(void);
+struct state_controller_t *stateControllerGet(void);
 
 /* Initialize the state controller */
 void stateInit(void);

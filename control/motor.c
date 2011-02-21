@@ -52,6 +52,8 @@ void motorsInit(void)
 	struct esc_controller_t *esc_controller;
 	uint8_t i;
 
+	esc_controller = escGetController();
+
 	for(i = 0;i < CFG_MOTOR_CNT;i++)
 		motorInit(&_motor_controller.motors[i]);
 
@@ -101,6 +103,8 @@ void motorsSyncDutyCycle(void)
 
 void motorThrustIncrease(struct motor_t *motor, float value)
 {
+	if((motor->duty_cycle + value * motor->thrust_proportion) < CFG_MOTOR_DEFAULT_MAX_THRUST)
+		return;
 	motor->duty_cycle += value * motor->thrust_proportion;
 }
 
