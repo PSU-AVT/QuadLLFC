@@ -32,8 +32,6 @@
 #include "state.h"
 #include "../control/motor.h"
 
-#include <math.h>
-
 static struct state_controller_t _stateController;
 
 struct state_controller_t *stateControllerGet(void)
@@ -46,14 +44,11 @@ void stateInit(void)
 }
 
 void stateUpdateFromGyro1d(struct state1d_t *state,
-                           struct gyro1d_t *g,
+                           struct gyro_t *g,
                            float dt)
 {
 	state->angle_vel = gyroGetAngVel(g);
 	state->angle += state->angle_vel * dt;
-	state->accel = motorsGetThrust() * sinf(state->angle);
-	state->vel += state->accel * dt;
-	state->pos += state->vel * dt;
 }
 
 void stateUpdateFromGyros(struct gyro3d_t *g, float dt)

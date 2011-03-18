@@ -29,31 +29,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef STATE_H
-#define STATE_H
+#ifndef CONTROL_LOOP_H
+#define CONTROL_LOOP_H
 
-#include "../sensors/gyro.h"
 
-struct state1d_t
-{
-	float angle_vel;
-	float angle;
-};
-
-struct state_controller_t
-{
-	struct state1d_t x,
-	                 y,
-                     z;
-};
-
-struct state_controller_t *stateControllerGet(void);
-
-/* Initialize the state controller */
-void stateInit(void);
-
-/* Update state from gyros */
-void stateUpdateFromGyros(struct gyro3d_t *g, float dt);
 
 #endif
-

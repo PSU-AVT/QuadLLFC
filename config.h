@@ -15,6 +15,10 @@
 #define CFG_CTL_K_PREDICT           (10)
 #define CFG_CTL_K_UPDATE            (2)
 
+#define CFG_STATE_UPDATE_MSECS     (80) // msecs between sensor updates
+#define CFG_RESPONSE_UPDATE_MSECS  (10) // msecs between responding to state
+#define CFG_STATE_OUTPUT_MSECS     (200)
+
 #define ROLL_FACTOR -300
 
 #define CFG_ESC_CNT 4
