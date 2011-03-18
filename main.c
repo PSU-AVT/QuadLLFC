@@ -112,6 +112,8 @@ int main(void)
 
 	char buff[50];
 
+	//gyros.pitch.base_val = 402;
+
 	// Main control loop
 	while(1)
 	{
@@ -140,8 +142,8 @@ int main(void)
 #if DEBUG
 		if(cur_ticks >= state_output_ticks)
 		{
-			sprintf(buff, "Roll: %f %u %f\r\n",
-			       sc->x.angle, sensorGetAdcVal(&gyros.roll.sensor), gyroGetAngVel(&gyros.roll));
+			sprintf(buff, "%f\t%f\t%f\r\n",
+			       sc->x.angle, sc->y.angle, sc->z.angle);
 			uartSend(buff, strlen(buff));
 			state_output_ticks += CFG_STATE_OUTPUT_MSECS;
 		}

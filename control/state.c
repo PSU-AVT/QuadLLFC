@@ -48,7 +48,8 @@ void stateUpdateFromGyro1d(struct state1d_t *state,
                            float dt)
 {
 	state->angle_vel = gyroGetAngVel(g);
-	state->angle += state->angle_vel * dt;
+	//state->angle_vel = 0;
+	state->angle += (state->angle_vel * dt);
 }
 
 void stateUpdateFromGyros(struct gyro3d_t *g, float dt)

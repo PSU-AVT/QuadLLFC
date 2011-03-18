@@ -19,6 +19,8 @@
 #define CFG_RESPONSE_UPDATE_MSECS  (10) // msecs between responding to state
 #define CFG_STATE_OUTPUT_MSECS     (200)
 
+#define CFG_GYRO_ZERO_WIDTH        (1)
+
 #define ROLL_FACTOR -300
 
 #define CFG_ESC_CNT 4

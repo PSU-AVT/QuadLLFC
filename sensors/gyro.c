@@ -64,5 +64,7 @@ void gyro3dStart(struct gyro3d_t *g)
 float gyroGetAngVel(struct gyro_t *g)
 {
 	float offset = (sensorGetAdcVal(&g->sensor) - g->base_val);
+	if(offset < CFG_GYRO_ZERO_WIDTH && offset > -CFG_GYRO_ZERO_WIDTH)
+		return 0;
 	return offset * .01; // Convert to rad / s
 }
