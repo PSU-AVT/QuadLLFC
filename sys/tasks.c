@@ -39,6 +39,7 @@ void tasks_add_task(struct task_t *task)
 {
 	task->list.next = 0;
 	task->last_exec = 0;
+	task->next_exec = 0;
 	if(tasks)
 	{
 		tasks_tail->list.next = &task->list;
@@ -51,28 +52,26 @@ void tasks_add_task(struct task_t *task)
 	}
 }
 
-void tasks_loop_forever(void)
+void tasks_loop(void)
 {
 	struct task_t *task_itr;
-	unsigned int cur_ticks;
+	uint32_t cur_ticks;
+	uint32_t n_exec;
 
-	while(1) // See function name
+	task_itr = tasks;
+
+	while(task_itr)
 	{
-		task_itr = tasks;
+		cur_ticks = systickGetTicks();
 
-		while(task_itr)
+		if(task_itr->next_exec <= cur_ticks)
 		{
-			cur_ticks = systickGetTicks();
-
-			if(task_itr->next_exec >= cur_ticks)
-			{
-				// Exec the task
-				task_itr->handler(task_itr);
-			}
+			// Exec the task
+			task_itr->handler(task_itr);
 			task_itr->last_exec = cur_ticks;
 			task_itr->next_exec = cur_ticks + task_itr->msecs;
-
-			task_itr = (struct task_t*)task_itr->list.next;
 		}
+
+		task_itr = (struct task_t*)task_itr->list.next;
 	}
 }

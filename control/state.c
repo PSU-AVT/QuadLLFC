@@ -69,6 +69,13 @@ void stateInit(void)
 	tasks_add_task(&yaw_update_task);
 }
 
+void stateStart(void)
+{
+	gyroStart(&_stateController.roll.gyro);
+	gyroStart(&_stateController.pitch.gyro);
+	gyroStart(&_stateController.yaw.gyro);
+}
+
 void stateAngularUpdate(struct task_t *task)
 {
 	struct state_angular_1d_t *state = (struct state_angular_1d_t*)task->data;

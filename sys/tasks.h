@@ -41,8 +41,8 @@ struct task_t
 	struct list_t list; // Dont touch
 	uint16_t msecs; // How often to exec
 	void (*handler)(struct task_t *task); // Function called every msecs
-	unsigned int last_exec; // Dont touch
-	unsigned int next_exec; // Dont touch
+	uint32_t last_exec; // Dont touch
+	uint32_t next_exec; // Dont touch
 	void *data;
 };
 
@@ -51,6 +51,6 @@ struct task_t
 /* Insert tasks in order of priority (greatest first) */
 void tasks_add_task(struct task_t *task);
 
-void tasks_loop_forever(void);
+void tasks_loop(void);
 
 #endif

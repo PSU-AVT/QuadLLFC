@@ -72,8 +72,9 @@ void handleControlInput(void)
 	motorsSyncDutyCycle();
 }
 
-void doResponseUpdate(void)
+void sendHello(struct task_t *task)
 {
+	uartSend("Hello\r\n", 7);
 }
 
 int main(void)
@@ -82,14 +83,22 @@ int main(void)
 	systickInit(1);
 	uartInit(9600);
 
-	sensorsStart();
-
 	motorsInit();
 	motorsStart();
 
 	stateInit();
 
-	tasks_loop_forever();
+	sensorsStart();
+
+	stateStart();
+
+	struct task_t hello_task;
+	hello_task.handler = sendHello;
+	hello_task.msecs = 1000;
+	tasks_add_task(&hello_task);
+
+	while(1)
+		tasks_loop();
 
 	return 0;
 }
