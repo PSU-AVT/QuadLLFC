@@ -1,5 +1,6 @@
 /*
  * Author: Gregory Haynes <greg@greghaynes.net>
+ *         Jonathan Harker <kjharke@cs.pdx.edu>
  *
  * Software License Agreement (BSD License)
  *
