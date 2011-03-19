@@ -19,9 +19,15 @@
 #define CFG_RESPONSE_UPDATE_MSECS  (10) // msecs between responding to state
 #define CFG_STATE_OUTPUT_MSECS     (200)
 
-#define CFG_GYRO_ZERO_WIDTH        (1)
+#define CFG_ROLL_ADC_PIN           ADC_PIN0
+#define CFG_PITCH_ADC_PIN          ADC_PIN1
+#define CFG_YAW_ADC_PIN            ADC_PIN2
 
-#define ROLL_FACTOR -300
+#define CFG_ROLL_UPDATE_MSECS      (80)
+#define CFG_PITCH_UPDATE_MSECS     (80)
+#define CFG_YAW_UPDATE_MSECS       (100)
+
+#define CFG_GYRO_ZERO_WIDTH        (1)
 
 #define CFG_ESC_CNT 4
 #define CFG_MOTOR_CNT CFG_ESC_CNT
