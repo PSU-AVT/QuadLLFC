@@ -56,6 +56,10 @@ void stateInit(void)
 	pitch_update_task.data = &_stateController.pitch;
 	yaw_update_task.data = &_stateController.yaw;
 
+	roll_update_task.handler = stateAngularUpdate;
+	pitch_update_task.handler = stateAngularUpdate;
+	yaw_update_task.handler = stateAngularUpdate;
+
 	roll_update_task.msecs = CFG_ROLL_UPDATE_MSECS;
 	pitch_update_task.msecs = CFG_PITCH_UPDATE_MSECS;
 	yaw_update_task.msecs = CFG_YAW_UPDATE_MSECS;
