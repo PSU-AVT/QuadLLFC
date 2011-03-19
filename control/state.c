@@ -30,7 +30,10 @@
 */
 
 #include "state.h"
+#include "../config.h"
 #include "../control/motor.h"
+#include "../systick/systick.h"
+#include "../adc/adc.h"
 
 static struct state_controller_t _stateController;
 
@@ -41,21 +44,15 @@ struct state_controller_t *stateControllerGet(void)
 
 void stateInit(void)
 {
+	gyroInit(&_stateController.roll.gyro, CFG_ROLL_ADC_PIN);
+	gyroInit(&_stateController.pitch.gyro, CFG_PITCH_ADC_PIN);
+	gyroInit(&_stateController.yaw.gyro, CFG_YAW_ADC_PIN);
 }
 
-void stateUpdateFromGyro1d(struct state1d_t *state,
-                           struct gyro_t *g,
-                           float dt)
+void stateAngularUpdate(struct task_t *task)
 {
-	state->angle_vel = gyroGetAngVel(g);
-	//state->angle_vel = 0;
-	state->angle += (state->angle_vel * dt);
-}
+	struct state_angular_1d_t *state = (struct state_angular_1d_t*)task->data;
 
-void stateUpdateFromGyros(struct gyro3d_t *g, float dt)
-{
-	stateUpdateFromGyro1d(&(_stateController.x), &(g->roll), dt);
-	stateUpdateFromGyro1d(&(_stateController.y), &(g->pitch), dt);
-	stateUpdateFromGyro1d(&(_stateController.z), &(g->yaw), dt);
+	state->angle_vel = gyroGetAngVel(&state->gyro);
+	state->angle += state->angle_vel * task_get_dt(task);
 }
-

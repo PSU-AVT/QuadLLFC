@@ -47,8 +47,6 @@
 #include "control/motor.h"
 #include "control/state.h"
 
-extern volatile uint32_t timer32_0_counter; // In timer32.c
-
 #define DEBUG 1
 
 void handleControlInput(void)
@@ -86,70 +84,14 @@ int main(void)
 
 	struct state_controller_t *sc = stateControllerGet();
 
-	// gyro init
-	struct gyro3d_t gyros;
-	gyro3dInit(&gyros, ADC_PIN0, ADC_PIN1, ADC_PIN2);
 	sensorsStart();
 
 	motorsInit();
 	motorsStart();
 
-	// Start sensors
 	stateInit();
-	//systickDelay(10000); // Let adc settle
-	gyro3dStart(&gyros);
 
-	// Ticks when actions should be performed
-	uint32_t state_update_ticks = systickGetTicks();
-	uint32_t response_update_ticks = state_update_ticks;
-#if DEBUG
-	uint32_t state_output_ticks = state_update_ticks;
-#endif
-	uint32_t cur_ticks;
-
-	uint16_t last_state_update = state_update_ticks;
-	float state_update_dt;
-
-	char buff[50];
-
-	//gyros.pitch.base_val = 402;
-
-	// Main control loop
-	while(1)
-	{
-		cur_ticks = systickGetTicks();
-
-		// Check for control input
-		if(uartRxBufferDataPending())
-			handleControlInput();
-
-		// Check for state update
-		if(cur_ticks >= state_update_ticks)
-		{
-			state_update_dt = (cur_ticks - last_state_update) * .001;
-			stateUpdateFromGyros(&gyros, state_update_dt);
-			last_state_update = cur_ticks;
-			state_update_ticks += CFG_STATE_UPDATE_MSECS;
-		}
-
-		// Check for response update
-		if(cur_ticks >= response_update_ticks)
-		{
-			doResponseUpdate();
-			response_update_ticks += CFG_RESPONSE_UPDATE_MSECS;
-		}
-
-#if DEBUG
-		if(cur_ticks >= state_output_ticks)
-		{
-			sprintf(buff, "%f\t%f\t%f\r\n",
-			       sc->x.angle, sc->y.angle, sc->z.angle);
-			uartSend(buff, strlen(buff));
-			state_output_ticks += CFG_STATE_OUTPUT_MSECS;
-		}
-#endif
-
-	}
+	tasks_loop_forever();
 
 	return 0;
 }

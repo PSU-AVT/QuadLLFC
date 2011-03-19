@@ -43,8 +43,10 @@ struct task_t
 	void (*handler)(struct task_t *task); // Function called every msecs
 	unsigned int last_exec; // Dont touch
 	unsigned int next_exec; // Dont touch
-	void *data; // Set to any data you like
+	void *data;
 };
+
+#define task_get_dt(T) ((systickGetTicks() - T->last_exec) * .001)
 
 /* Insert tasks in order of priority (greatest first) */
 void tasks_add_task(struct task_t *task);
