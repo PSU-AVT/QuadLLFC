@@ -82,8 +82,6 @@ int main(void)
 	systickInit(1);
 	uartInit(9600);
 
-	struct state_controller_t *sc = stateControllerGet();
-
 	sensorsStart();
 
 	motorsInit();
