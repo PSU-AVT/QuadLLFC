@@ -74,14 +74,49 @@ void handleControlInput(void)
 	motorsSyncDutyCycle();
 }
 
+#if 0
+static int cnt;
+static float roll_sum, pitch_sum, yaw_sum;
+static float roll_avg, pitch_avg, yaw_avg;
+
+char buff[100];
 void debugState(struct task_t *task)
 {
-	char buff[100];
 	struct state_controller_t *sc;
 	sc = stateControllerGet();
-	sprintf(buff, "%f\t%f\r\n", sc->roll.angle, sc->roll.gyro.val);
+	cnt++;
+	roll_sum += sc->roll.gyro.val;
+	pitch_sum += sc->pitch.gyro.val;
+	yaw_sum += sc->yaw.gyro.val;
+	roll_avg = roll_sum / cnt;
+	pitch_avg = pitch_sum / cnt;
+	yaw_avg = pitch_sum / cnt;
+	sprintf(buff, "%f\t%f\t%f\r\n", roll_avg, pitch_avg, yaw_avg);
 	uartSend(buff, strlen(buff));
 }
+#endif
+
+#if 0
+char buff[100];
+void debugState(struct task_t *task)
+{
+	struct state_controller_t *sc;
+	sc = stateControllerGet();
+	sprintf(buff, "%f\t%f\t%f\r\n", sc->roll.angle, sc->pitch.angle, sc->yaw.angle);
+	uartSend(buff, strlen(buff));
+}
+#endif
+
+#if 1
+char buff[100];
+void debugState(struct task_t *task)
+{
+	struct state_controller_t *sc;
+	sc = stateControllerGet();
+	sprintf(buff, "%u\t%u\t%u\r\n", sensorGetAdcVal(&sc->accelero.x), sensorGetAdcVal(&sc->accelero.y), sensorGetAdcVal(&sc->accelero.z));
+	uartSend(buff, strlen(buff));
+}
+#endif
 
 int main(void)
 {

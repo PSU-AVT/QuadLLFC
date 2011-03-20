@@ -47,7 +47,7 @@ struct gyro_t
 {
 	struct sensor_t sensor;
 	float val;
-	uint16_t base_val;
+	float base_val;
 };
 
 struct gyro3d_t

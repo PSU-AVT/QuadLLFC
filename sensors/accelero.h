@@ -37,6 +37,7 @@
 struct accelero_t
 {
 	struct sensor_t sensor;
+	uint16_t val;
 	uint16_t base_val;
 };
 

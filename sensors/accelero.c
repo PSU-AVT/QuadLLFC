@@ -56,12 +56,13 @@ void accelero3dInit(struct accelero3d_t *a, uint16_t x_adc_pin,
 
 void accelero3dStart(struct accelero3d_t *a)
 {
-	//acceleroStart(&a->x);
-	//acceleroStart(&a->y);
-	//acceleroStart(&a->z);
-	a->x.base_val = 444;
-	a->y.base_val = 526;
-	a->z.base_val = 510;
+	acceleroStart(&a->x);
+	acceleroStart(&a->y);
+	acceleroStart(&a->z);
+
+	a->x.base_val = CFG_ACCELERO_X_BASE_VAL;
+	a->y.base_val = CFG_ACCELERO_Y_BASE_VAL;
+	a->z.base_val = CFG_ACCELERO_Z_BASE_VAL;
 }
 
 float accelero3dGetRoll(struct accelero3d_t *a)
