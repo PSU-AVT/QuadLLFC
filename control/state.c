@@ -39,7 +39,8 @@ static struct state_controller_t _stateController;
 
 static struct task_t roll_update_task,
                      pitch_update_task,
-                     yaw_update_task;
+                     yaw_update_task,
+                     roll_gyro_update_task;
 
 struct state_controller_t *stateControllerGet(void)
 {
@@ -52,6 +53,16 @@ void stateInit(void)
 	gyroInit(&_stateController.pitch.gyro, CFG_PITCH_ADC_PIN);
 	gyroInit(&_stateController.yaw.gyro, CFG_YAW_ADC_PIN);
 
+	// Gyro update tasks
+	roll_gyro_update_task.data = &_stateController.roll.gyro;
+
+	roll_gyro_update_task.handler = gyroUpdateVal;
+
+	roll_gyro_update_task.msecs = CFG_ROLL_GYRO_FILTER_MSECS;
+
+	tasks_add_task(&roll_gyro_update_task);
+
+	// State update tasks
 	roll_update_task.data = &_stateController.roll;
 	pitch_update_task.data = &_stateController.pitch;
 	yaw_update_task.data = &_stateController.yaw;
@@ -74,6 +85,9 @@ void stateStart(void)
 	gyroStart(&_stateController.roll.gyro);
 	gyroStart(&_stateController.pitch.gyro);
 	gyroStart(&_stateController.yaw.gyro);
+
+	_stateController.roll.gyro.base_val = 401;
+	_stateController.roll.gyro.val = 401;
 }
 
 void stateAngularUpdate(struct task_t *task)

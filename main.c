@@ -73,9 +73,13 @@ void handleControlInput(void)
 	motorsSyncDutyCycle();
 }
 
-void sendHello(struct task_t *task)
+void debugState(struct task_t *task)
 {
-	uartSend("Hello\r\n", 7);
+	char buff[100];
+	struct state_controller_t *sc;
+	sc = stateControllerGet();
+	sprintf(buff, "%f\t%f\r\n", sc->roll.angle, sc->roll.gyro.val);
+	uartSend(buff, strlen(buff));
 }
 
 int main(void)
@@ -85,7 +89,7 @@ int main(void)
 	uartInit(9600);
 
 	motorsInit();
-	motorsStart();
+	//motorsStart();
 
 	stateInit();
 
@@ -93,10 +97,10 @@ int main(void)
 
 	stateStart();
 
-	struct task_t hello_task;
-	hello_task.handler = sendHello;
-	hello_task.msecs = 1000;
-	tasks_add_task(&hello_task);
+	struct task_t state_debug_task;
+	state_debug_task.handler = debugState;
+	state_debug_task.msecs = 200;
+	tasks_add_task(&state_debug_task);
 
 	while(1)
 		tasks_loop();

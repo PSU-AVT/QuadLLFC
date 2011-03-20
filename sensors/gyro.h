@@ -41,10 +41,12 @@
 #define GYRO_H
 
 #include "sensor.h"
+#include "../sys/tasks.h"
 
 struct gyro_t
 {
 	struct sensor_t sensor;
+	float val;
 	uint16_t base_val;
 };
 
@@ -71,5 +73,7 @@ void gyro3dStart(struct gyro3d_t *gyro);
 /* Returns last measured angular velocity of gyro
  * units are rad / s */
 float gyroGetAngVel(struct gyro_t *gyro);
+
+void gyroUpdateVal(struct task_t *task);
 
 #endif
