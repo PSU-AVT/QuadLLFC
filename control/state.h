@@ -33,21 +33,20 @@
 #define STATE_H
 
 #include "../sensors/gyro.h"
+#include "../sensors/accelero.h"
+#include "../sys/tasks.h"
 
-struct state1d_t
+struct state_angular_1d_t
 {
+	struct gyro_t gyro;
 	float angle_vel;
 	float angle;
-	float accel;
-	float vel;
-	float pos;
 };
 
 struct state_controller_t
 {
-	struct state1d_t x,
-	                 y,
-                     z;
+	struct state_angular_1d_t roll, pitch, yaw;
+	struct accelero3d_t accelero;
 };
 
 struct state_controller_t *stateControllerGet(void);
@@ -55,8 +54,7 @@ struct state_controller_t *stateControllerGet(void);
 /* Initialize the state controller */
 void stateInit(void);
 
-/* Update state from gyros */
-void stateUpdateFromGyros(struct gyro3d_t *g, float dt);
+void stateAngularUpdate(struct task_t *task);
 
 #endif
 

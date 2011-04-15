@@ -3,7 +3,7 @@
  *
  * Software License Agreement (BSD License)
  *
- * Copyright (c) 2011, Gregory Haynes
+ * Copyright (c) 2010, Gregory Haynes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,37 +29,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef ACCELERO_H
-#define ACCELERO_H
+#ifndef LIST_H
+#define LIST_H
 
-#include "sensor.h"
-
-struct accelero_t
+struct list_t
 {
-	struct sensor_t sensor;
-	uint16_t val;
-	uint16_t base_val;
+	struct list_t *next;
 };
-
-struct accelero3d_t
-{
-	struct accelero_t x,
-	                  y,
-	                  z;
-};
-
-void acceleroInit(struct accelero_t *accelero, uint16_t adc_pin);
-void acceleroStart(struct accelero_t *accelero);
-
-void accelero3dInit(struct accelero3d_t *accelero, uint16_t x_adc_pin,
-                    uint16_t y_adc_pin,
-                    uint16_t z_adc_pin);
-void accelero3dStart(struct accelero3d_t *accelero);
-
-// Around the x axis
-float accelero3dGetRoll(struct accelero3d_t *accelro);
-
-// Around the y axis
-float accelero3dGetPitch(struct accelero3d_t *accelero);
 
 #endif

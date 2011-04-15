@@ -1,5 +1,7 @@
 /*
- * Author: Gregory Haynes <greg@greghaynes.net>
+ * Author: Gregory Haynes 	<greg@greghaynes.net>
+ *         Jonathan Harker 	<kjharke@cs.pdx.edu>
+ *         Spencer Krum		<krum.spencer@gmail.com>
  *
  * Software License Agreement (BSD License)
  *
@@ -45,150 +47,99 @@
 #include "sensors/accelero.h"
 #include "kalman/kalman.h"
 #include "control/motor.h"
-
-extern volatile uint32_t timer32_0_counter; // In timer32.c
+#include "control/state.h"
 
 #define DEBUG 1
 
-int main(void)
+void handleControlInput(void)
 {
-	struct motor_controller_t *mc = motorControllerGet();
+	char ch;
 
-	cpuInit();
-	systickInit(1);
-	uartInit(9600);
-
-	motorsInit();
-	motorsStart();
-
-	uint8_t ch;
-	char buff[512];
-	while(1)
+	ch = uartRxBufferRead();
+	if(ch == '.')
 	{
-		if(uartRxBufferDataPending())
-		{
-			ch = uartRxBufferRead();
-			if(ch == '.')
-			{
 #if DEBUG
-				sprintf(buff, "%f\r\n", mc->motors[1].duty_cycle);
-				uartSend(buff, strlen(buff));
+		uartSend(" --- GOT . ---", strlen(" --- GOT . ---"));
 #endif
-				motorsThrustIncreaseAll(100);
-			}
-			else if(ch == '-')
-			{
+		motorsThrustIncreaseAll(100);
+	}
+	else if(ch == '-')
+	{
 #if DEBUG
-				sprintf(buff, "%f\r\n", mc->motors[1].duty_cycle);
-				uartSend(buff, strlen(buff));
+		uartSend(" --- GOT - ---", strlen(" --- GOT - ---"));
 #endif
-				motorsThrustIncreaseAll(-100);
-			}
-
-			motorsSyncDutyCycle();
-		}
+		motorsThrustIncreaseAll(-100);
 	}
 
+	motorsSyncDutyCycle();
 }
 
-#if 0 // Real control loop
+#if 0
+static int cnt;
+static float roll_sum, pitch_sum, yaw_sum;
+static float roll_avg, pitch_avg, yaw_avg;
+
+char buff[100];
+void debugState(struct task_t *task)
+{
+	struct state_controller_t *sc;
+	sc = stateControllerGet();
+	cnt++;
+	roll_sum += sc->roll.gyro.val;
+	pitch_sum += sc->pitch.gyro.val;
+	yaw_sum += sc->yaw.gyro.val;
+	roll_avg = roll_sum / cnt;
+	pitch_avg = pitch_sum / cnt;
+	yaw_avg = pitch_sum / cnt;
+	sprintf(buff, "%f\t%f\t%f\r\n", roll_avg, pitch_avg, yaw_avg);
+	uartSend(buff, strlen(buff));
+}
+#endif
+
+#if 0
+char buff[100];
+void debugState(struct task_t *task)
+{
+	struct state_controller_t *sc;
+	sc = stateControllerGet();
+	sprintf(buff, "%f\t%f\t%f\r\n", sc->roll.angle, sc->pitch.angle, sc->yaw.angle);
+	uartSend(buff, strlen(buff));
+}
+#endif
+
+#if 1
+char buff[100];
+void debugState(struct task_t *task)
+{
+	struct state_controller_t *sc;
+	sc = stateControllerGet();
+	sprintf(buff, "%u\t%u\t%u\r\n", sensorGetAdcVal(&sc->accelero.x), sensorGetAdcVal(&sc->accelero.y), sensorGetAdcVal(&sc->accelero.z));
+	uartSend(buff, strlen(buff));
+}
+#endif
+
 int main(void)
 {
-	struct esc_controller_t *controller;
-
 	cpuInit();
 	systickInit(1);
 	uartInit(9600);
 
 	motorsInit();
+	//motorsStart();
 
-	// gyro init
-	struct gyro3d_t gyros;
-	gyro3dInit(&gyros, ADC_PIN0, ADC_PIN1, ADC_PIN2);
-
-	// Accelerometer init
-	struct accelero3d_t accelero;
-	accelero3dInit(&accelero, ADC_PIN3, ADC_PIN5, ADC_PIN7);
-
-	// Kalman filters init
-	struct kalman1d_t k_roll, k_pitch;
-	kalman1d_init(&k_roll, 0.0001, 0.0003, 0.69);
-	kalman1d_init(&k_pitch, 0.0001, 0.0003, 0.69);
+	stateInit();
 
 	sensorsStart();
-	systickDelay(1000); // Let adc settle
-	gyro3dStart(&gyros);
-	accelero3dStart(&accelero);
 
-	motorsStart();
+	stateStart();
 
-	uint32_t last_predict = systickGetTicks();
-	uint32_t last_update = systickGetTicks();
-	uint32_t cur_ticks;
-	float predict_dt = .001 * CFG_CTL_K_PREDICT;
-	float update_dt = .001 * CFG_CTL_K_UPDATE;
-	float dt;
-	char buff[150];
-
-	uint8_t ch;
+	struct task_t state_debug_task;
+	state_debug_task.handler = debugState;
+	state_debug_task.msecs = 200;
+	tasks_add_task(&state_debug_task);
 
 	while(1)
-	{
-		cur_ticks = systickGetTicks();
-
-		if(uartRxBufferDataPending())
-		{
-			ch = uartRxBufferRead();
-			if(ch == '.')
-			{
-				uartSend(" --- GOT . ---", strlen(" --- GOT . ---"));
-				motorsThrustIncreaseAll(100);
-			}
-			else if(ch == '-')
-			{
-				uartSend(" --- GOT - ---", strlen(" --- GOT - ---"));
-				motorsThrustIncreaseAll(-100);
-			}
-
-			motorsSyncDutyCycle();
-		}
-
-		// Check for update timer
-		if((dt = (cur_ticks - last_update)) >= CFG_CTL_K_UPDATE)
-		{
-			float roll = accelero3dGetRoll(&accelero);
-			float pitch = accelero3dGetPitch(&accelero);
-			float val;
-/*
-			val = motors[0] + (roll * ROLL_FACTOR);
-			if(!(val < MOTOR_MIN || val > MOTOR_MAX))
-				motors[0] = val;
-			val = motors[1] - (roll * ROLL_FACTOR);
-			if(!(val < MOTOR_MIN || val > MOTOR_MAX))
-				motors[1] = val;
-
-			val = motors[2] - (pitch * ROLL_FACTOR);
-			if(!(val < MOTOR_MIN || val > MOTOR_MAX))
-				motors[2] = val;
-			val = motors[3] + (pitch * ROLL_FACTOR);
-			if(!(val < MOTOR_MIN || val > MOTOR_MAX))
-				motors[3] = val;
-				*/
-
-			/*
-			sprintf(buff, "%f %f %f %f %f\r\n",
-					motors[0],
-					motors[1],
-					motors[2],
-					motors[3],
-					roll);
-			uartSend(buff, strlen(buff));
-			*/
-
-			last_update = cur_ticks;
-		}
-	}
+		tasks_loop();
 
 	return 0;
 }
-#endif

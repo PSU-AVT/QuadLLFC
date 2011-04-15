@@ -3,7 +3,7 @@
  *
  * Software License Agreement (BSD License)
  *
- * Copyright (c) 2011, Gregory Haynes
+ * Copyright (c) 2010, Gregory Haynes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,37 +29,49 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef ACCELERO_H
-#define ACCELERO_H
+#include "tasks.h"
+#include "../systick/systick.h"
 
-#include "sensor.h"
+static struct task_t *tasks;
+static struct task_t *tasks_tail;
 
-struct accelero_t
+void tasks_add_task(struct task_t *task)
 {
-	struct sensor_t sensor;
-	uint16_t val;
-	uint16_t base_val;
-};
+	task->list.next = 0;
+	task->last_exec = 0;
+	task->next_exec = 0;
+	if(tasks)
+	{
+		tasks_tail->list.next = &task->list;
+		tasks_tail = task;
+	}
+	else
+	{
+		tasks = task;
+		tasks_tail = task;
+	}
+}
 
-struct accelero3d_t
+void tasks_loop(void)
 {
-	struct accelero_t x,
-	                  y,
-	                  z;
-};
+	struct task_t *task_itr;
+	uint32_t cur_ticks;
+	uint32_t n_exec;
 
-void acceleroInit(struct accelero_t *accelero, uint16_t adc_pin);
-void acceleroStart(struct accelero_t *accelero);
+	task_itr = tasks;
 
-void accelero3dInit(struct accelero3d_t *accelero, uint16_t x_adc_pin,
-                    uint16_t y_adc_pin,
-                    uint16_t z_adc_pin);
-void accelero3dStart(struct accelero3d_t *accelero);
+	while(task_itr)
+	{
+		cur_ticks = systickGetTicks();
 
-// Around the x axis
-float accelero3dGetRoll(struct accelero3d_t *accelro);
+		if(task_itr->next_exec <= cur_ticks)
+		{
+			// Exec the task
+			task_itr->handler(task_itr);
+			task_itr->last_exec = cur_ticks;
+			task_itr->next_exec = cur_ticks + task_itr->msecs;
+		}
 
-// Around the y axis
-float accelero3dGetPitch(struct accelero3d_t *accelero);
-
-#endif
+		task_itr = (struct task_t*)task_itr->list.next;
+	}
+}
