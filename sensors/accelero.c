@@ -30,9 +30,17 @@
 */
 
 #include "accelero.h"
+#include "../config.h"
 #include "../adc/adc.h"
 
 #include <math.h>
+
+void acceleroUpdate(struct task_t *task)
+{
+	struct accelero_t *a;
+	a = (struct accelero_t*)task->data;
+	a->val = ((a->val * (1.0f - CFG_ACCELERO_FILTER_ALPHA)) + (sensorGetAdcVal(&a->sensor) * CFG_ACCELERO_FILTER_ALPHA));
+}
 
 void acceleroInit(struct accelero_t *a, uint16_t adc_pin)
 {
@@ -52,6 +60,18 @@ void accelero3dInit(struct accelero3d_t *a, uint16_t x_adc_pin,
 	acceleroInit(&a->x, x_adc_pin);
 	acceleroInit(&a->y, y_adc_pin);
 	acceleroInit(&a->z, z_adc_pin);
+
+	a->x_update_task.data = &a->x;
+	a->y_update_task.data = &a->y;
+	a->z_update_task.data = &a->z;
+
+	a->x_update_task.msecs = CFG_ACCELERO_FILTER_MSECS;
+	a->y_update_task.msecs = CFG_ACCELERO_FILTER_MSECS;
+	a->z_update_task.msecs = CFG_ACCELERO_FILTER_MSECS;
+
+	a->x_update_task.handler = acceleroUpdate;
+	a->y_update_task.handler = acceleroUpdate;
+	a->z_update_task.handler = acceleroUpdate;
 }
 
 void accelero3dStart(struct accelero3d_t *a)
@@ -63,28 +83,35 @@ void accelero3dStart(struct accelero3d_t *a)
 	a->x.base_val = CFG_ACCELERO_X_BASE_VAL;
 	a->y.base_val = CFG_ACCELERO_Y_BASE_VAL;
 	a->z.base_val = CFG_ACCELERO_Z_BASE_VAL;
+
+	a->x.val = a->x.val;
+	a->y.val = a->y.val;
+	a->z.val = a->z.val;
+
+	a->x.val_scale_acc_div_g = (1.0f / 101);
+	a->y.val_scale_acc_div_g = (1.0f / 104);
+
+	tasks_add_task(&a->x_update_task);
+	tasks_add_task(&a->y_update_task);
+	tasks_add_task(&a->z_update_task);
 }
 
 float accelero3dGetRoll(struct accelero3d_t *a)
 {
-	float y = sensorGetAdcVal(&a->y.sensor);
-	y -= a->y.base_val;
-	float z = sensorGetAdcVal(&a->z.sensor);
-	z -= a->z.base_val;
-	z = -z;
-	if(!z)
-		return 0;
-	return atan2f(y, z);
+	float ret = (a->x.val - a->x.base_val) * a->x.val_scale_acc_div_g;
+	if(ret > 1)
+		ret = 1;
+	else if(ret < -1)
+		ret = -1;
+	return asin(ret);
 }
 
 float accelero3dGetPitch(struct accelero3d_t *a)
 {
-	float x = sensorGetAdcVal(&a->x.sensor);
-	x -= a->x.base_val;
-	float z = sensorGetAdcVal(&a->z.sensor);
-	z -= a->z.base_val;
-	z = -z;
-	if(!z)
-		return 0;
-	return atan2f(x, z);
+	float ret = (a->y.val - a->y.base_val) * a->x.val_scale_acc_div_g;
+	if(ret > 1)
+		ret = 1;
+	else if(ret < -1)
+		ret = -1;
+	return asin(ret);
 }

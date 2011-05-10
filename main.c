@@ -51,52 +51,6 @@
 
 #define DEBUG 1
 
-void handleControlInput(void)
-{
-	char ch;
-
-	ch = uartRxBufferRead();
-	if(ch == '.')
-	{
-#if DEBUG
-		uartSend(" --- GOT . ---", strlen(" --- GOT . ---"));
-#endif
-		motorsThrustIncreaseAll(100);
-	}
-	else if(ch == '-')
-	{
-#if DEBUG
-		uartSend(" --- GOT - ---", strlen(" --- GOT - ---"));
-#endif
-		motorsThrustIncreaseAll(-100);
-	}
-
-	motorsSyncDutyCycle();
-}
-
-#if 0
-static int cnt;
-static float roll_sum, pitch_sum, yaw_sum;
-static float roll_avg, pitch_avg, yaw_avg;
-
-char buff[100];
-void debugState(struct task_t *task)
-{
-	struct state_controller_t *sc;
-	sc = stateControllerGet();
-	cnt++;
-	roll_sum += sc->roll.gyro.val;
-	pitch_sum += sc->pitch.gyro.val;
-	yaw_sum += sc->yaw.gyro.val;
-	roll_avg = roll_sum / cnt;
-	pitch_avg = pitch_sum / cnt;
-	yaw_avg = pitch_sum / cnt;
-	sprintf(buff, "%f\t%f\t%f\r\n", roll_avg, pitch_avg, yaw_avg);
-	uartSend(buff, strlen(buff));
-}
-#endif
-
-#if 0
 char buff[100];
 void debugState(struct task_t *task)
 {
@@ -105,27 +59,32 @@ void debugState(struct task_t *task)
 	sprintf(buff, "%f\t%f\t%f\r\n", sc->roll.angle, sc->pitch.angle, sc->yaw.angle);
 	uartSend(buff, strlen(buff));
 }
-#endif
 
-#if 1
-char buff[100];
-void debugState(struct task_t *task)
+void handle_control_input(char ch)
 {
-	struct state_controller_t *sc;
-	sc = stateControllerGet();
-	sprintf(buff, "%u\t%u\t%u\r\n", sensorGetAdcVal(&sc->accelero.x), sensorGetAdcVal(&sc->accelero.y), sensorGetAdcVal(&sc->accelero.z));
-	uartSend(buff, strlen(buff));
+	switch(ch)
+	{
+	case ']':
+		motorsThrustIncreaseAll(-1000);
+		break;
+	case '[':
+		motorsThrustIncreaseAll(1000);
+		break;
+	case 'q':
+		motorsReset();
+		break;
+	}
+	motorsSyncDutyCycle();
 }
-#endif
 
 int main(void)
 {
 	cpuInit();
 	systickInit(1);
-	uartInit(9600);
+	uartInit(38400);
 
 	motorsInit();
-	//motorsStart();
+	motorsStart();
 
 	stateInit();
 
@@ -138,8 +97,18 @@ int main(void)
 	state_debug_task.msecs = 200;
 	tasks_add_task(&state_debug_task);
 
+	systickDelay(6000);
+
+	responseStart();
+
 	while(1)
+	{
+		while(uartRxBufferDataPending())
+		{
+			handle_control_input(uartRxBufferRead());
+		}
 		tasks_loop();
+	}
 
 	return 0;
 }

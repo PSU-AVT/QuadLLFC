@@ -105,7 +105,14 @@ void motorThrustIncrease(struct motor_t *motor, float value)
 {
 	if((motor->duty_cycle + value * motor->thrust_proportion) < CFG_MOTOR_DEFAULT_MAX_THRUST)
 		return;
+	if((motor->duty_cycle + value * motor->thrust_proportion) > CFG_MOTOR_DEFAULT_MIN_THRUST)
+		return;
 	motor->duty_cycle += value * motor->thrust_proportion;
+}
+
+void motorNdxThrustIncrease(int ndx, float value)
+{
+	motorThrustIncrease(&_motor_controller.motors[ndx], value);
 }
 
 void motorsThrustIncreaseAll(float value)
@@ -115,6 +122,15 @@ void motorsThrustIncreaseAll(float value)
 	{
 		motorThrustIncrease(&_motor_controller.motors[i],
 		                      value);
+	}
+}
+
+void motorsReset(void)
+{
+	uint8_t i;
+	for(i = 0;i < CFG_MOTOR_CNT;i++)
+	{
+		_motor_controller.motors[i].duty_cycle = _motor_controller.motors[i].thrust_min;
 	}
 }
 

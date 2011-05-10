@@ -33,12 +33,14 @@
 #define ACCELERO_H
 
 #include "sensor.h"
+#include "../sys/tasks.h"
 
 struct accelero_t
 {
 	struct sensor_t sensor;
-	uint16_t val;
-	uint16_t base_val;
+	float val;
+	float base_val;
+	float val_scale_acc_div_g;
 };
 
 struct accelero3d_t
@@ -46,6 +48,10 @@ struct accelero3d_t
 	struct accelero_t x,
 	                  y,
 	                  z;
+
+	struct task_t x_update_task,
+	              y_update_task,
+	              z_update_task;
 };
 
 void acceleroInit(struct accelero_t *accelero, uint16_t adc_pin);

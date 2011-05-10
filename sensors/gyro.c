@@ -37,8 +37,15 @@ void gyroInit(struct gyro_t *g, uint16_t adc_pin)
 	sensorInit(&g->sensor, adc_pin);
 }
 
-void gyroStart(struct gyro_t *g)
+void gyroStart(struct gyro_t *g, uint16_t update_msecs)
 {
+	// Setup gyro update task
+	g->update_task.data = g;
+	g->update_task.msecs = update_msecs;
+	g->update_task.handler = gyroUpdateVal;
+
+	tasks_add_task(&g->update_task);
+
 	// Block until we get a valid base gyro value
 	do
 		g->base_val = sensorGetAdcVal(&g->sensor);
@@ -54,11 +61,11 @@ void gyro3dInit(struct gyro3d_t *g, uint16_t r_adc_pin,
 	gyroInit(&g->yaw, y_adc_pin);
 }
 
-void gyro3dStart(struct gyro3d_t *g)
+void gyro3dStart(struct gyro3d_t *g, uint16_t roll_update, uint16_t pitch_update, uint16_t yaw_update)
 {
-	gyroStart(&g->roll);
-	gyroStart(&g->pitch);
-	gyroStart(&g->yaw);
+	gyroStart(&g->roll, roll_update);
+	gyroStart(&g->pitch, pitch_update);
+	gyroStart(&g->yaw, yaw_update);
 }
 
 float gyroGetAngVel(struct gyro_t *g)
@@ -73,4 +80,10 @@ void gyroUpdateVal(struct task_t *task)
 {
 	struct gyro_t *g = (struct gyro_t*)task->data;
 	g->val = ((g->val * (1.0f - CFG_GYRO_FILTER_ALPHA)) + (sensorGetAdcVal(&g->sensor) * CFG_GYRO_FILTER_ALPHA));
+}
+
+void gyroCorrectBias(struct gyro_t *g, float angle)
+{
+	float real_offset = angle * 100;
+	g->base_val = g->val + real_offset;
 }

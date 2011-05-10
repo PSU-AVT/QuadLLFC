@@ -35,14 +35,18 @@
 #include "../systick/systick.h"
 #include "../adc/adc.h"
 
+void stateRollBiasCorrect(struct task_t *task);
+void statePitchBiasCorrect(struct task_t *task);
+void stateRollUpdate(struct task_t *task);
+void statePitchUpdate(struct task_t *task);
+
 static struct state_controller_t _stateController;
 
-static struct task_t roll_update_task,
-                     pitch_update_task,
-                     yaw_update_task,
-                     roll_gyro_update_task,
-                     pitch_gyro_update_task,
-                     yaw_gyro_update_task;
+static struct task_t state_angular_update_task;
+
+void state_angular_update(struct task_t *task)
+{
+}
 
 struct state_controller_t *stateControllerGet(void)
 {
@@ -51,71 +55,30 @@ struct state_controller_t *stateControllerGet(void)
 
 void stateInit(void)
 {
-	gyroInit(&_stateController.roll.gyro, CFG_ROLL_ADC_PIN);
-	gyroInit(&_stateController.pitch.gyro, CFG_PITCH_ADC_PIN);
-	gyroInit(&_stateController.yaw.gyro, CFG_YAW_ADC_PIN);
-
-	accelero3dInit(&_stateController.accelero, CFG_ACCELERO_X_ADC_PIN,
-	               CFG_ACCELERO_Y_ADC_PIN,
-	               CFG_ACCELERO_Z_ADC_PIN);
-
-	// Gyro update tasks
-	roll_gyro_update_task.data = &_stateController.roll.gyro;
-	pitch_gyro_update_task.data = &_stateController.pitch.gyro;
-	yaw_gyro_update_task.data = &_stateController.yaw.gyro;
-
-	roll_gyro_update_task.handler = gyroUpdateVal;
-	pitch_gyro_update_task.handler = gyroUpdateVal;
-	yaw_gyro_update_task.handler = gyroUpdateVal;
-
-	roll_gyro_update_task.msecs = CFG_ROLL_GYRO_FILTER_MSECS;
-	pitch_gyro_update_task.msecs = CFG_PITCH_GYRO_FILTER_MSECS;
-	yaw_gyro_update_task.msecs = CFG_YAW_GYRO_FILTER_MSECS;
-
-	tasks_add_task(&roll_gyro_update_task);
-	tasks_add_task(&pitch_gyro_update_task);
-	tasks_add_task(&yaw_gyro_update_task);
-
-	// State update tasks
-	roll_update_task.data = &_stateController.roll;
-	pitch_update_task.data = &_stateController.pitch;
-	yaw_update_task.data = &_stateController.yaw;
-
-	roll_update_task.handler = stateAngularUpdate;
-	pitch_update_task.handler = stateAngularUpdate;
-	yaw_update_task.handler = stateAngularUpdate;
-
-	roll_update_task.msecs = CFG_ROLL_UPDATE_MSECS;
-	pitch_update_task.msecs = CFG_PITCH_UPDATE_MSECS;
-	yaw_update_task.msecs = CFG_YAW_UPDATE_MSECS;
-
-	tasks_add_task(&roll_update_task);
-	tasks_add_task(&pitch_update_task);
-	tasks_add_task(&yaw_update_task);
+	// Initialize gyros
+	gyro3dInit(&_stateController.gyros, CFG_ROLL_ADC_PIN, CFG_PITCH_ADC_PIN, CFG_YAW_ADC_PIN);
 }
 
 void stateStart(void)
 {
-	gyroStart(&_stateController.roll.gyro);
-	gyroStart(&_stateController.pitch.gyro);
-	gyroStart(&_stateController.yaw.gyro);
+	_stateController.gyros.roll.base_val = CFG_ROLL_BASE_VAL;
+	_stateController.gyros.roll.val = CFG_ROLL_BASE_VAL;
 
-	accelero3dStart(&_stateController.accelero);
+	_stateController.gyros.pitch.base_val = CFG_PITCH_BASE_VAL;
+	_stateController.gyros.pitch.val = CFG_PITCH_BASE_VAL;
 
-	_stateController.roll.gyro.base_val = CFG_ROLL_BASE_VAL;
-	_stateController.roll.gyro.val = CFG_ROLL_BASE_VAL;
+	_stateController.gyros.yaw.base_val = CFG_YAW_BASE_VAL;
+	_stateController.gyros.yaw.val = CFG_YAW_BASE_VAL;
 
-	_stateController.pitch.gyro.base_val = CFG_PITCH_BASE_VAL;
-	_stateController.pitch.gyro.val = CFG_PITCH_BASE_VAL;
+	_stateController.roll.angle = 0;
+	_stateController.pitch.angle = 0;
+	_stateController.yaw.angle = 0;
 
-	_stateController.yaw.gyro.base_val = CFG_YAW_BASE_VAL;
-	_stateController.yaw.gyro.val = CFG_YAW_BASE_VAL;
-}
+	// Start gyros
+	gyro3dStart(&_stateController.gyros, CFG_ROLL_GYRO_FILTER_MSECS, CFG_PITCH_GYRO_FILTER_MSECS, CFG_YAW_GYRO_FILTER_MSECS);
 
-void stateAngularUpdate(struct task_t *task)
-{
-	struct state_angular_1d_t *state = (struct state_angular_1d_t*)task->data;
-
-	state->angle_vel = gyroGetAngVel(&state->gyro);
-	state->angle += state->angle_vel * task_get_dt(task);
+	// Create angular state update task
+	state_angular_update_task.handler = state_angular_update;
+	state_angular_update_task.msecs = CFG_ANGULAR_STATE_UPDATE_MSECS;
+	tasks_add_task(&state_angular_update_task);
 }

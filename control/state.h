@@ -38,13 +38,13 @@
 
 struct state_angular_1d_t
 {
-	struct gyro_t gyro;
 	float angle_vel;
 	float angle;
 };
 
 struct state_controller_t
 {
+	struct gyro3d_t gyros;
 	struct state_angular_1d_t roll, pitch, yaw;
 	struct accelero3d_t accelero;
 };

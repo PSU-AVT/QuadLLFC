@@ -57,7 +57,9 @@ void motorsStart(void);
 void motorsSyncDutyCycle(void);
 
 void motorThrustIncrease(struct motor_t *motor, float value);
+void motorNdxThrustIncrease(int ndx, float value);
 void motorsThrustIncreaseAll(float value);
+void motorsReset(void);
 
 /* Get current thrust in M/S */
 float motorsGetThrust(void);

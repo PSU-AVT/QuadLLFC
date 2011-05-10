@@ -48,6 +48,7 @@ struct gyro_t
 	struct sensor_t sensor;
 	float val;
 	float base_val;
+	struct task_t update_task;
 };
 
 struct gyro3d_t
@@ -62,18 +63,18 @@ void gyroInit(struct gyro_t *gyro, uint16_t adc_pin);
 /*
  * call after sensorsStart (or adcStart()) is called
  */
-void gyroStart(struct gyro_t *gyro);
+void gyroStart(struct gyro_t *gyro, uint16_t update_msecs);
 
 void gyro3dInit(struct gyro3d_t *gyro, uint16_t r_adc_pin,
                 uint16_t p_adc_pin,
                 uint16_t y_adc_pin);
 
-void gyro3dStart(struct gyro3d_t *gyro);
+void gyro3dStart(struct gyro3d_t *gyro, uint16_t roll_update, uint16_t pitch_update, uint16_t yaw_update);
 
 /* Returns last measured angular velocity of gyro
  * units are rad / s */
 float gyroGetAngVel(struct gyro_t *gyro);
 
-void gyroUpdateVal(struct task_t *task);
+void gyroUpdateVal(struct task_t*);
 
 #endif
