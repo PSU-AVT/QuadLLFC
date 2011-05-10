@@ -5,7 +5,7 @@
  *
  * Software License Agreement (BSD License)
  *
- * Copyright (c) 2010, Gregory Haynes
+ * Copyright (c) 2010, Gregory Haynes, Spencer Krum
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
