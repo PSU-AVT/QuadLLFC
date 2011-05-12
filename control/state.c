@@ -35,18 +35,7 @@
 #include "../systick/systick.h"
 #include "../adc/adc.h"
 
-void stateRollBiasCorrect(struct task_t *task);
-void statePitchBiasCorrect(struct task_t *task);
-void stateRollUpdate(struct task_t *task);
-void statePitchUpdate(struct task_t *task);
-
 static struct state_controller_t _stateController;
-
-static struct task_t state_angular_update_task;
-
-void state_angular_update(struct task_t *task)
-{
-}
 
 struct state_controller_t *stateControllerGet(void)
 {
@@ -76,9 +65,4 @@ void stateStart(void)
 
 	// Start gyros
 	gyro3dStart(&_stateController.gyros, CFG_ROLL_GYRO_FILTER_MSECS, CFG_PITCH_GYRO_FILTER_MSECS, CFG_YAW_GYRO_FILTER_MSECS);
-
-	// Create angular state update task
-	state_angular_update_task.handler = state_angular_update;
-	state_angular_update_task.msecs = CFG_ANGULAR_STATE_UPDATE_MSECS;
-	tasks_add_task(&state_angular_update_task);
 }

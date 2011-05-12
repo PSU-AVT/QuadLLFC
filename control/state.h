@@ -54,7 +54,5 @@ struct state_controller_t *stateControllerGet(void);
 /* Initialize the state controller */
 void stateInit(void);
 
-void stateAngularUpdate(struct task_t *task);
-
 #endif
 
