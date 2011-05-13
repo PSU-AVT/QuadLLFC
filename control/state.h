@@ -32,9 +32,9 @@
 #ifndef STATE_H
 #define STATE_H
 
-#include "../sensors/gyro.h"
 #include "../sensors/accelero.h"
 #include "../sys/tasks.h"
+#include "../sensors/itg3200.h"
 
 struct state_angular_1d_t
 {
@@ -44,7 +44,7 @@ struct state_angular_1d_t
 
 struct state_controller_t
 {
-	struct gyro3d_t gyros;
+	GyroData gyros;
 	struct state_angular_1d_t roll, pitch, yaw;
 	struct accelero3d_t accelero;
 };

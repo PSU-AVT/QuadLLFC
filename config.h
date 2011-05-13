@@ -17,13 +17,9 @@
 #define CFG_CTL_K_PREDICT           (10)
 #define CFG_CTL_K_UPDATE            (2)
 
-#define CFG_ANGULAR_STATE_UPDATE_MSECS     (4) // msecs between sensor updates
+#define CFG_GYRO_UPDATE_MSECS      (4) // msecs between sensor updates
 #define CFG_RESPONSE_UPDATE_MSECS  (50) // msecs between responding to state
 #define CFG_STATE_OUTPUT_MSECS     (200)
-
-#define CFG_ROLL_ADC_PIN           ADC_PIN0
-#define CFG_PITCH_ADC_PIN          ADC_PIN1
-#define CFG_YAW_ADC_PIN            ADC_PIN2
 
 #define CFG_ACCELERO_X_ADC_PIN     ADC_PIN3
 #define CFG_ACCELERO_Y_ADC_PIN     ADC_PIN5

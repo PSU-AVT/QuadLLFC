@@ -57,7 +57,7 @@ void debugState(struct task_t *task)
 {
 	struct state_controller_t *sc;
 	sc = stateControllerGet();
-	sprintf(buff, "%f\t%f\t%f\r\n", sc->roll.angle, sc->pitch.angle, sc->yaw.angle);
+	sprintf(buff, "%f\t%f\t%f\r\n", sc->gyros.X, sc->gyros.Y, sc->gyros.Z);
 	uartSend(buff, strlen(buff));
 }
 
@@ -84,23 +84,10 @@ int main(void)
 	systickInit(1);
 	uartInit(38400);
 
-	GyroData g;
-	itg3200Init();
-	char buff[512];
-	while(1) {
-		systickDelay(100);
-		itg3200GetData(&g);
-		sprintf(buff, "%f (c) %f (x) %f (y) %f (z)\r\n", g.temp, g.X, g.Y, g.Z);
-		uartSend(buff, strlen(buff));
-	}
-
 	motorsInit();
 	motorsStart();
 
 	stateInit();
-
-	sensorsStart();
-
 	stateStart();
 
 	struct task_t state_debug_task;
@@ -108,7 +95,7 @@ int main(void)
 	state_debug_task.msecs = 200;
 	tasks_add_task(&state_debug_task);
 
-	systickDelay(6000);
+	//systickDelay(6000);
 
 	responseStart();
 
