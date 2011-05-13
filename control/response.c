@@ -12,25 +12,16 @@ void responseUpdate(struct task_t *task)
 	struct state_controller_t *sc;
 	sc = stateControllerGet();
 
-	float roll_d = sc->roll.angle - roll_prev;
-	float pitch_d = sc->pitch.angle - pitch_prev;
 
-	// P
-	motorNdxThrustIncrease(MOTOR_LF, 50*sc->roll.angle);
-	motorNdxThrustIncrease(MOTOR_RR, -50*sc->roll.angle);
-	motorNdxThrustIncrease(MOTOR_LR, 50*sc->pitch.angle);
-	motorNdxThrustIncrease(MOTOR_RF, -50*sc->pitch.angle);
 
 	// D
-	motorNdxThrustIncrease(MOTOR_LF, 4000*roll_d);
-	motorNdxThrustIncrease(MOTOR_RR, -4000*roll_d);
-	motorNdxThrustIncrease(MOTOR_LR, 4000*pitch_d);
-	motorNdxThrustIncrease(MOTOR_RF, -4000*pitch_d);
+	motorNdxThrustIncrease(MOTOR_LF, PID_D_TERM*sc->gyros.Y);
+	motorNdxThrustIncrease(MOTOR_RR, PID_D_TERM*sc->gyros.Y);
+	motorNdxThrustIncrease(MOTOR_LR, PID_D_TERM*sc->gyros.X);
+	motorNdxThrustIncrease(MOTOR_RF, PID_D_TERM*sc->gyros.X);
 
 	motorsSyncDutyCycle();
 
-	roll_prev = sc->roll.angle;
-	pitch_prev = sc->pitch.angle;
 }
 
 void responseStart(void)

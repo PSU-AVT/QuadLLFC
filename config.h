@@ -5,6 +5,8 @@
 
 #define CFG_PI                      (3.141)
 
+#define PID_D_TERM                  (4000)
+
 // This doesn't actually effect clock speed
 #define CFG_CPU_CCLK                (72000000)
 

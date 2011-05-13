@@ -36,16 +36,11 @@
 #include "../sys/tasks.h"
 #include "../sensors/itg3200.h"
 
-struct state_angular_1d_t
-{
-	float angle_vel;
-	float angle;
-};
 
 struct state_controller_t
 {
 	GyroData gyros;
-	struct state_angular_1d_t roll, pitch, yaw;
+    float roll, pitch,yaw;
 	struct accelero3d_t accelero;
 };
 

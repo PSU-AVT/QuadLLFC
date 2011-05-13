@@ -41,6 +41,20 @@ static struct task_t gyro_update_task;
 
 void stateGyroUpdate(struct task_t *task)
 {
+    struct state_controller_t *sc;
+    sc = stateControllerGet();
+    dt = task_get_dt(task_t);
+    
+    float rawx = sc->gyros.X;
+    float rawy = sc->gyros.Y;
+    float rawz = sc->gyros.Z;
+
+
+    sc->pitch = sc->pitch +dt*rawx;
+    sc->yaw = sc->yaw + dt*rawz;
+    sc->roll= sc->roll + dt*rawy;
+
+
 	itg3200GetData(&_stateController.gyros);
 }
 
