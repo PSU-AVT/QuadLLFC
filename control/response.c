@@ -9,7 +9,7 @@ void responseUpdate(struct task_t *task)
 	struct state_controller_t *sc;
 	sc = stateControllerGet();
 
-	float roll_torque, pitch, yaw;
+	float roll_torque, pitch_torque, yaw_torque;
 
 	// P
 	roll_torque = sc->roll * CFG_PID_P_FACTOR;
