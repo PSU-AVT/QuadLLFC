@@ -45,6 +45,7 @@
 #include "adc/adc.h"
 #include "sensors/gyro.h"
 #include "sensors/accelero.h"
+#include "sensors/itg3200.h"
 #include "kalman/kalman.h"
 #include "control/motor.h"
 #include "control/state.h"
@@ -82,6 +83,16 @@ int main(void)
 	cpuInit();
 	systickInit(1);
 	uartInit(38400);
+
+	GyroData g;
+	itg3200Init();
+	char buff[512];
+	while(1) {
+		systickDelay(100);
+		itg3200GetData(&g);
+		sprintf(buff, "%f (c) %f (x) %f (y) %f (z)\r\n", g.temp, g.X, g.Y, g.Z);
+		uartSend(buff, strlen(buff));
+	}
 
 	motorsInit();
 	motorsStart();

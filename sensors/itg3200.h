@@ -42,7 +42,7 @@
 #include "../config.h"
 #include "../i2c/i2c.h"
 
-#define itg3200_ADDRESS (0xD0) // device ID
+#define itg3200_ADDRESS (0xD2) // device ID
 #define itg3200_READBIT (0x01)
 
 #define itg3200_REGISTER_CONFIG_DLPF (0x16) //Config byte required - must set bits 4 and 5 (i.e. 0x18)
