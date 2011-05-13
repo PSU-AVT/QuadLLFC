@@ -61,7 +61,4 @@ void motorNdxThrustIncrease(int ndx, float value);
 void motorsThrustIncreaseAll(float value);
 void motorsReset(void);
 
-/* Get current thrust in M/S */
-float motorsGetThrust(void);
-
 #endif

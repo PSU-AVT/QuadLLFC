@@ -1,6 +1,6 @@
 #include "../sys/tasks.h"
 #include "state.h"
-#include "motor.h"
+#include "movement.h"
 
 static struct task_t _response_task;
 
@@ -9,21 +9,23 @@ void responseUpdate(struct task_t *task)
 	struct state_controller_t *sc;
 	sc = stateControllerGet();
 
-    roll = sc->gyros.Y;
-    pitch = sc->gyros.X;
+	float roll_torque, pitch, yaw;
+
+	// P
+	roll_torque = sc->roll * CFG_PID_P_FACTOR;
+	pitch_torque = sc->pitch * CFG_PID_P_FACTOR;
+	yaw_torque = sc->yaw * CFG_PID_P_FACTOR;
 
 	// D
-    if !(roll + 30 <= 60){
-        motorNdxThrustIncrease(MOTOR_LF, PID_D_TERM*sc->gyros.Y);
-        motorNdxThrustIncrease(MOTOR_RR, -PID_D_TERM*sc->gyros.Y);
-    }
-    if !(pitch + 30 <= 60){
-        motorNdxThrustIncrease(MOTOR_LR, PID_D_TERM*sc->gyros.X);
-        motorNdxThrustIncrease(MOTOR_RF, -PID_D_TERM*sc->gyros.X);
-    }
+	roll_torque += sc->gyros.X * CFG_PID_D_FACTOR;
+	pitch_torque += sc->gyros.Y * CFG_PID_D_FACTOR;
+	yaw_torque += sc->gyros.Z * CFG_PID_D_FACTOR;
+
+	movement_roll(roll_torque);
+	movement_pitch(pitch_torque);
+	movement_yaw(yaw_torque);
 
 	motorsSyncDutyCycle();
-
 }
 
 void responseStart(void)

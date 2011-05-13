@@ -43,8 +43,6 @@
 #include "esc/esc.h"
 #include "uart/uart.h"
 #include "adc/adc.h"
-#include "sensors/gyro.h"
-#include "sensors/accelero.h"
 #include "sensors/itg3200.h"
 #include "kalman/kalman.h"
 #include "control/motor.h"

@@ -134,8 +134,3 @@ void motorsReset(void)
 	}
 }
 
-float motorsGetThrust(void)
-{
-	return 1;
-}
-
