@@ -9,13 +9,18 @@ void responseUpdate(struct task_t *task)
 	struct state_controller_t *sc;
 	sc = stateControllerGet();
 
-
+    roll = sc->gyros.Y;
+    pitch = sc->gyros.X;
 
 	// D
-	motorNdxThrustIncrease(MOTOR_LF, PID_D_TERM*sc->gyros.Y);
-	motorNdxThrustIncrease(MOTOR_RR, -PID_D_TERM*sc->gyros.Y);
-	motorNdxThrustIncrease(MOTOR_LR, PID_D_TERM*sc->gyros.X);
-	motorNdxThrustIncrease(MOTOR_RF, -PID_D_TERM*sc->gyros.X);
+    if !(roll + 30 <= 60){
+        motorNdxThrustIncrease(MOTOR_LF, PID_D_TERM*sc->gyros.Y);
+        motorNdxThrustIncrease(MOTOR_RR, -PID_D_TERM*sc->gyros.Y);
+    }
+    if !(pitch + 30 <= 60){
+        motorNdxThrustIncrease(MOTOR_LR, PID_D_TERM*sc->gyros.X);
+        motorNdxThrustIncrease(MOTOR_RF, -PID_D_TERM*sc->gyros.X);
+    }
 
 	motorsSyncDutyCycle();
 
