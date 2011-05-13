@@ -43,7 +43,10 @@ void stateGyroUpdate(struct task_t *task)
 {
     struct state_controller_t *sc;
     sc = stateControllerGet();
-    dt = task_get_dt(task_t);
+
+	itg3200GetData(&_stateController.gyros);
+
+    int dt = task_get_dt(task);
     
     float rawx = sc->gyros.X;
     float rawy = sc->gyros.Y;
@@ -55,7 +58,7 @@ void stateGyroUpdate(struct task_t *task)
     sc->roll= sc->roll + dt*rawy;
 
 
-	itg3200GetData(&_stateController.gyros);
+
 }
 
 struct state_controller_t *stateControllerGet(void)
