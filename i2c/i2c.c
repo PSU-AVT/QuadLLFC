@@ -371,6 +371,7 @@ uint32_t i2cEngine( void )
     return ( FALSE );
   }
 
+  uint32_t start_ticks = systickGetTicks();
   while ( 1 )
   {
     if ( I2CMasterState == I2CSTATE_DATA_NACK )
@@ -378,6 +379,8 @@ uint32_t i2cEngine( void )
       i2cStop();
       break;
     }
+    if((systickGetTicks() - start_ticks) > CFG_I2C_TIMEOUT)
+    	return ( FALSE );
   }
   return ( TRUE );
 }

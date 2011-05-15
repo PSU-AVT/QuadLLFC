@@ -35,20 +35,20 @@
 static struct task_t *tasks;
 static struct task_t *tasks_tail;
 
-void tasks_add_task(struct task_t *task)
+void tasks_add_task(struct task_t *task_arg)
 {
-	task->list.next = 0;
-	task->last_exec = 0;
-	task->next_exec = 0;
+	task_arg->list.next = 0;
+	task_arg->last_exec = 0;
+	task_arg->next_exec = 0;
 	if(tasks)
 	{
-		tasks_tail->list.next = &task->list;
-		tasks_tail = task;
+		tasks_tail->list.next = &task_arg->list;
+		tasks_tail = task_arg;
 	}
 	else
 	{
-		tasks = task;
-		tasks_tail = task;
+		tasks = task_arg;
+		tasks_tail = task_arg;
 	}
 }
 
@@ -56,7 +56,6 @@ void tasks_loop(void)
 {
 	struct task_t *task_itr;
 	uint32_t cur_ticks;
-	uint32_t n_exec;
 
 	task_itr = tasks;
 

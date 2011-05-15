@@ -36,6 +36,7 @@
 #endif
 
 #include <stdint.h>
+#include <string.h>
 
 #include "cpu/cpu.h"
 #include "systick/systick.h"
@@ -47,27 +48,19 @@
 #include "kalman/kalman.h"
 #include "control/motor.h"
 #include "control/state.h"
+#include "control/response.h"
 
 #define DEBUG 1
-
-char buff[100];
-void debugState(struct task_t *task)
-{
-	struct state_controller_t *sc;
-	sc = stateControllerGet();
-	sprintf(buff, "%f\t%f\t%f\r\n", sc->gyros.X, sc->gyros.Y, sc->gyros.Z);
-	uartSend(buff, strlen(buff));
-}
 
 void handle_control_input(char ch)
 {
 	switch(ch)
 	{
 	case ']':
-		motorsThrustIncreaseAll(-1000);
+		motorsThrustIncreaseAll(-500);
 		break;
 	case '[':
-		motorsThrustIncreaseAll(1000);
+		motorsThrustIncreaseAll(500);
 		break;
 	case 'q':
 		motorsReset();
@@ -87,11 +80,6 @@ int main(void)
 
 	stateInit();
 	stateStart();
-
-	struct task_t state_debug_task;
-	state_debug_task.handler = debugState;
-	state_debug_task.msecs = 200;
-	tasks_add_task(&state_debug_task);
 
 	//systickDelay(6000);
 
