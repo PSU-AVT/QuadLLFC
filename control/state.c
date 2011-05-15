@@ -38,29 +38,34 @@
 static struct state_controller_t _stateController;
 
 static struct task_t gyro_update_task,
+                     atenn_update_task,
                      state_debug_task;
 
-char buff[100];
 void state_debug(struct task_t *task)
 {
+	char buff[256];
 	struct state_controller_t *sc;
 	sc = stateControllerGet();
-	sprintf(buff, "%f\t%f\t%f\r\n", sc->gyros.X, sc->gyros.Y, sc->gyros.Z);
+	sprintf(buff, "%f\t%f\t%f\t%f\t%f\t%f\r\n", sc->roll, sc->pitch, sc->yaw, sc->roll_vel, sc->pitch_vel, sc->yaw_vel);
 	uartSend(buff, strlen(buff));
 }
 
 void stateGyroUpdate(struct task_t *task)
 {
-    struct state_controller_t *sc;
-    sc = stateControllerGet();
-
 	itg3200GetData(&_stateController.gyros);
+	
+	_stateController.roll_vel = _stateController.roll_vel * (1 - CFG_GYRO_FILTER_ALPHA) + (_stateController.gyros.X * CFG_GYRO_FILTER_ALPHA)
+	_stateController.pitch_vel = _stateController.pitch_vel * (1 - CFG_GYRO_FILTER_ALPHA) + (_stateController.gyros.Y * CFG_GYRO_FILTER_ALPHA)
+	_stateController.yaw_vel = _stateController.yaw_vel * (1 - CFG_GYRO_FILTER_ALPHA) + (_stateController.gyros.Z * CFG_GYRO_FILTER_ALPHA)
+}
 
+void stateAtennUpdate(struct task_t *task)
+{
     float dt = task_get_dt(task);
     
-    sc->pitch = sc->pitch + (dt*(sc->gyros.Y + CFG_GYRO_Y_BIAS));
-    sc->yaw = sc->yaw + (dt*sc->gyros.Z);
-    sc->roll= sc->roll + (dt*(sc->gyros.X + CFG_GYRO_X_BIAS));
+    _stateController.pitch = _stateController.pitch + (dt*_stateController.roll_vel);
+    _stateControllery.yaw = _stateController.yaw + (dt*_stateController.yaw_vel);
+    _stateController.roll= _stateController.roll + (dt*_stateController.pitch_vel);
 }
 
 struct state_controller_t *stateControllerGet(void)
@@ -78,9 +83,12 @@ void stateStart(void)
 {
 	gyro_update_task.handler = stateGyroUpdate;
 	gyro_update_task.msecs = CFG_GYRO_UPDATE_MSECS;
+	atenn_update_task.handler = stateAtennUpdate;
+	atenn_update_task.msecs = CFG_ATENN_UPDATE_MSECS;
 	state_debug_task.handler = state_debug;
 	state_debug_task.msecs = CFG_STATE_OUTPUT_MSECS;
 
 	tasks_add_task(&gyro_update_task);
+	tasks_add_task(&atenn_update_task);
 	tasks_add_task(&state_debug_task);
 }

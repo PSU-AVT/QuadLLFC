@@ -39,7 +39,8 @@
 struct state_controller_t
 {
 	GyroData gyros;
-    float roll, pitch,yaw;
+    float roll, pitch, yaw;
+	float roll_vel, pitch_vel, yaw_vel;
 };
 
 struct state_controller_t *stateControllerGet(void);
