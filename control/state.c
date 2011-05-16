@@ -54,18 +54,18 @@ void stateGyroUpdate(struct task_t *task)
 {
 	itg3200GetData(&_stateController.gyros);
 	
-	_stateController.roll_vel = _stateController.roll_vel * (1 - CFG_GYRO_FILTER_ALPHA) + (_stateController.gyros.X * CFG_GYRO_FILTER_ALPHA)
-	_stateController.pitch_vel = _stateController.pitch_vel * (1 - CFG_GYRO_FILTER_ALPHA) + (_stateController.gyros.Y * CFG_GYRO_FILTER_ALPHA)
-	_stateController.yaw_vel = _stateController.yaw_vel * (1 - CFG_GYRO_FILTER_ALPHA) + (_stateController.gyros.Z * CFG_GYRO_FILTER_ALPHA)
+	_stateController.roll_vel = _stateController.roll_vel * (1 - CFG_GYRO_FILTER_ALPHA) + ((_stateController.gyros.X + CFG_GYRO_X_BIAS) * CFG_GYRO_FILTER_ALPHA);
+	_stateController.pitch_vel = _stateController.pitch_vel * (1 - CFG_GYRO_FILTER_ALPHA) + ((_stateController.gyros.Y + CFG_GYRO_Y_BIAS) * CFG_GYRO_FILTER_ALPHA);
+	_stateController.yaw_vel = _stateController.yaw_vel * (1 - CFG_GYRO_FILTER_ALPHA) + (_stateController.gyros.Z * CFG_GYRO_FILTER_ALPHA);
 }
 
 void stateAtennUpdate(struct task_t *task)
 {
     float dt = task_get_dt(task);
     
-    _stateController.pitch = _stateController.pitch + (dt*_stateController.roll_vel);
-    _stateControllery.yaw = _stateController.yaw + (dt*_stateController.yaw_vel);
-    _stateController.roll= _stateController.roll + (dt*_stateController.pitch_vel);
+    _stateController.pitch = _stateController.pitch + (dt*_stateController.pitch_vel);
+    _stateController.yaw = _stateController.yaw + (dt*_stateController.yaw_vel);
+    _stateController.roll= _stateController.roll + (dt*_stateController.roll_vel);
 }
 
 struct state_controller_t *stateControllerGet(void)
