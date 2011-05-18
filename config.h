@@ -22,8 +22,8 @@
 #define CFG_STATE_OUTPUT_MSECS     (200)
 #define CFG_ATENN_UPDATE_MSECS     (4)
 
-#define CFG_GYRO_X_BIAS            0.91
-#define CFG_GYRO_Y_BIAS            -1.69
+#define CFG_GYRO_X_BIAS            0.88
+#define CFG_GYRO_Y_BIAS            -1.72
 #define CFG_GYRO_FILTER_ALPHA      .1
 
 #define CFG_PID_P_FACTOR           (9.3)

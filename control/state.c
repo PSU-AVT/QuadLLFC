@@ -54,8 +54,8 @@ void state_debug(struct task_t *task)
 void stateGyroUpdate(struct task_t *task)
 {
     //move everything back one unit in time
-	copy_struct(&_stateController.minus_2, &_stateController.minus_1);
-	copy_struct(&_stateController.minus_1, &_stateController.minus_0);
+	roll_pitch_yaw_vel_copy(&_stateController.minus_2, &_stateController.minus_1);
+	roll_pitch_yaw_vel_copy(&_stateController.minus_1, &_stateController.minus_0);
 	//_stateController.minus0 is dealt with below
 
 	itg3200GetData(&_stateController.gyros);
@@ -78,9 +78,9 @@ void stateAtennUpdate(struct task_t *task)
     //approximation of an intergral
 
 
-    _stateController.pitch = ((_stateController.dt_minus2 + _stateController.dt_minus1 + _stateController.dt_minus0) /6.0) *(_stateController.minus_2.pitch_vel + 4 * _stateController.minus_1.pitch_vel + _stateController.minus_0.pitch_vel);
-    _stateController.yaw = ((_stateController.dt_minus2 + _stateController.dt_minus1 + _stateController.dt_minus0) /6.0) *(_stateController.minus_2.yaw_vel + 4 * _stateController.minus_1.yaw_vel + _stateController.minus_0.yaw_vel);
-    _stateController.roll = ((_stateController.dt_minus2 + _stateController.dt_minus1 + _stateController.dt_minus0) /6.0) *(_stateController.minus_2.roll_vel + 4 * _stateController.minus_1.roll_vel + _stateController.minus_0.roll_vel);
+    _stateController.pitch += ((_stateController.dt_minus2 + _stateController.dt_minus1 + _stateController.dt_minus0) /6.0) *(_stateController.minus_2.pitch_vel + (4 * _stateController.minus_1.pitch_vel) + _stateController.minus_0.pitch_vel);
+    _stateController.yaw += ((_stateController.dt_minus2 + _stateController.dt_minus1 + _stateController.dt_minus0) /6.0) *(_stateController.minus_2.yaw_vel + (4 * _stateController.minus_1.yaw_vel) + _stateController.minus_0.yaw_vel);
+    _stateController.roll += ((_stateController.dt_minus2 + _stateController.dt_minus1 + _stateController.dt_minus0) /6.0) *(_stateController.minus_2.roll_vel + (4 * _stateController.minus_1.roll_vel) + _stateController.minus_0.roll_vel);
 
 }
 
@@ -90,10 +90,10 @@ struct state_controller_t *stateControllerGet(void)
 	return &_stateController;
 }
 
-void copy_struct(struct roll_pitch_yaw_vel * foo, struct roll_pitch_yaw_vel * bar){
-	foo->pitch_vel = bar->pitch_vel;
-	foo->yaw_vel = bar->yaw_vel;
-	foo->roll_vel = bar->roll_vel;
+void roll_pitch_yaw_vel_copy(struct roll_pitch_yaw_vel *dest, struct roll_pitch_yaw_vel *src){
+	dest->pitch_vel = src->pitch_vel;
+	dest->yaw_vel = src->yaw_vel;
+	dest->roll_vel = src->roll_vel;
 }
 void stateInit(void)
 {
