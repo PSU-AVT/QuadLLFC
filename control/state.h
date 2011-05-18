@@ -48,6 +48,7 @@ struct state_controller_t
 	float dt_minus0;
 	float dt_minus1;
 	float dt_minus2;
+	int repetition;
 };
 
 struct state_controller_t *stateControllerGet(void);

@@ -76,11 +76,16 @@ void stateAtennUpdate(struct task_t *task)
 
     //calculating our pitch,yaw,roll with simpsons rule numerical
     //approximation of an intergral
+    if (_stateController.repetition % 3 == 0){
 
 
-    _stateController.pitch += ((_stateController.dt_minus2 + _stateController.dt_minus1 + _stateController.dt_minus0) /6.0) *(_stateController.minus_2.pitch_vel + (4 * _stateController.minus_1.pitch_vel) + _stateController.minus_0.pitch_vel);
-    _stateController.yaw += ((_stateController.dt_minus2 + _stateController.dt_minus1 + _stateController.dt_minus0) /6.0) *(_stateController.minus_2.yaw_vel + (4 * _stateController.minus_1.yaw_vel) + _stateController.minus_0.yaw_vel);
-    _stateController.roll += ((_stateController.dt_minus2 + _stateController.dt_minus1 + _stateController.dt_minus0) /6.0) *(_stateController.minus_2.roll_vel + (4 * _stateController.minus_1.roll_vel) + _stateController.minus_0.roll_vel);
+        _stateController.pitch += ((_stateController.dt_minus2 + _stateController.dt_minus1 + _stateController.dt_minus0) /6.0) *(_stateController.minus_2.pitch_vel + 4 * _stateController.minus_1.pitch_vel + _stateController.minus_0.pitch_vel);
+        _stateController.yaw += ((_stateController.dt_minus2 + _stateController.dt_minus1 + _stateController.dt_minus0) /6.0) *(_stateController.minus_2.yaw_vel + 4 * _stateController.minus_1.yaw_vel + _stateController.minus_0.yaw_vel);
+        _stateController.roll += ((_stateController.dt_minus2 + _stateController.dt_minus1 + _stateController.dt_minus0) /6.0) *(_stateController.minus_2.roll_vel + 4 * _stateController.minus_1.roll_vel + _stateController.minus_0.roll_vel);
+        _stateController.repetition += 1;
+    }
+
+    _stateController.repetition += 1;
 
 }
 
@@ -103,6 +108,10 @@ void stateInit(void)
 
 void stateStart(void)
 {
+	_stateController.roll = 0;
+	_stateController.pitch = 0;
+	_stateController.yaw = 0;
+
 	gyro_update_task.handler = stateGyroUpdate;
 	gyro_update_task.msecs = CFG_GYRO_UPDATE_MSECS;
 	atenn_update_task.handler = stateAtennUpdate;
