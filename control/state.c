@@ -77,9 +77,11 @@ void stateAtennUpdate(struct task_t *task)
     //calculating our pitch,yaw,roll with simpsons rule numerical
     //approximation of an intergral
 
-    _stateController.pitch = (_stateController.dt_minus2 + _stateController.dt_minus1 + _stateController.dt_minus0) /6 *(_stateController.minus_2.pitch_vel + 4 * _stateController.minus_1.pitch_vel + _stateController.minus_0.pitch_vel);
-    _stateController.yaw = (_stateController.dt_minus2 + _stateController.dt_minus1 + _stateController.dt_minus0) /6 *(_stateController.minus_2.yaw_vel + 4 * _stateController.minus_1.yaw_vel + _stateController.minus_0.yaw_vel);
-    _stateController.roll = (_stateController.dt_minus2 + _stateController.dt_minus1 + _stateController.dt_minus0) /6 *(_stateController.minus_2.roll_vel + 4 * _stateController.minus_1.roll_vel + _stateController.minus_0.roll_vel);
+
+    _stateController.pitch = ((_stateController.dt_minus2 + _stateController.dt_minus1 + _stateController.dt_minus0) /6.0) *(_stateController.minus_2.pitch_vel + 4 * _stateController.minus_1.pitch_vel + _stateController.minus_0.pitch_vel);
+    _stateController.yaw = ((_stateController.dt_minus2 + _stateController.dt_minus1 + _stateController.dt_minus0) /6.0) *(_stateController.minus_2.yaw_vel + 4 * _stateController.minus_1.yaw_vel + _stateController.minus_0.yaw_vel);
+    _stateController.roll = ((_stateController.dt_minus2 + _stateController.dt_minus1 + _stateController.dt_minus0) /6.0) *(_stateController.minus_2.roll_vel + 4 * _stateController.minus_1.roll_vel + _stateController.minus_0.roll_vel);
+
 }
 
 
