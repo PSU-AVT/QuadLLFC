@@ -24,10 +24,10 @@
 
 #define CFG_GYRO_X_BIAS            0.89
 #define CFG_GYRO_Y_BIAS            -1.72
-#define CFG_GYRO_FILTER_ALPHA      .05
+#define CFG_GYRO_FILTER_ALPHA      .02
 
-#define CFG_PID_P_FACTOR           (9.3)
-#define CFG_PID_D_FACTOR           (24)
+#define CFG_PID_P_FACTOR           (10)
+#define CFG_PID_D_FACTOR           (31)
 
 #define CFG_ESC_CNT 4
 #define CFG_MOTOR_CNT CFG_ESC_CNT
