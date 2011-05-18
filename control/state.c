@@ -46,7 +46,8 @@ void state_debug(struct task_t *task)
 	char buff[256];
 	struct state_controller_t *sc;
 	sc = stateControllerGet();
-	sprintf(buff, "%f\t%f\t%f\t%f\t%f\t%f\r\n", sc->roll, sc->pitch, sc->yaw, sc->roll_vel, sc->pitch_vel, sc->yaw_vel);
+	sprintf(buff, "%f\t%f\t%f\t%f\t%f\t%f\r\n", sc->minus_0.roll_vel, sc->minus_0.pitch_vel, sc->minus_0.yaw_vel,
+			sc->roll, sc->pitch, sc->yaw);
 	uartSend(buff, strlen(buff));
 }
 
