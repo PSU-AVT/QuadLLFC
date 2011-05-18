@@ -3,7 +3,7 @@
  *
  * Software License Agreement (BSD License)
  *
- * Copyright (c) 2011, Gregory Haynes
+ * Copyright (c) 2011, Gregory Haynes, Spencer Krum
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,12 +35,19 @@
 #include "../sys/tasks.h"
 #include "../sensors/itg3200.h"
 
+struct roll_pitch_yaw_vel
+{
+	float roll_vel, pitch_vel, yaw_vel;
+};
 
 struct state_controller_t
 {
 	GyroData gyros;
     float roll, pitch, yaw;
-	float roll_vel, pitch_vel, yaw_vel;
+	struct roll_pitch_yaw_vel minus_0, minus_1, minus_2;
+	float dt_minus0;
+	float dt_minus1;
+	float dt_minus2;
 };
 
 struct state_controller_t *stateControllerGet(void);

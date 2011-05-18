@@ -3,7 +3,7 @@
  *
  * Software License Agreement (BSD License)
  *
- * Copyright (c) 2011, Gregory Haynes
+ * Copyright (c) 2011, Gregory Haynes, Spencer Krum
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,21 +52,35 @@ void state_debug(struct task_t *task)
 
 void stateGyroUpdate(struct task_t *task)
 {
+    //move everything back one unit in time
+	_stateController.minus_2 = _stateController.minus_1;
+	_stateController.minus_1 = _stateController.minus_0;
+	//_stateController.minus0 is dealt with below
+
 	itg3200GetData(&_stateController.gyros);
 	
-	_stateController.roll_vel = _stateController.roll_vel * (1 - CFG_GYRO_FILTER_ALPHA) + ((_stateController.gyros.X + CFG_GYRO_X_BIAS) * CFG_GYRO_FILTER_ALPHA);
-	_stateController.pitch_vel = _stateController.pitch_vel * (1 - CFG_GYRO_FILTER_ALPHA) + ((_stateController.gyros.Y + CFG_GYRO_Y_BIAS) * CFG_GYRO_FILTER_ALPHA);
-	_stateController.yaw_vel = _stateController.yaw_vel * (1 - CFG_GYRO_FILTER_ALPHA) + (_stateController.gyros.Z * CFG_GYRO_FILTER_ALPHA);
+	//filtering with  configurable variables
+	_stateController.minus_0.roll_vel = _stateController.minus_0.roll_vel * (1 - CFG_GYRO_FILTER_ALPHA) + ((_stateController.gyros.X + CFG_GYRO_X_BIAS) * CFG_GYRO_FILTER_ALPHA);
+	_stateController.minus_0.pitch_vel = _stateController.minus_0.pitch_vel * (1 - CFG_GYRO_FILTER_ALPHA) + ((_stateController.gyros.Y + CFG_GYRO_Y_BIAS) * CFG_GYRO_FILTER_ALPHA);
+	_stateController.minus_0.yaw_vel = _stateController.minus_0.yaw_vel * (1 - CFG_GYRO_FILTER_ALPHA) + (_stateController.gyros.Z * CFG_GYRO_FILTER_ALPHA);
+
+
 }
 
 void stateAtennUpdate(struct task_t *task)
 {
-    float dt = task_get_dt(task);
-    
-    _stateController.pitch = _stateController.pitch + (dt*_stateController.pitch_vel);
-    _stateController.yaw = _stateController.yaw + (dt*_stateController.yaw_vel);
-    _stateController.roll= _stateController.roll + (dt*_stateController.roll_vel);
+	_stateController.dt_minus2 = _stateController.dt_minus1;
+	_stateController.dt_minus1 = _stateController.dt_minus0;
+    _stateController.dt_minus0 = task_get_dt(task);
+
+    //calculating our pitch,yaw,roll with simpsons rule numerical
+    //approximation of an intergral
+
+    _stateController.pitch = _stateController.dt_minus2 + _stateController.dt_minus1 + _stateController.dt_minus0 /6 *(_stateController.minus_2.pitch_vel + 4 * _stateController.minus_1.pitch_vel + _stateController.minus_0.pitch_vel);
+    _stateController.yaw = _stateController.dt_minus2 + _stateController.dt_minus1 + _stateController.dt_minus0 /6 *(_stateController.minus_2.yaw_vel + 4 * _stateController.minus_1.yaw_vel + _stateController.minus_0.yaw_vel);
+    _stateController.roll = _stateController.dt_minus2 + _stateController.dt_minus1 + _stateController.dt_minus0 /6 *(_stateController.minus_2.roll_vel + 4 * _stateController.minus_1.roll_vel + _stateController.minus_0.roll_vel);
 }
+
 
 struct state_controller_t *stateControllerGet(void)
 {
