@@ -51,6 +51,15 @@ struct state_controller_t
 	int repetition;
 };
 
+enum axis_t {
+	Roll,
+	Pitch,
+	Yaw,
+	X,
+	Y,
+	Z
+};
+
 struct state_controller_t *stateControllerGet(void);
 
 /* Initialize the state controller */
