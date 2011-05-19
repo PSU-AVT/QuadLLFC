@@ -74,3 +74,9 @@ void tasks_loop(void)
 		task_itr = (struct task_t*)task_itr->list.next;
 	}
 }
+
+float task_get_dt(struct task_t *task) {
+	float dt = (systickGetTicks() - task->last_exec) * .001;
+	task->last_exec = systickGetTicks();
+	return dt;
+}

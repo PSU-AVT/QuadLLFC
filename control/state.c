@@ -100,7 +100,6 @@ void stateInit(void)
 
 void stateStart(void)
 {
-
 	gyro_update_task.handler = stateGyroUpdate;
 	gyro_update_task.msecs = CFG_GYRO_UPDATE_MSECS;
 	state_debug_task.handler = state_debug;

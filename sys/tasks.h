@@ -46,11 +46,11 @@ struct task_t
 	void *data;
 };
 
-#define task_get_dt(T) ((systickGetTicks() - T->last_exec) * .001)
-
 /* Insert tasks in order of priority (greatest first) */
 void tasks_add_task(struct task_t *task);
 
 void tasks_loop(void);
+
+float task_get_dt(struct task_t *task);
 
 #endif
