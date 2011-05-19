@@ -11,6 +11,7 @@ void responseUpdate(struct task_t *task)
 	sc = stateControllerGet();
 
 	float roll_torque = 0, pitch_torque = 0, yaw_torque = 0,
+	      thrust_accum = 0,
 	      x, y,
 	      dt;
 
@@ -20,9 +21,17 @@ void responseUpdate(struct task_t *task)
 	y = sc->gyros.Y + CFG_GYRO_Y_BIAS;
 
 	// P
+	/*
 	roll_torque = sc->roll * CFG_PID_P_FACTOR;
 	pitch_torque = sc->pitch * CFG_PID_P_FACTOR;
 	yaw_torque = sc->yaw * CFG_PID_P_FACTOR;
+	*/
+
+	/*
+	thrust_accum = CFG_PID_P_THRUST_FACTOR*dt*cos(sc->roll*0.0174532925);
+	thrust_accum += CFG_PID_P_THRUST_FACTOR*dt*cos(sc->pitch*0.0174532925);
+	motorsThrustIncreaseAll(-thrust_accum);
+	*/
 
 	// D
 	roll_torque += x * CFG_PID_D_FACTOR;

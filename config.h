@@ -20,14 +20,14 @@
 #define CFG_GYRO_UPDATE_MSECS      (2) // msecs between sensor updates
 #define CFG_RESPONSE_UPDATE_MSECS  (16) // msecs between responding to state
 #define CFG_STATE_OUTPUT_MSECS     (200)
-#define CFG_ATENN_UPDATE_MSECS     (2)
 
 #define CFG_GYRO_X_BIAS            0.89
 #define CFG_GYRO_Y_BIAS            -1.72
 #define CFG_GYRO_FILTER_ALPHA      .02
 
-#define CFG_PID_P_FACTOR           (10)
-#define CFG_PID_D_FACTOR           (31)
+#define CFG_PID_P_FACTOR           (5)
+#define CFG_PID_D_FACTOR           (20)
+#define CFG_PID_P_THRUST_FACTOR    (.1)
 
 #define CFG_ESC_CNT 4
 #define CFG_MOTOR_CNT CFG_ESC_CNT

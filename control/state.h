@@ -35,22 +35,6 @@
 #include "../sys/tasks.h"
 #include "../sensors/itg3200.h"
 
-struct roll_pitch_yaw_vel
-{
-	float roll_vel, pitch_vel, yaw_vel;
-};
-
-struct state_controller_t
-{
-	GyroData gyros;
-    float roll, pitch, yaw;
-	struct roll_pitch_yaw_vel minus_0, minus_1, minus_2;
-	float dt_minus0;
-	float dt_minus1;
-	float dt_minus2;
-	int repetition;
-};
-
 enum axis_t {
 	Roll,
 	Pitch,
@@ -58,6 +42,15 @@ enum axis_t {
 	X,
 	Y,
 	Z
+};
+
+#define AXIS_CNT 6
+
+struct state_controller_t
+{
+	GyroData gyros;
+    float state[AXIS_CNT];
+    float state_dt[AXIS_CNT];
 };
 
 struct state_controller_t *stateControllerGet(void);

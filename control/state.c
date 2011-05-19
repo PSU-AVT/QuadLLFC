@@ -38,68 +38,60 @@
 static struct state_controller_t _stateController;
 
 static struct task_t gyro_update_task,
-                     atenn_update_task,
                      state_debug_task;
+
+static float gyro_old_vals[2][3];
+static float gyro_int_dt;
+static int gyro_int_repetition;
 
 void state_debug(struct task_t *task)
 {
 	char buff[256];
 	struct state_controller_t *sc;
 	sc = stateControllerGet();
-	sprintf(buff, "%f\t%f\t%f\t%f\t%f\t%f\r\n", sc->minus_0.roll_vel, sc->minus_0.pitch_vel, sc->minus_0.yaw_vel,
-			sc->roll, sc->pitch, sc->yaw);
+	sprintf(buff, "State: %f\t%f\t%f\r\ndState/dt\t%f\t%f\t%f",
+			sc->state[Roll], sc->state[Pitch], sc->state[Yaw],
+			sc->state_dt[Roll], sc->state_dt[Pitch], sc->state_dt[Yaw]);
 	uartSend(buff, strlen(buff));
 }
 
+#define SIMPSONS(S1, S2, S3, dt) ((dt/6.0) * (S1+(4*S2)+S3))
+
 void stateGyroUpdate(struct task_t *task)
 {
-    //move everything back one unit in time
-	roll_pitch_yaw_vel_copy(&_stateController.minus_2, &_stateController.minus_1);
-	roll_pitch_yaw_vel_copy(&_stateController.minus_1, &_stateController.minus_0);
-	//_stateController.minus0 is dealt with below
-
 	itg3200GetData(&_stateController.gyros);
 	
-	//filtering with  configurable variables
-	_stateController.minus_0.roll_vel = _stateController.minus_0.roll_vel * (1 - CFG_GYRO_FILTER_ALPHA) + ((_stateController.gyros.X + CFG_GYRO_X_BIAS) * CFG_GYRO_FILTER_ALPHA);
-	_stateController.minus_0.pitch_vel = _stateController.minus_0.pitch_vel * (1 - CFG_GYRO_FILTER_ALPHA) + ((_stateController.gyros.Y + CFG_GYRO_Y_BIAS) * CFG_GYRO_FILTER_ALPHA);
-	_stateController.minus_0.yaw_vel = _stateController.minus_0.yaw_vel * (1 - CFG_GYRO_FILTER_ALPHA) + (_stateController.gyros.Z * CFG_GYRO_FILTER_ALPHA);
+	// Low pass filter
+	_stateController.state_dt[Roll] = _stateController.state[Roll] * (1 - CFG_GYRO_FILTER_ALPHA) + ((_stateController.gyros.X + CFG_GYRO_X_BIAS) * CFG_GYRO_FILTER_ALPHA);
+	_stateController.state_dt[Pitch] = _stateController.state[Pitch] * (1 - CFG_GYRO_FILTER_ALPHA) + ((_stateController.gyros.Y + CFG_GYRO_Y_BIAS) * CFG_GYRO_FILTER_ALPHA);
+	_stateController.state_dt[Yaw] = _stateController.state[Yaw] * (1 - CFG_GYRO_FILTER_ALPHA) + ((_stateController.gyros.Z * CFG_GYRO_FILTER_ALPHA) * CFG_GYRO_FILTER_ALPHA);
 
+	// Integration for attenuation state
+	// Uses simpsons rule (requres 3 samples)
+	if(gyro_int_repetition == 2) {
+		_stateController.state[Roll] += SIMPSONS(gyro_old_vals[0][0], gyro_old_vals[1][0], _stateController.state[Roll], gyro_int_dt);
+		_stateController.state[Pitch] += SIMPSONS(gyro_old_vals[0][1], gyro_old_vals[1][1], _stateController.state[Pitch], gyro_int_dt);
+		_stateController.state[Yaw] += SIMPSONS(gyro_old_vals[0][2], gyro_old_vals[1][2], _stateController.state[Yaw], gyro_int_dt);
 
+		gyro_int_repetition = 0;
+		gyro_int_dt = 0;
+	} else {
+		gyro_old_vals[gyro_int_repetition][0] = _stateController.state_dt[Roll];
+		gyro_old_vals[gyro_int_repetition][1] = _stateController.state_dt[Pitch];
+		gyro_old_vals[gyro_int_repetition][2] = _stateController.state_dt[Yaw];
+
+		gyro_int_repetition++;
+		gyro_int_dt += task_get_dt(task);
+	}
 }
 
-void stateAtennUpdate(struct task_t *task)
-{
-	_stateController.dt_minus2 = _stateController.dt_minus1;
-	_stateController.dt_minus1 = _stateController.dt_minus0;
-    _stateController.dt_minus0 = task_get_dt(task);
-
-    //calculating our pitch,yaw,roll with simpsons rule numerical
-    //approximation of an intergral
-    if (_stateController.repetition % 3 == 0){
-
-
-        _stateController.pitch += ((_stateController.dt_minus2 + _stateController.dt_minus1 + _stateController.dt_minus0) /6.0) *(_stateController.minus_2.pitch_vel + 4 * _stateController.minus_1.pitch_vel + _stateController.minus_0.pitch_vel);
-        _stateController.yaw += ((_stateController.dt_minus2 + _stateController.dt_minus1 + _stateController.dt_minus0) /6.0) *(_stateController.minus_2.yaw_vel + 4 * _stateController.minus_1.yaw_vel + _stateController.minus_0.yaw_vel);
-        _stateController.roll += ((_stateController.dt_minus2 + _stateController.dt_minus1 + _stateController.dt_minus0) /6.0) *(_stateController.minus_2.roll_vel + 4 * _stateController.minus_1.roll_vel + _stateController.minus_0.roll_vel);
-        _stateController.repetition += 1;
-    }
-
-    _stateController.repetition += 1;
-
-}
-
+#undef SIMPSONS
 
 struct state_controller_t *stateControllerGet(void)
 {
 	return &_stateController;
 }
 
-void roll_pitch_yaw_vel_copy(struct roll_pitch_yaw_vel *dest, struct roll_pitch_yaw_vel *src){
-	dest->pitch_vel = src->pitch_vel;
-	dest->yaw_vel = src->yaw_vel;
-	dest->roll_vel = src->roll_vel;
-}
 void stateInit(void)
 {
 	// Initialize gyros
@@ -108,18 +100,12 @@ void stateInit(void)
 
 void stateStart(void)
 {
-	_stateController.roll = 0;
-	_stateController.pitch = 0;
-	_stateController.yaw = 0;
 
 	gyro_update_task.handler = stateGyroUpdate;
 	gyro_update_task.msecs = CFG_GYRO_UPDATE_MSECS;
-	atenn_update_task.handler = stateAtennUpdate;
-	atenn_update_task.msecs = CFG_ATENN_UPDATE_MSECS;
 	state_debug_task.handler = state_debug;
 	state_debug_task.msecs = CFG_STATE_OUTPUT_MSECS;
 
 	tasks_add_task(&gyro_update_task);
-	tasks_add_task(&atenn_update_task);
 	tasks_add_task(&state_debug_task);
 }
