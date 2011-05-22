@@ -6,6 +6,7 @@
 void movement_roll(float value);
 void movement_pitch(float value);
 void movement_yaw(float value);
+void movement_y(float value);
 
 #endif
 

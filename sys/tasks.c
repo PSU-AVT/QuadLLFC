@@ -65,9 +65,11 @@ void tasks_loop(void)
 
 		if(task_itr->next_exec <= cur_ticks)
 		{
+			if(task_itr->last_exec == 0)
+				task_itr->last_exec = systickGetTicks();
+
 			// Exec the task
 			task_itr->handler(task_itr);
-			task_itr->last_exec = cur_ticks;
 			task_itr->next_exec = cur_ticks + task_itr->msecs;
 		}
 

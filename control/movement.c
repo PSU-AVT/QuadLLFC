@@ -20,3 +20,7 @@ void movement_yaw(float value)
 	motorNdxThrustIncrease(MOTOR_RR, -value);
 }
 
+void movement_y(float value)
+{
+	motorsThrustIncreaseAll(-value);
+}

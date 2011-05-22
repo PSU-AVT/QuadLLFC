@@ -34,6 +34,7 @@
 #include "../control/motor.h"
 #include "../systick/systick.h"
 #include "../adc/adc.h"
+#include "response.h"
 
 static struct state_controller_t _stateController;
 
@@ -44,14 +45,16 @@ static float gyro_old_vals[2][3];
 static float gyro_int_dt;
 static int gyro_int_repetition;
 
+#define TCOS(x) (1 - ((x*x) / 2) + ((x*x*x*x) / 24) - ((x*x*x*x*x*x)/720))
 void state_debug(struct task_t *task)
 {
 	char buff[256];
 	struct state_controller_t *sc;
 	sc = stateControllerGet();
-	sprintf(buff, "State: %f\t%f\t%f\r\ndState/dt\t%f\t%f\t%f",
+	sprintf(buff, "State:\t%f\t%f\t%f\r\ndState/dt\t%f\t%f\t%f\r\n%f\r\n\r\n",
 			sc->state[Roll], sc->state[Pitch], sc->state[Yaw],
-			sc->state_dt[Roll], sc->state_dt[Pitch], sc->state_dt[Yaw]);
+			sc->state_dt[Roll], sc->state_dt[Pitch], sc->state_dt[Yaw],
+			TCOS(sc->state[Roll]*0.0174532925));
 	uartSend(buff, strlen(buff));
 }
 
@@ -62,9 +65,9 @@ void stateGyroUpdate(struct task_t *task)
 	itg3200GetData(&_stateController.gyros);
 	
 	// Low pass filter
-	_stateController.state_dt[Roll] = _stateController.state[Roll] * (1 - CFG_GYRO_FILTER_ALPHA) + ((_stateController.gyros.X + CFG_GYRO_X_BIAS) * CFG_GYRO_FILTER_ALPHA);
-	_stateController.state_dt[Pitch] = _stateController.state[Pitch] * (1 - CFG_GYRO_FILTER_ALPHA) + ((_stateController.gyros.Y + CFG_GYRO_Y_BIAS) * CFG_GYRO_FILTER_ALPHA);
-	_stateController.state_dt[Yaw] = _stateController.state[Yaw] * (1 - CFG_GYRO_FILTER_ALPHA) + ((_stateController.gyros.Z * CFG_GYRO_FILTER_ALPHA) * CFG_GYRO_FILTER_ALPHA);
+	_stateController.state_dt[Roll] = _stateController.state_dt[Roll] * (1 - CFG_GYRO_FILTER_ALPHA) + ((_stateController.gyros.X + CFG_GYRO_X_BIAS) * CFG_GYRO_FILTER_ALPHA);
+	_stateController.state_dt[Pitch] = _stateController.state_dt[Pitch] * (1 - CFG_GYRO_FILTER_ALPHA) + ((_stateController.gyros.Y + CFG_GYRO_Y_BIAS) * CFG_GYRO_FILTER_ALPHA);
+	_stateController.state_dt[Yaw] = _stateController.state_dt[Yaw] * (1 - CFG_GYRO_FILTER_ALPHA) + (_stateController.gyros.Z * CFG_GYRO_FILTER_ALPHA);
 
 	// Integration for attenuation state
 	// Uses simpsons rule (requres 3 samples)
@@ -86,6 +89,7 @@ void stateGyroUpdate(struct task_t *task)
 }
 
 #undef SIMPSONS
+#undef TCOS
 
 struct state_controller_t *stateControllerGet(void)
 {

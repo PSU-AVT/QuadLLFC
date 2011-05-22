@@ -1,49 +1,40 @@
+#include "response.h"
 #include "../sys/tasks.h"
 #include "state.h"
 #include "../systick/systick.h"
 #include "movement.h"
 
-volatile static struct task_t _response_task;
+static struct response_controller_t _rc;
+
+static struct task_t _response_task;
+
+static float last_thrust_y;
+
+#define TCOS(x) (1 - ((x*x) / 2) + ((x*x*x*x) / 24) - ((x*x*x*x*x*x)/720))
 
 void responseUpdate(struct task_t *task)
 {
 	struct state_controller_t *sc;
 	sc = stateControllerGet();
-
-	float roll_torque = 0, pitch_torque = 0, yaw_torque = 0,
-	      thrust_accum = 0,
-	      x, y,
-	      dt;
-
-	dt = task_get_dt(task);
-
-	x = sc->gyros.X + CFG_GYRO_X_BIAS;
-	y = sc->gyros.Y + CFG_GYRO_Y_BIAS;
+	float dt = task_get_dt(task);
+	float y_thrust, y_err;
 
 	// P
-	/*
-	roll_torque = sc->roll * CFG_PID_P_FACTOR;
-	pitch_torque = sc->pitch * CFG_PID_P_FACTOR;
-	yaw_torque = sc->yaw * CFG_PID_P_FACTOR;
-	*/
+	// Stabilize Attenuation
+	movement_roll(sc->state[Roll] * CFG_PID_P_ROLL * dt);
+	movement_pitch(sc->state[Pitch] * CFG_PID_P_PITCH * dt);
+	//movement_yaw(sc->state[Yaw] * CFG_PID_P_YAW);
 
-	/*
-	thrust_accum = CFG_PID_P_THRUST_FACTOR*dt*cos(sc->roll*0.0174532925);
-	thrust_accum += CFG_PID_P_THRUST_FACTOR*dt*cos(sc->pitch*0.0174532925);
-	motorsThrustIncreaseAll(-thrust_accum);
-	*/
+	// Maintain vertical thrust
+	y_thrust = (_rc.state[Y]/TCOS(sc->state[Roll]*0.0174532925)) + (_rc.state[Y]/TCOS(sc->state[Pitch]*0.0174532925));
+	y_err = y_thrust - last_thrust_y;
+	movement_y(y_err);
+	last_thrust_y = y_thrust;
 
 	// D
-	roll_torque += x * CFG_PID_D_FACTOR;
-	pitch_torque += y * CFG_PID_D_FACTOR;
-	yaw_torque += sc->gyros.Z * CFG_PID_D_FACTOR;
-
-	roll_torque *= dt;
-	pitch_torque *= dt;
-
-	movement_roll(roll_torque);
-	movement_pitch(pitch_torque);
-	//movement_yaw(yaw_torque);
+	movement_roll(sc->state_dt[Roll] * CFG_PID_D_FACTOR * dt);
+	movement_pitch(sc->state_dt[Pitch] * CFG_PID_D_FACTOR * dt);
+	//movement_yaw(sc->gyros.Z * CFG_PID_D_FACTOR);
 
 	motorsSyncDutyCycle();
 }
@@ -52,6 +43,12 @@ void responseStart(void)
 {
 	_response_task.handler = responseUpdate;
 	_response_task.msecs = CFG_RESPONSE_UPDATE_MSECS;
+	_rc.state[Y] = 4;
 
 	tasks_add_task(&_response_task);
+}
+
+struct response_controller_t *responseControllerGet(void)
+{
+	return &_rc;
 }

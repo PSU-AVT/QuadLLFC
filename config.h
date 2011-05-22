@@ -25,7 +25,9 @@
 #define CFG_GYRO_Y_BIAS            -1.72
 #define CFG_GYRO_FILTER_ALPHA      .02
 
-#define CFG_PID_P_FACTOR           (5)
+#define CFG_PID_P_ROLL             (5)
+#define CFG_PID_P_PITCH            CFG_PID_P_ROLL
+#define CFG_PID_P_YAW              CFG_PID_P_ROLL
 #define CFG_PID_D_FACTOR           (20)
 #define CFG_PID_P_THRUST_FACTOR    (.1)
 
