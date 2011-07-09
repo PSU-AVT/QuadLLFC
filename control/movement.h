@@ -8,5 +8,7 @@ void movement_pitch(float value);
 void movement_yaw(float value);
 void movement_y(float value);
 
+void movement(int type, float value);
+
 #endif
 

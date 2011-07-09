@@ -35,7 +35,8 @@
 #include "state.h"
 
 struct response_controller_t {
-	float state[AXIS_CNT]; // State to maintain
+	float state_setpoint[AXIS_CNT]; // Desired state
+	float state_dt_setpoint[AXIS_CNT]; // Desired state dt
 };
 
 void responseStart(void);

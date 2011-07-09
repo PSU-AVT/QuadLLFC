@@ -112,3 +112,24 @@ void stateStart(void)
 	tasks_add_task(&gyro_update_task);
 	tasks_add_task(&state_debug_task);
 }
+
+void stateSubtract(float *a, float *b, float *dest)
+{
+	int i;
+	for(i = 0;i < AXIS_CNT;++i)
+		dest[i] = a[i] - b[i];
+}
+
+void stateCopy(float *src, float *dst)
+{
+	int i;
+	for(i = 0;i < AXIS_CNT;++i)
+		dst[i] = src[i];
+}
+
+void stateAdd(float *a, float *b, float *dest)
+{
+	int i;
+	for(i = 0;i < AXIS_CNT;++i)
+		dest[i] = a[i] + b[i];
+}

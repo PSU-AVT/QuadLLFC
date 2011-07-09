@@ -5,46 +5,56 @@
 #include "movement.h"
 
 static struct response_controller_t _rc;
-
 static struct task_t _response_task;
 
-static float last_thrust_y;
+static float state_error_sum[AXIS_CNT] = {0, 0, 0, 0, 0, 0};
+static float state_error_last[AXIS_CNT] = {0, 0, 0, 0, 0, 0};
 
-#define TCOS(x) (1 - ((x*x) / 2) + ((x*x*x*x) / 24) - ((x*x*x*x*x*x)/720))
+static float state_error_gains[3][AXIS_CNT] = {
+		{0, 0, 0, 0, 0, 0}, // P
+		{0, 0, 0, 0, 0, 0}, // I
+		{0, 0, 0, 0, 0, 0}  // D
+};   //  R  P  Y  X  Y  Z
 
+/* This gets called every CFG_RESPONSE_UPDATE_MSECS */
 void responseUpdate(struct task_t *task)
 {
+	int i;
 	struct state_controller_t *sc;
 	sc = stateControllerGet();
-	float dt = task_get_dt(task);
-	float y_thrust, y_err;
 
-	// P
-	// Stabilize Attenuation
-	movement_roll(sc->state[Roll] * CFG_PID_P_ROLL * dt);
-	movement_pitch(sc->state[Pitch] * CFG_PID_P_PITCH * dt);
-	//movement_yaw(sc->state[Yaw] * CFG_PID_P_YAW);
+	// Figure out error
+	float state_error[AXIS_CNT];
+	stateSubtract(_rc.state_setpoint, sc->state, state_error);
 
-	// Maintain vertical thrust
-	y_thrust = (_rc.state[Y]/TCOS(sc->state[Roll]*0.0174532925)) + (_rc.state[Y]/TCOS(sc->state[Pitch]*0.0174532925));
-	y_err = y_thrust - last_thrust_y;
-	movement_y(y_err);
-	last_thrust_y = y_thrust;
+	// Update state sum
+	stateAdd(state_error, state_error_sum, state_error_sum);
 
-	// D
-	movement_roll(sc->state_dt[Roll] * CFG_PID_D_FACTOR * dt);
-	movement_pitch(sc->state_dt[Pitch] * CFG_PID_D_FACTOR * dt);
-	//movement_yaw(sc->gyros.Z * CFG_PID_D_FACTOR);
+	// P, D
+	for(i = 0;i < AXIS_CNT;++i) {
+		movement(i, state_error_gains[0][i] * state_error[i]); // P
+		movement(i, state_error_gains[1][i] * state_error_sum[i]); // I
+		movement(i, state_error_gains[2][i] * (state_error_last[i] - state_error[i])); // D
+	}
+
+	stateCopy(state_error, state_error_last);
 
 	motorsSyncDutyCycle();
 }
 
 void responseStart(void)
 {
+	int i = 0;
+
+	// Init _rc
+	for(i = 0;i < AXIS_CNT;++i) {
+		_rc.state_setpoint[i] = 0;
+		_rc.state_dt_setpoint[i] = 0;
+	}
+
+	// Setup response update task
 	_response_task.handler = responseUpdate;
 	_response_task.msecs = CFG_RESPONSE_UPDATE_MSECS;
-	_rc.state[Y] = 4;
-
 	tasks_add_task(&_response_task);
 }
 

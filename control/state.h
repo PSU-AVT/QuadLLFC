@@ -59,5 +59,14 @@ struct state_controller_t *stateControllerGet(void);
 void stateInit(void);
 void stateStart(void);
 
+/* Difference of two float arrays of size AXIS_CNT
+ * dest[i] = a[i] - b[i]
+ */
+void stateSubtract(float *a, float *b, float *dest);
+
+void stateCopy(float *src, float *dst);
+
+void stateAdd(float *a, float *b, float *dest);
+
 #endif
 
