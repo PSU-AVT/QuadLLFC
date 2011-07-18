@@ -134,3 +134,7 @@ void motorsReset(void)
 	}
 }
 
+void motors_add(float *array)
+{
+
+}

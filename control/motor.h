@@ -61,4 +61,6 @@ void motorNdxThrustIncrease(int ndx, float value);
 void motorsThrustIncreaseAll(float value);
 void motorsReset(void);
 
+void motors_add(float *value);
+
 #endif

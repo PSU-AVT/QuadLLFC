@@ -45,7 +45,6 @@
 #include "uart/uart.h"
 #include "adc/adc.h"
 #include "sensors/itg3200.h"
-#include "kalman/kalman.h"
 #include "control/motor.h"
 #include "control/state.h"
 #include "control/response.h"

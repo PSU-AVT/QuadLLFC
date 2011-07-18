@@ -7,14 +7,26 @@
 static struct response_controller_t _rc;
 static struct task_t _response_task;
 
-static float state_error_sum[AXIS_CNT] = {0, 0, 0, 0, 0, 0};
 static float state_error_last[AXIS_CNT] = {0, 0, 0, 0, 0, 0};
 
-static float state_error_gains[3][AXIS_CNT] = {
-		{0, 0, 0, 0, 0, 0}, // P
-		{0, 0, 0, 0, 0, 0}, // I
-		{0, 0, 0, 0, 0, 0}  // D
-};   //  R  P  Y  X  Y  Z
+#define PID_T_P 1
+#define PID_Z_P 1
+#define PID_T_D 1
+#define PID_Z_D 1
+
+static float pid_gains_p[4][4] = {
+		{ 0,        -PID_T_P, PID_Z_P,  0 },
+		{ -PID_T_P, 0,        -PID_Z_P, 0 },
+		{ 0,        PID_T_P,  PID_Z_P,  0 },
+		{ PID_T_P,  0,        -PID_Z_P, 0 }
+};
+
+static float pid_gains_d[4][4] = {
+		{ 0, 0, 0, 0 },
+		{ 0, 0, 0, 0 },
+		{ 0, 0, 0, 0 },
+		{ 0, 0, 0, 0 }
+};
 
 /* This gets called every CFG_RESPONSE_UPDATE_MSECS */
 void responseUpdate(struct task_t *task)
@@ -27,16 +39,19 @@ void responseUpdate(struct task_t *task)
 	float state_error[AXIS_CNT];
 	stateSubtract(_rc.state_setpoint, sc->state, state_error);
 
-	// Update state sum
-	stateAdd(state_error, state_error_sum, state_error_sum);
+	float output[4];
+	// Multiply P gains
+	for(i = 0;i<4;i++)
+		output[i] = sc->state[Roll]*pid_gains_p[i][0] + sc->state[Pitch]*pid_gains_p[i][1] + sc->state[Pitch]*pid_gains_p[i][2] + sc->state[Y]*pid_gains_p[i][3];
 
-	// P, D
-	for(i = 0;i < AXIS_CNT;++i) {
-		movement(i, state_error_gains[0][i] * state_error[i]); // P
-		movement(i, state_error_gains[1][i] * state_error_sum[i]); // I
-		movement(i, state_error_gains[2][i] * (state_error_last[i] - state_error[i])); // D
-	}
+	// Multiply D gains
+	for(i = 0;i<4;i++)
+		output[i] += sc->state[Roll]*pid_gains_d[i][0] + sc->state[Pitch]*pid_gains_d[i][1] + sc->state[Pitch]*pid_gains_d[i][2] + sc->state[Y]*pid_gains_d[i][3];
 
+	// output to motors
+	motors_set(output);
+
+	// Set current error as last
 	stateCopy(state_error, state_error_last);
 
 	motorsSyncDutyCycle();
