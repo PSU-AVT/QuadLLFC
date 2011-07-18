@@ -1,9 +1,9 @@
 /*
- * Author: Gregory Haynes <greg@greghaynes.net>
+ * Author: Gregory Haynes <greg@greghaynes.net>, K Jonathan Harker <kjharke@cs.pdx.edu>
  *
  * Software License Agreement (BSD License)
  *
- * Copyright (c) 2011, Gregory Haynes, Spencer Krum
+ * Copyright (c) 2011, Gregory Haynes, Spencer Krum, K Jonathan Harker
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -72,9 +72,12 @@ void stateGyroUpdate(struct task_t *task)
 	// Integration for attenuation state
 	// Uses simpsons rule (requres 3 samples)
 	if(gyro_int_repetition == 2) {
-		_stateController.state[Roll] += SIMPSONS(gyro_old_vals[0][0], gyro_old_vals[1][0], _stateController.state[Roll], gyro_int_dt);
-		_stateController.state[Pitch] += SIMPSONS(gyro_old_vals[0][1], gyro_old_vals[1][1], _stateController.state[Pitch], gyro_int_dt);
-		_stateController.state[Yaw] += SIMPSONS(gyro_old_vals[0][2], gyro_old_vals[1][2], _stateController.state[Yaw], gyro_int_dt);
+		_stateController.state[Roll] += SIMPSONS(gyro_old_vals[0][0], gyro_old_vals[1][0], _stateController.state_dt[Roll], gyro_int_dt);
+		_stateController.state[Pitch] += SIMPSONS(gyro_old_vals[0][1], gyro_old_vals[1][1], _stateController.state_dt[Pitch], gyro_int_dt);
+		_stateController.state[Yaw] += SIMPSONS(gyro_old_vals[0][2], gyro_old_vals[1][2], _stateController.state_dt[Yaw], gyro_int_dt);
+
+		// Rotate from the Body frame to the Inertial (Earth) frame
+		_stateController = *translateB2I(_stateController);
 
 		gyro_int_repetition = 0;
 		gyro_int_dt = 0;
