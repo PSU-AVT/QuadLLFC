@@ -47,22 +47,25 @@
 
 #define DEBUG 1
 
+static int motor_val;
+
 void handle_control_input(char ch)
 {
 	switch(ch)
 	{
 	case ']':
-
+		motor_val += 5;
+		motor_set(0, motor_val);
 		break;
 	case '[':
-
+		motor_val -= 5;
+		motor_set(0, motor_val);
 		break;
 	case 'q':
 		motors_off();
 		response_off();
 		break;
 	}
-	motorsSyncDutyCycle();
 }
 
 int main(void)
