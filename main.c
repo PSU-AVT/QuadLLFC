@@ -66,6 +66,9 @@ void handle_control_input(char ch)
 		response_off();
 		break;
 	}
+	uartSend("Got ", 4);
+	uartSendByte(ch);
+	uartSend("\r\n", 2);
 }
 
 int main(void)
@@ -78,13 +81,13 @@ int main(void)
 	motorsInit();
 
 	// Initialize state system
-	stateInit();
+	//stateInit();
 
 	// Start motors
 	motorsStart();
 
 	// Start state recording
-	stateStart();
+	//stateStart();
 
 	// Start the control system
 	responseStart();
