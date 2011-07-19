@@ -64,7 +64,7 @@ void stateStart(void);
  */
 void stateSubtract(float *a, float *b, float *dest);
 
-void stateCopy(float *src, float *dst);
+void stateCopy(const float *src, float *dst);
 
 void stateAdd(float *a, float *b, float *dest);
 

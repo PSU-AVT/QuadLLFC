@@ -37,9 +37,7 @@
 //The Euler Kinematics Equations for transforming from the Body Fixed Frame
 //into the Intertial Fixed Frame
 
-static struct state_controller_t _inertialState;
-
-struct state_controller_t *translateB2I(struct state_controller_t _bodyState) {
+void translateB2I(const struct state_controller_t *_bodyState, struct state_controller_t *_inertialState) {
     // Multiply the state vector by a super special rotation matrix:
     // http://www.wolframalpha.com/input/?i={{1%2C0%2C0}%2C{0%2Ccos%28x%29%2Csin%28x%29}%2C{0%2C-sin%28x%29%2Ccos%28x%29}}*{{cos%28y%29%2C0%2C-sin%28y%29}%2C{0%2C1%2C0}%2C{sin%28y%29%2C0%2Ccos%28y%29}}*{{cos%28z%29%2Csin%28z%29%2C0}%2C{-sin%28z%29%2Ccos%28z%29%2C0}%2C{0%2C0%2C1}}
     //    (cos(y) cos(z)                     | cos(y) sin(z)                      | -sin(y)
@@ -54,15 +52,16 @@ struct state_controller_t *translateB2I(struct state_controller_t _bodyState) {
     //      x(cos(z) sin(x) sin(y)-cos(x) sin(z)) + y(cos(x) cos(z)+sin(x) sin(y) sin(z)) + z(cos(y) sin(x))
     //      x(cos(x) cos(z) sin(y)+sin(x) sin(z)) + y(cos(x) sin(y) sin(z)-cos(z) sin(x)) + z(cos(x) cos(y))]
 	
-    _inertialState = _bodyState;
+    _inertialState->gyros = _bodyState->gyros;
+    stateCopy(_bodyState->state_dt, _inertialState->state_dt);
 
-    double R = double(_bodyState.state[Roll]);
-    double P = double(_bodyState.state[Pitch]);
-    double Y = double(_bodyState.state[Yaw]);
+    double R = (double)(_bodyState->state[Roll]);
+    double P = (double)(_bodyState->state[Pitch]);
+    double Y = (double)(_bodyState->state[Yaw]);
 
-    _inertialState.state[Roll] = float(R * cos(P) * cos(Y) + P * cos(P) * sin(Y) + (Y * (0 - sin(P))));
-    _inertialState.state[Pitch] = float(R * cos(Y) * sin(R) * (sin(P) - cos(R)) * sin(Y) + P * cos(R) * (cos(Y) + sin(R)) * sin(P) * sin(Y) + Y * cos(P) * sin(R));
-    _inertialState.state[Yaw] = float(R * cos(R) * cos(Y) * (sin(P)+cos(R)) * sin(Y) + P * cos(R) * sin(P) * (sin(Y)-cos(Y)) * sin(R) + Y * cos(R) * cos(P));
+    _inertialState->state[Roll] = (float)(R * cos(P) * cos(Y) + P * cos(P) * sin(Y) + (Y * (0 - sin(P))));
+    _inertialState->state[Pitch] = (float)(R * cos(Y) * sin(R) * (sin(P) - cos(R)) * sin(Y) + P * cos(R) * (cos(Y) + sin(R)) * sin(P) * sin(Y) + Y * cos(P) * sin(R));
+    _inertialState->state[Yaw] = (float)(R * cos(R) * cos(Y) * (sin(P)+cos(R)) * sin(Y) + P * cos(R) * sin(P) * (sin(Y)-cos(Y)) * sin(R) + Y * cos(R) * cos(P));
 
-    return &_inertialState;
+    return;
 }

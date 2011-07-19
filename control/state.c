@@ -123,7 +123,7 @@ void stateSubtract(float *a, float *b, float *dest)
 		dest[i] = a[i] - b[i];
 }
 
-void stateCopy(float *src, float *dst)
+void stateCopy(const float *src, float *dst)
 {
 	int i;
 	for(i = 0;i < AXIS_CNT;++i)
