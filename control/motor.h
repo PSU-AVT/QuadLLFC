@@ -53,14 +53,16 @@ struct motor_controller_t *motorControllerGet(void);
 void motorsInit(void);
 void motorsStart(void);
 
+void motors_off(void);
+
 /* Must call this to apply duty cycles to hardware */
 void motorsSyncDutyCycle(void);
 
 void motorThrustIncrease(struct motor_t *motor, float value);
 void motorNdxThrustIncrease(int ndx, float value);
 void motorsThrustIncreaseAll(float value);
-void motorsReset(void);
 
-void motors_add(float *value);
+// Turn off motors
+void motors_off(void);
 
 #endif

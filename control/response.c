@@ -7,6 +7,8 @@
 static struct response_controller_t _rc;
 static struct task_t _response_task;
 
+static int _response_is_on;
+
 static float state_error_last[AXIS_CNT] = {0, 0, 0, 0, 0, 0};
 
 #define PID_T_P 1
@@ -31,6 +33,11 @@ static float pid_gains_d[4][4] = {
 /* This gets called every CFG_RESPONSE_UPDATE_MSECS */
 void responseUpdate(struct task_t *task)
 {
+	// Ability to turn off response system
+	// Safety feature, DO NOT DISABLE!
+	if(!_response_is_on)
+		return;
+
 	int i;
 	struct state_controller_t *sc;
 	sc = stateControllerGet();
@@ -53,8 +60,6 @@ void responseUpdate(struct task_t *task)
 
 	// Set current error as last
 	stateCopy(state_error, state_error_last);
-
-	motorsSyncDutyCycle();
 }
 
 void responseStart(void)
@@ -71,9 +76,21 @@ void responseStart(void)
 	_response_task.handler = responseUpdate;
 	_response_task.msecs = CFG_RESPONSE_UPDATE_MSECS;
 	tasks_add_task(&_response_task);
+
+	response_start();
 }
 
 struct response_controller_t *responseControllerGet(void)
 {
 	return &_rc;
+}
+
+void response_on(void)
+{
+	_response_is_on = 1;
+}
+
+void response_off(void)
+{
+	_response_is_on = 0;
 }

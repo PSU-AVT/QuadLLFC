@@ -42,4 +42,7 @@ struct response_controller_t {
 void responseStart(void);
 struct response_controller_t *responseControllerGet(void);
 
+void response_off(void);
+void response_on(void);
+
 #endif

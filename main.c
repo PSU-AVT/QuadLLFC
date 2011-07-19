@@ -40,11 +40,7 @@
 
 #include "cpu/cpu.h"
 #include "systick/systick.h"
-#include "pwm/pwm16.h"
-#include "esc/esc.h"
 #include "uart/uart.h"
-#include "adc/adc.h"
-#include "sensors/itg3200.h"
 #include "control/motor.h"
 #include "control/state.h"
 #include "control/response.h"
@@ -56,13 +52,14 @@ void handle_control_input(char ch)
 	switch(ch)
 	{
 	case ']':
-		motorsThrustIncreaseAll(-500);
+
 		break;
 	case '[':
-		motorsThrustIncreaseAll(500);
+
 		break;
 	case 'q':
-		motorsReset();
+		motors_off();
+		response_off();
 		break;
 	}
 	motorsSyncDutyCycle();
@@ -74,14 +71,19 @@ int main(void)
 	systickInit(1);
 	uartInit(38400);
 
+	// Initialize motor pins
 	motorsInit();
+
+	// Initialize state system
+	stateInit();
+
+	// Start motors
 	motorsStart();
 
-	stateInit();
+	// Start state recording
 	stateStart();
 
-	//systickDelay(6000);
-
+	// Start the control system
 	responseStart();
 
 	while(1)

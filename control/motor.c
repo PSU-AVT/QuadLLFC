@@ -125,16 +125,11 @@ void motorsThrustIncreaseAll(float value)
 	}
 }
 
-void motorsReset(void)
+void motors_off(void)
 {
 	uint8_t i;
 	for(i = 0;i < CFG_MOTOR_CNT;i++)
 	{
 		_motor_controller.motors[i].duty_cycle = _motor_controller.motors[i].thrust_min;
 	}
-}
-
-void motors_add(float *array)
-{
-
 }
