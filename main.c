@@ -82,7 +82,7 @@ int main(void)
 
 	//systickDelay(6000);
 
-	responseStart();
+	//responseStart();
 
 	while(1)
 	{
