@@ -35,6 +35,7 @@
 #include "../systick/systick.h"
 #include "../adc/adc.h"
 #include "response.h"
+#include "translate.h"
 
 static struct state_controller_t _stateController;
 
