@@ -33,29 +33,26 @@
 #include "../esc/esc.h"
 
 static struct motor_controller_t _motor_controller;
+static float motor_val_pwm_fact;
+
+void motorsSyncDutyCycle(void);
 
 struct motor_controller_t *motorControllerGet(void)
 {
 	return &_motor_controller;
 }
 
-void motorInit(struct motor_t *motor)
-{
-	motor->duty_cycle = CFG_MOTOR_DEFAULT_DUTY_CYCLE;
-	motor->thrust_max = CFG_MOTOR_DEFAULT_MAX_THRUST;
-	motor->thrust_min = CFG_MOTOR_DEFAULT_MIN_THRUST;
-	motor->thrust_proportion = 1;
-}
-
 void motorsInit(void)
 {
+	motor_val_pwm_fact = ((float)CFG_MOTOR_MIN_THRUST - CFG_MOTOR_MAX_THRUST) / CFG_MOTOR_MAX;
+
 	struct esc_controller_t *esc_controller;
 	uint8_t i;
 
 	esc_controller = escGetController();
 
 	for(i = 0;i < CFG_MOTOR_CNT;i++)
-		motorInit(&_motor_controller.motors[i]);
+		_motor_controller.motors[i] = 0;
 
 	ESC_SETUP(esc_controller->escs[0],
 	          ESC_0_PWM_PIN,
@@ -81,55 +78,83 @@ void motorsStart(void)
 	uint8_t i;
 
 	escsArm();
-	for(i = 0;i < CFG_MOTOR_CNT;i++)
-	{
-		_motor_controller.motors[i].duty_cycle = _motor_controller.motors[i].thrust_min;
-	}
+
 	motorsSyncDutyCycle();
 }
 
-void motorsSyncDutyCycle(void)
-{
-	uint8_t i;
-	struct esc_controller_t *controller;
+// If any motors are over CFG_MOTOR_MAX we rescale all, equally to make
+// this not the case
+void motors_rescale(float *motor_vals, int *scaled_vals) {
+	int i;
+	float scale_factor;
 
-	controller = escGetController();
-	for(i = 0;i < CFG_MOTOR_CNT;i++)
-	{
-		escSetDutyCycle(&controller->escs[i],
-		                _motor_controller.motors[i].duty_cycle);
+	// motor into working array
+	for(i = 0;i < CFG_MOTOR_CNT;++i)
+		scaled_vals[i] = motor_vals[i];
+
+	// Find max
+	int max_ndx = 0;
+	for(i = 1;i < CFG_MOTOR_CNT;++i) {
+		if(scaled_vals[i] > scaled_vals[max_ndx])
+			max_ndx = i;
+	}
+
+	// We need to rescale
+	if(scaled_vals[max_ndx] > CFG_MOTOR_MAX) {
+		scale_factor = CFG_MOTOR_MAX / scaled_vals[max_ndx];
+
+		for(i = 0;i < CFG_MOTOR_CNT;++i)
+			scaled_vals[i] *= scale_factor;
 	}
 }
 
-void motorThrustIncrease(struct motor_t *motor, float value)
-{
-	if((motor->duty_cycle + value * motor->thrust_proportion) < CFG_MOTOR_DEFAULT_MAX_THRUST)
-		return;
-	if((motor->duty_cycle + value * motor->thrust_proportion) > CFG_MOTOR_DEFAULT_MIN_THRUST)
-		return;
-	motor->duty_cycle += value * motor->thrust_proportion;
+int motor_val_to_pwm(int val) {
+	return CFG_MOTOR_MIN_THRUST - (val * motor_val_pwm_fact);
 }
 
-void motorNdxThrustIncrease(int ndx, float value)
+// Called to actually apply motor changes
+void motorsSyncDutyCycle(void)
 {
-	motorThrustIncrease(&_motor_controller.motors[ndx], value);
-}
+	int i;
 
-void motorsThrustIncreaseAll(float value)
-{
-	uint8_t i;
-	for(i = 0;i < CFG_MOTOR_CNT;i++)
+	// Rescale motors
+	int scaled_vals[CFG_MOTOR_CNT];
+	motors_rescale(_motor_controller.motors, scaled_vals);
+
+	// Convert to pwm duty cycle
+	for(i = 0;i < CFG_MOTOR_CNT;++i) {
+		scaled_vals[i] = motor_val_to_pwm(scaled_vals[i]);
+	}
+
+	struct esc_controller_t *controller;
+
+	controller = escGetController();
+	for(i = 0;i < CFG_MOTOR_CNT;++i)
 	{
-		motorThrustIncrease(&_motor_controller.motors[i],
-		                      value);
+		escSetDutyCycle(&controller->escs[i],
+		                scaled_vals[i]);
 	}
 }
 
 void motors_off(void)
 {
+	float vals[4];
+	int i;
+	for(i = 0;i < CFG_MOTOR_MAX;++i)
+		vals[i] = 0;
+	motors_set(vals);
+}
+
+void motor_set(int ndx, float value)
+{
+	_motor_controller.motors[ndx] = value;
+	motorsSyncDutyCycle();
+}
+
+void motors_set(float *values)
+{
 	uint8_t i;
 	for(i = 0;i < CFG_MOTOR_CNT;i++)
-	{
-		_motor_controller.motors[i].duty_cycle = _motor_controller.motors[i].thrust_min;
-	}
+		_motor_controller.motors[i] = values[i];
+	motorsSyncDutyCycle();
 }

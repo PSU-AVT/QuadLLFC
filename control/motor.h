@@ -36,33 +36,24 @@
 
 #include <stdint.h>
 
-struct motor_t
-{
-	float duty_cycle;
-	float thrust_proportion;
-	uint16_t thrust_min;
-	uint16_t thrust_max;
-};
-
 struct motor_controller_t
 {
-	struct motor_t motors[CFG_MOTOR_CNT];
+	float motors[CFG_MOTOR_CNT];
 };
 
 struct motor_controller_t *motorControllerGet(void);
+
+// Initialize motor pins and registers
 void motorsInit(void);
+
+// Arm the motors
 void motorsStart(void);
-
-void motors_off(void);
-
-/* Must call this to apply duty cycles to hardware */
-void motorsSyncDutyCycle(void);
-
-void motorThrustIncrease(struct motor_t *motor, float value);
-void motorNdxThrustIncrease(int ndx, float value);
-void motorsThrustIncreaseAll(float value);
 
 // Turn off motors
 void motors_off(void);
+
+void motor_set(int ndx, float value);
+
+void motors_set(float *values);
 
 #endif
