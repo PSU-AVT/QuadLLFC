@@ -56,4 +56,6 @@ void motor_set(int ndx, float value);
 
 void motors_set(float *values);
 
+float motor_get_val(int ndx);
+
 #endif

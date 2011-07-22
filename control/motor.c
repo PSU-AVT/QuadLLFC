@@ -109,6 +109,8 @@ void motors_rescale(float *motor_vals, int *scaled_vals) {
 }
 
 int motor_val_to_pwm(int val) {
+	if(val < 0)
+		return CFG_MOTOR_MIN_THRUST;
 	return CFG_MOTOR_MIN_THRUST - (val * motor_val_pwm_fact);
 }
 
@@ -157,4 +159,11 @@ void motors_set(float *values)
 	for(i = 0;i < CFG_MOTOR_CNT;i++)
 		_motor_controller.motors[i] = values[i];
 	motorsSyncDutyCycle();
+}
+
+float motor_get_val(int ndx)
+{
+	if(ndx < 0 || ndx >= CFG_MOTOR_CNT)
+		return 0;
+	return _motor_controller.motors[ndx];
 }
