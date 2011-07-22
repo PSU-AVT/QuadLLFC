@@ -84,8 +84,8 @@ void stateGyroUpdate(struct task_t *task)
 		_stateController.body_state[AxisYaw] += SIMPSONS(gyro_old_vals[0][2], gyro_old_vals[1][2], _stateController.body_state_dt[AxisYaw], gyro_int_dt);
 
 		// Rotate from the Body frame to the Inertial (Earth) frame
-		// This loads _stateController.inertial_state
-		//translateB2I(&_stateController);
+		// This loads inertial_state
+		translateB2I(&_stateController);
 
 		gyro_int_repetition = 0;
 		gyro_int_dt = 0;
