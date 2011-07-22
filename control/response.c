@@ -11,11 +11,12 @@ static int _response_is_on;
 
 static float state_error_last[AXIS_CNT] = {0, 0, 0, 0, 0, 0};
 
-#define PID_T_P 1
-#define PID_Z_P 1
-#define PID_T_D 1
-#define PID_Z_D 1
-#define PID_Y_P 2
+#define PID_T_P 0 // Torque (roll, pitch) P gain
+#define PID_Z_P 0 // Torque (yaw) P gain
+#define PID_T_D 0 // Torque (roll, pitch) D gain
+#define PID_Z_D 0 // Torque (yaw) D gain
+#define PID_Y_P 2 // Vertical P gain
+#define PID_Y_D 0 // Vertical D gain
 
 static float pid_gains_p[4][4] = {
 		{ 0,        -PID_T_P, PID_Z_P,  PID_Y_P },
@@ -25,10 +26,10 @@ static float pid_gains_p[4][4] = {
 };
 
 static float pid_gains_d[4][4] = {
-		{ 0, 0, 0, 0 },
-		{ 0, 0, 0, 0 },
-		{ 0, 0, 0, 0 },
-		{ 0, 0, 0, 0 }
+		{ 0,        -PID_T_D, PID_Z_D,  PID_Y_D },
+		{ -PID_T_D, 0,        -PID_Z_D, PID_Y_D },
+		{ 0,        PID_T_D,  PID_Z_D,  PID_Y_D },
+		{ PID_T_D,  0,        -PID_Z_D, PID_Y_D }
 };
 
 /* This gets called every CFG_RESPONSE_UPDATE_MSECS */
