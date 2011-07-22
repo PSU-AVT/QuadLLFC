@@ -51,7 +51,8 @@ void translateB2I(const struct state_controller_t *_bodyState, struct state_cont
     //    [ x(cos(y) cos(z)) + y(cos(y) sin(z)) + z(-sin(y))
     //      x(cos(z) sin(x) sin(y)-cos(x) sin(z)) + y(cos(x) cos(z)+sin(x) sin(y) sin(z)) + z(cos(y) sin(x))
     //      x(cos(x) cos(z) sin(y)+sin(x) sin(z)) + y(cos(x) sin(y) sin(z)-cos(z) sin(x)) + z(cos(x) cos(y))]
-	
+
+	/*
     _inertialState->gyros = _bodyState->gyros;
     stateCopy(_bodyState->state_dt, _inertialState->state_dt);
 
@@ -63,5 +64,5 @@ void translateB2I(const struct state_controller_t *_bodyState, struct state_cont
     _inertialState->state[Pitch] = (float)(R * cos(Y) * sin(R) * (sin(P) - cos(R)) * sin(Y) + P * cos(R) * (cos(Y) + sin(R)) * sin(P) * sin(Y) + Y * cos(P) * sin(R));
     _inertialState->state[Yaw] = (float)(R * cos(R) * cos(Y) * (sin(P)+cos(R)) * sin(Y) + P * cos(R) * sin(P) * (sin(Y)-cos(Y)) * sin(R) + Y * cos(R) * cos(P));
 
-    return;
+    */
 }

@@ -46,7 +46,7 @@ void response_update(struct task_t *task)
 
 	// Figure out error
 	float state_error[AXIS_CNT];
-	stateSubtract(_rc.state_setpoint, sc->state, state_error);
+	stateSubtract(_rc.state_setpoint, sc->body_state, state_error);
 
 	float output[4];
 	// Multiply P gains

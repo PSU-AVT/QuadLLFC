@@ -52,49 +52,48 @@ void state_debug(struct task_t *task)
 	struct state_controller_t *sc;
 	sc = stateControllerGet();
 	sprintf(buff, "State:  \t%f\t%f\t%f\r\ndState/dt\t%f\t%f\t%f\r\n\r\n",
-			sc->state[Roll], sc->state[Pitch], sc->state[Yaw],
-			sc->state_dt[Roll], sc->state_dt[Pitch], sc->state_dt[Yaw]);
+			sc->body_state[Roll], sc->body_state[Pitch], sc->body_state[Yaw],
+			sc->body_state_dt[Roll], sc->body_state_dt[Pitch], sc->body_state_dt[Yaw]);
 	uartSend(buff, strlen(buff));
 }
 
 #define SIMPSONS(S1, S2, S3, dt) ((dt/6.0) * (S1+(4*S2)+S3))
 
+// In this method we obtain our gyro inputs as body_state_dt
+// We then integrate using simpsons rule to obtain body_state
+// We then rotate this body state to obtain delta_initial_state
+// We then add this to our inertial_state to obtain new inertial state
 void stateGyroUpdate(struct task_t *task)
 {
 	char buff[255];
 
+	// update gyro data
 	itg3200GetData(&_stateController.gyros);
 
-	// Low pass filter
-	_stateController.state_dt[Roll] = _stateController.state_dt[Roll] * (1 - CFG_GYRO_FILTER_ALPHA) + ((_stateController.gyros.X + CFG_GYRO_X_BIAS) * CFG_GYRO_FILTER_ALPHA);
-	_stateController.state_dt[Pitch] = _stateController.state_dt[Pitch] * (1 - CFG_GYRO_FILTER_ALPHA) + ((_stateController.gyros.Y + CFG_GYRO_Y_BIAS) * CFG_GYRO_FILTER_ALPHA);
-	_stateController.state_dt[Yaw] = _stateController.state_dt[Yaw] * (1 - CFG_GYRO_FILTER_ALPHA_YAW) + ((_stateController.gyros.Z + CFG_GYRO_Z_BIAS) * CFG_GYRO_FILTER_ALPHA_YAW);
-
-	sprintf(buff, "%f\r\n",  _stateController.state_dt[Yaw]);
-	uartSend(buff, strlen(buff));
+	// Low pass filter on gyro vals into state_dt
+	// state_dt_(n) = state_dt(n-1) * (1 - alpha) + gyro_data * alpha
+	_stateController.body_state_dt[Roll] = _stateController. body_state_dt[Roll] * (1 - CFG_GYRO_FILTER_ALPHA) + ((_stateController.gyros.X + CFG_GYRO_X_BIAS) * CFG_GYRO_FILTER_ALPHA);
+	_stateController.body_state_dt[Pitch] = _stateController.body_state_dt[Pitch] * (1 - CFG_GYRO_FILTER_ALPHA) + ((_stateController.gyros.Y + CFG_GYRO_Y_BIAS) * CFG_GYRO_FILTER_ALPHA);
+	_stateController.body_state_dt[Yaw] = _stateController.body_state_dt[Yaw] * (1 - CFG_GYRO_FILTER_ALPHA_YAW) + ((_stateController.gyros.Z + CFG_GYRO_Z_BIAS) * CFG_GYRO_FILTER_ALPHA_YAW);
 
 	// Integration for attenuation state
 	// Uses simpsons rule (requres 3 samples)
 	if(gyro_int_repetition == 2) {
-		_stateController.state[Roll] += SIMPSONS(gyro_old_vals[0][0], gyro_old_vals[1][0], _stateController.state_dt[Roll], gyro_int_dt);
-		_stateController.state[Pitch] += SIMPSONS(gyro_old_vals[0][1], gyro_old_vals[1][1], _stateController.state_dt[Pitch], gyro_int_dt);
-		_stateController.state[Yaw] += SIMPSONS(gyro_old_vals[0][2], gyro_old_vals[1][2], _stateController.state_dt[Yaw], gyro_int_dt);
-
-		//sprintf(buff, "%f\t",  _stateController.state[Roll]);
-		//uartSend(buff, strlen(buff));
+		_stateController.body_state[Roll] += SIMPSONS(gyro_old_vals[0][0], gyro_old_vals[1][0], _stateController.body_state_dt[Roll], gyro_int_dt);
+		_stateController.body_state[Pitch] += SIMPSONS(gyro_old_vals[0][1], gyro_old_vals[1][1], _stateController.body_state_dt[Pitch], gyro_int_dt);
+		_stateController.body_state[Yaw] += SIMPSONS(gyro_old_vals[0][2], gyro_old_vals[1][2], _stateController.body_state_dt[Yaw], gyro_int_dt);
 
 		// Rotate from the Body frame to the Inertial (Earth) frame
-		translateB2I(&_stateController, &_stateController);
-
-		//sprintf(buff, "%f\r\n", _stateController.state[Roll]);
-		//uartSend(buff, strlen(buff));
+		// This loads _stateController.inertial_state
+		//translateB2I(&_stateController);
 
 		gyro_int_repetition = 0;
 		gyro_int_dt = 0;
 	} else {
-		gyro_old_vals[gyro_int_repetition][0] = _stateController.state_dt[Roll];
-		gyro_old_vals[gyro_int_repetition][1] = _stateController.state_dt[Pitch];
-		gyro_old_vals[gyro_int_repetition][2] = _stateController.state_dt[Yaw];
+		// Load state_dt vals into buffer for simpsons rule
+		gyro_old_vals[gyro_int_repetition][0] = _stateController.body_state_dt[Roll];
+		gyro_old_vals[gyro_int_repetition][1] = _stateController.body_state_dt[Pitch];
+		gyro_old_vals[gyro_int_repetition][2] = _stateController.body_state_dt[Yaw];
 
 		gyro_int_repetition++;
 		gyro_int_dt += task_get_dt(task);
