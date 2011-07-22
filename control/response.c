@@ -15,7 +15,7 @@ static float state_error_last[AXIS_CNT] = {0, 0, 0, 0, 0, 0};
 #define PID_Z_P 0 // Torque (yaw) P gain
 #define PID_T_D 0 // Torque (roll, pitch) D gain
 #define PID_Z_D 0 // Torque (yaw) D gain
-#define PID_Y_P 2 // Vertical P gain
+#define PID_Y_P .2 // Vertical P gain
 #define PID_Y_D 0 // Vertical D gain
 
 static float pid_gains_p[4][4] = {
@@ -57,6 +57,10 @@ void response_update(struct task_t *task)
 	for(i = 0;i<4;i++)
 		output[i] += state_error[Roll]*pid_gains_d[i][0] + state_error[Pitch]*pid_gains_d[i][1] + state_error[Pitch]*pid_gains_d[i][2] + state_error[Y]*pid_gains_d[i][3];
 
+	// Square outputs to account for motor input -> thrust conversion
+	for(i = 0;i<4;i++)
+		output[i] *= output[i];
+
 	// output to motors
 	motors_set(output);
 
@@ -78,6 +82,8 @@ void response_start(void)
 	_response_task.handler = response_update;
 	_response_task.msecs = CFG_RESPONSE_UPDATE_MSECS;
 	tasks_add_task(&_response_task);
+
+	response_on();
 }
 
 struct response_controller_t *response_controller_get(void)
