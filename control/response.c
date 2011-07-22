@@ -51,11 +51,11 @@ void response_update(struct task_t *task)
 	float output[4];
 	// Multiply P gains
 	for(i = 0;i<4;i++)
-		output[i] = state_error[Roll]*pid_gains_p[i][0] + state_error[Pitch]*pid_gains_p[i][1] + state_error[Pitch]*pid_gains_p[i][2] + state_error[Y]*pid_gains_p[i][3];
+		output[i] = state_error[AxisRoll]*pid_gains_p[i][0] + state_error[AxisPitch]*pid_gains_p[i][1] + state_error[AxisPitch]*pid_gains_p[i][2] + state_error[AxisY]*pid_gains_p[i][3];
 
 	// Multiply D gains
 	for(i = 0;i<4;i++)
-		output[i] += state_error[Roll]*pid_gains_d[i][0] + state_error[Pitch]*pid_gains_d[i][1] + state_error[Pitch]*pid_gains_d[i][2] + state_error[Y]*pid_gains_d[i][3];
+		output[i] += state_error[AxisRoll]*pid_gains_d[i][0] + state_error[AxisPitch]*pid_gains_d[i][1] + state_error[AxisPitch]*pid_gains_d[i][2] + state_error[AxisY]*pid_gains_d[i][3];
 
 	// Square outputs to account for motor input -> thrust conversion
 	for(i = 0;i<4;i++)

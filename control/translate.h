@@ -34,6 +34,6 @@
 
 #include "state.h"
 
-void translateB2I(const struct state_controller_t *_bodyState, struct state_controller_t *_inertialState);
+void translateB2I(const struct state_controller_t *state_controller);
 
 #endif //TRANSLATE_H

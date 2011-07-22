@@ -37,7 +37,7 @@
 //The Euler Kinematics Equations for transforming from the Body Fixed Frame
 //into the Intertial Fixed Frame
 
-void translateB2I(const struct state_controller_t *_bodyState, struct state_controller_t *_inertialState) {
+void translateB2I(const struct state_controller_t *state_controller) {
     // Multiply the state vector by a super special rotation matrix:
     // http://www.wolframalpha.com/input/?i={{1%2C0%2C0}%2C{0%2Ccos%28x%29%2Csin%28x%29}%2C{0%2C-sin%28x%29%2Ccos%28x%29}}*{{cos%28y%29%2C0%2C-sin%28y%29}%2C{0%2C1%2C0}%2C{sin%28y%29%2C0%2Ccos%28y%29}}*{{cos%28z%29%2Csin%28z%29%2C0}%2C{-sin%28z%29%2Ccos%28z%29%2C0}%2C{0%2C0%2C1}}
     //    (cos(y) cos(z)                     | cos(y) sin(z)                      | -sin(y)

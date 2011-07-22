@@ -52,10 +52,10 @@ void handle_control_input(char ch)
 	switch(ch)
 	{
 	case ']': // Increase thrust
-		response_controller_get()->state_setpoint[Y] += 1;
+		response_controller_get()->state_setpoint[AxisY] += 1;
 		break;
 	case '[': // Decrease thrust
-		response_controller_get()->state_setpoint[Y] -= 1;
+		response_controller_get()->state_setpoint[AxisY] -= 1;
 		break;
 	case 'q': // Turn off
 		motors_off();

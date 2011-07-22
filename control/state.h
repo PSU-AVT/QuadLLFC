@@ -36,12 +36,12 @@
 #include "../sensors/itg3200.h"
 
 enum axis_t {
-	Roll,
-	Pitch,
-	Yaw,
-	X,
-	Y,
-	Z
+	AxisRoll,
+	AxisPitch,
+	AxisYaw,
+	AxisX,
+	AxisY,
+	AxisZ
 };
 
 #define AXIS_CNT 6
@@ -51,6 +51,8 @@ struct state_controller_t
 	GyroData gyros;
     float body_state[AXIS_CNT];
     float body_state_dt[AXIS_CNT];
+    float inertial_state[AXIS_CNT];
+    float inertial_state_dt[AXIS_CNT];
 };
 
 struct state_controller_t *stateControllerGet(void);
