@@ -52,17 +52,20 @@ void handle_control_input(char ch)
 	int i;
 	switch(ch)
 	{
-	case ']':
+	case ']': // Increase thrust
 		for(i=0;i<4;i++)
 			motor_set(i, motor_get_val(i)+5);
 		break;
-	case '[':
+	case '[': // Decrease thrust
 		for(i=0;i<4;i++)
 			motor_set(i, motor_get_val(i)-5);
 		break;
-	case 'q':
+	case 'q': // Turn off
 		motors_off();
 		response_off();
+		break;
+	case 's': // Turn on
+		response_on();
 		break;
 	}
 	uartSend("Got ", 4);
@@ -89,7 +92,7 @@ int main(void)
 	//stateStart();
 
 	// Start the control system
-	responseStart();
+	//responseStart();
 
 	while(1)
 	{

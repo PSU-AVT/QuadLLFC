@@ -142,7 +142,7 @@ void motors_off(void)
 {
 	float vals[4];
 	int i;
-	for(i = 0;i < CFG_MOTOR_MAX;++i)
+	for(i = 0;i < CFG_MOTOR_CNT;++i)
 		vals[i] = 0;
 	motors_set(vals);
 }
