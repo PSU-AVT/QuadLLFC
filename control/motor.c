@@ -101,7 +101,7 @@ void motors_rescale(float *motor_vals, int *scaled_vals) {
 
 	// We need to rescale
 	if(scaled_vals[max_ndx] > CFG_MOTOR_MAX) {
-		scale_factor = CFG_MOTOR_MAX / scaled_vals[max_ndx];
+		scale_factor = ((float)CFG_MOTOR_MAX) / scaled_vals[max_ndx];
 
 		for(i = 0;i < CFG_MOTOR_CNT;++i)
 			scaled_vals[i] *= scale_factor;
