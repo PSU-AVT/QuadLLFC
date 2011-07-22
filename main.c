@@ -80,16 +80,19 @@ int main(void)
 	motorsInit();
 
 	// Initialize state system
-	//stateInit();
+	stateInit();
 
 	// Start motors
 	motorsStart();
 
 	// Start state recording
-	//stateStart();
+	stateStart();
 
 	// Start the control system
 	response_start();
+
+	motors_off();
+	response_off();
 
 	while(1)
 	{

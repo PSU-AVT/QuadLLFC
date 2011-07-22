@@ -46,16 +46,14 @@ static float gyro_old_vals[2][3];
 static float gyro_int_dt;
 static int gyro_int_repetition;
 
-#define TCOS(x) (1 - ((x*x) / 2) + ((x*x*x*x) / 24) - ((x*x*x*x*x*x)/720))
 void state_debug(struct task_t *task)
 {
 	char buff[256];
 	struct state_controller_t *sc;
 	sc = stateControllerGet();
-	sprintf(buff, "State:\t%f\t%f\t%f\r\ndState/dt\t%f\t%f\t%f\r\n%f\r\n\r\n",
+	sprintf(buff, "State:  \t%f\t%f\t%f\r\ndState/dt\t%f\t%f\t%f\r\n\r\n",
 			sc->state[Roll], sc->state[Pitch], sc->state[Yaw],
-			sc->state_dt[Roll], sc->state_dt[Pitch], sc->state_dt[Yaw],
-			TCOS(sc->state[Roll]*0.0174532925));
+			sc->state_dt[Roll], sc->state_dt[Pitch], sc->state_dt[Yaw]);
 	uartSend(buff, strlen(buff));
 }
 
@@ -63,12 +61,17 @@ void state_debug(struct task_t *task)
 
 void stateGyroUpdate(struct task_t *task)
 {
+	char buff[255];
+
 	itg3200GetData(&_stateController.gyros);
-	
+
 	// Low pass filter
 	_stateController.state_dt[Roll] = _stateController.state_dt[Roll] * (1 - CFG_GYRO_FILTER_ALPHA) + ((_stateController.gyros.X + CFG_GYRO_X_BIAS) * CFG_GYRO_FILTER_ALPHA);
 	_stateController.state_dt[Pitch] = _stateController.state_dt[Pitch] * (1 - CFG_GYRO_FILTER_ALPHA) + ((_stateController.gyros.Y + CFG_GYRO_Y_BIAS) * CFG_GYRO_FILTER_ALPHA);
-	_stateController.state_dt[Yaw] = _stateController.state_dt[Yaw] * (1 - CFG_GYRO_FILTER_ALPHA) + (_stateController.gyros.Z * CFG_GYRO_FILTER_ALPHA);
+	_stateController.state_dt[Yaw] = _stateController.state_dt[Yaw] * (1 - CFG_GYRO_FILTER_ALPHA_YAW) + ((_stateController.gyros.Z + CFG_GYRO_Z_BIAS) * CFG_GYRO_FILTER_ALPHA_YAW);
+
+	sprintf(buff, "%f\r\n",  _stateController.state_dt[Yaw]);
+	uartSend(buff, strlen(buff));
 
 	// Integration for attenuation state
 	// Uses simpsons rule (requres 3 samples)
@@ -77,8 +80,14 @@ void stateGyroUpdate(struct task_t *task)
 		_stateController.state[Pitch] += SIMPSONS(gyro_old_vals[0][1], gyro_old_vals[1][1], _stateController.state_dt[Pitch], gyro_int_dt);
 		_stateController.state[Yaw] += SIMPSONS(gyro_old_vals[0][2], gyro_old_vals[1][2], _stateController.state_dt[Yaw], gyro_int_dt);
 
+		//sprintf(buff, "%f\t",  _stateController.state[Roll]);
+		//uartSend(buff, strlen(buff));
+
 		// Rotate from the Body frame to the Inertial (Earth) frame
 		translateB2I(&_stateController, &_stateController);
+
+		//sprintf(buff, "%f\r\n", _stateController.state[Roll]);
+		//uartSend(buff, strlen(buff));
 
 		gyro_int_repetition = 0;
 		gyro_int_dt = 0;
@@ -93,7 +102,6 @@ void stateGyroUpdate(struct task_t *task)
 }
 
 #undef SIMPSONS
-#undef TCOS
 
 struct state_controller_t *stateControllerGet(void)
 {
@@ -114,7 +122,7 @@ void stateStart(void)
 	state_debug_task.msecs = CFG_STATE_OUTPUT_MSECS;
 
 	tasks_add_task(&gyro_update_task);
-	tasks_add_task(&state_debug_task);
+	//tasks_add_task(&state_debug_task);
 }
 
 void stateSubtract(float *a, float *b, float *dest)

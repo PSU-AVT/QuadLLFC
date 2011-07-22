@@ -162,9 +162,16 @@ itg3200Error_e itg3200GetData (GyroData *data)
         data->temp = 35.0 + ((data->raw_temp + 13200)/280.0);
         //Gyro scaling:  14.375 LSB/degrees/sec
         //SO output should be counts / 14.375;
+        /*
         data->X = data->raw_X / 14.375;
         data->Y = data->raw_Y / 14.375;
         data->Z = data->raw_Z / 14.375;
+        lets use radians, not degrees
+        and multiply, not divide
+        */
+        data->X = data->raw_X * LSB_CORRECTION;
+        data->Y = data->raw_Y * LSB_CORRECTION;
+        data->Z = data->raw_Z * LSB_CORRECTION;
 
   return error;
 }

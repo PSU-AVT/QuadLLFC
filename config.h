@@ -21,9 +21,11 @@
 #define CFG_RESPONSE_UPDATE_MSECS  (16) // msecs between responding to state
 #define CFG_STATE_OUTPUT_MSECS     (200)
 
-#define CFG_GYRO_X_BIAS            0.89
-#define CFG_GYRO_Y_BIAS            -1.72
-#define CFG_GYRO_FILTER_ALPHA      .02
+#define CFG_GYRO_X_BIAS            0.08
+#define CFG_GYRO_Y_BIAS            -.16
+#define CFG_GYRO_Z_BIAS	           0.28
+#define CFG_GYRO_FILTER_ALPHA      .03
+#define CFG_GYRO_FILTER_ALPHA_YAW  .02
 
 #define CFG_PID_P_ROLL             (5)
 #define CFG_PID_P_PITCH            CFG_PID_P_ROLL
