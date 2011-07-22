@@ -15,12 +15,13 @@ static float state_error_last[AXIS_CNT] = {0, 0, 0, 0, 0, 0};
 #define PID_Z_P 1
 #define PID_T_D 1
 #define PID_Z_D 1
+#define PID_Y_P 2
 
 static float pid_gains_p[4][4] = {
-		{ 0,        -PID_T_P, PID_Z_P,  0 },
-		{ -PID_T_P, 0,        -PID_Z_P, 0 },
-		{ 0,        PID_T_P,  PID_Z_P,  0 },
-		{ PID_T_P,  0,        -PID_Z_P, 0 }
+		{ 0,        -PID_T_P, PID_Z_P,  PID_Y_P },
+		{ -PID_T_P, 0,        -PID_Z_P, PID_Y_P },
+		{ 0,        PID_T_P,  PID_Z_P,  PID_Y_P },
+		{ PID_T_P,  0,        -PID_Z_P, PID_Y_P }
 };
 
 static float pid_gains_d[4][4] = {
@@ -31,7 +32,7 @@ static float pid_gains_d[4][4] = {
 };
 
 /* This gets called every CFG_RESPONSE_UPDATE_MSECS */
-void responseUpdate(struct task_t *task)
+void response_update(struct task_t *task)
 {
 	// Ability to turn off response system
 	// Safety feature, DO NOT DISABLE!
@@ -49,11 +50,11 @@ void responseUpdate(struct task_t *task)
 	float output[4];
 	// Multiply P gains
 	for(i = 0;i<4;i++)
-		output[i] = sc->state[Roll]*pid_gains_p[i][0] + sc->state[Pitch]*pid_gains_p[i][1] + sc->state[Pitch]*pid_gains_p[i][2] + sc->state[Y]*pid_gains_p[i][3];
+		output[i] = state_error[Roll]*pid_gains_p[i][0] + state_error[Pitch]*pid_gains_p[i][1] + state_error[Pitch]*pid_gains_p[i][2] + state_error[Y]*pid_gains_p[i][3];
 
 	// Multiply D gains
 	for(i = 0;i<4;i++)
-		output[i] += sc->state[Roll]*pid_gains_d[i][0] + sc->state[Pitch]*pid_gains_d[i][1] + sc->state[Pitch]*pid_gains_d[i][2] + sc->state[Y]*pid_gains_d[i][3];
+		output[i] += state_error[Roll]*pid_gains_d[i][0] + state_error[Pitch]*pid_gains_d[i][1] + state_error[Pitch]*pid_gains_d[i][2] + state_error[Y]*pid_gains_d[i][3];
 
 	// output to motors
 	motors_set(output);
@@ -62,7 +63,7 @@ void responseUpdate(struct task_t *task)
 	stateCopy(state_error, state_error_last);
 }
 
-void responseStart(void)
+void response_start(void)
 {
 	int i = 0;
 
@@ -73,12 +74,12 @@ void responseStart(void)
 	}
 
 	// Setup response update task
-	_response_task.handler = responseUpdate;
+	_response_task.handler = response_update;
 	_response_task.msecs = CFG_RESPONSE_UPDATE_MSECS;
 	tasks_add_task(&_response_task);
 }
 
-struct response_controller_t *responseControllerGet(void)
+struct response_controller_t *response_controller_get(void)
 {
 	return &_rc;
 }

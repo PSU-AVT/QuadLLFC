@@ -39,8 +39,8 @@ struct response_controller_t {
 	float state_dt_setpoint[AXIS_CNT]; // Desired state dt
 };
 
-void responseStart(void);
-struct response_controller_t *responseControllerGet(void);
+void response_start(void);
+struct response_controller_t *response_controller_get(void);
 
 void response_off(void);
 void response_on(void);

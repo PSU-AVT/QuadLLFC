@@ -49,16 +49,13 @@
 
 void handle_control_input(char ch)
 {
-	int i;
 	switch(ch)
 	{
 	case ']': // Increase thrust
-		for(i=0;i<4;i++)
-			motor_set(i, motor_get_val(i)+5);
+		response_controller_get()->state_setpoint[Y] += 1;
 		break;
 	case '[': // Decrease thrust
-		for(i=0;i<4;i++)
-			motor_set(i, motor_get_val(i)-5);
+		response_controller_get()->state_setpoint[Y] -= 1;
 		break;
 	case 'q': // Turn off
 		motors_off();
@@ -92,7 +89,7 @@ int main(void)
 	//stateStart();
 
 	// Start the control system
-	//responseStart();
+	response_start();
 
 	while(1)
 	{
