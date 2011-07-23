@@ -34,7 +34,7 @@
 
 #include "state.h"
 
-void rotation_matrix_get_eulers(float **r, float *eulers);
+void rotation_matrix_get_eulers(float r[][3], float eulers[3]);
 
 void rotation_matrix_update(struct state_controller_t *sc);
 

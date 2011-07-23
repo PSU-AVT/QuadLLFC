@@ -44,7 +44,7 @@
 
 //0.06956522 for degrees
 //0.00121414 for radians
-#define LSB_CORRECTION 0.00121414
+#define LSB_CORRECTION 823.626831
 
 #define itg3200_ADDRESS (0xD2) // device ID
 #define itg3200_READBIT (0x01)

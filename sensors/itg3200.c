@@ -169,9 +169,9 @@ itg3200Error_e itg3200GetData (GyroData *data)
         lets use radians, not degrees
         and multiply, not divide
         */
-        data->X = data->raw_X * LSB_CORRECTION;
-        data->Y = data->raw_Y * LSB_CORRECTION;
-        data->Z = data->raw_Z * LSB_CORRECTION;
+        data->X = data->raw_X / LSB_CORRECTION;
+        data->Y = data->raw_Y / LSB_CORRECTION;
+        data->Z = data->raw_Z / LSB_CORRECTION;
 
   return error;
 }

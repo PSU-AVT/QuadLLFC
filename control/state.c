@@ -42,10 +42,6 @@ static struct state_controller_t _stateController;
 static struct task_t gyro_update_task,
                      state_debug_task;
 
-static float gyro_old_vals[2][3];
-static float gyro_int_dt;
-static int gyro_int_repetition;
-
 void state_debug(struct task_t *task)
 {
 	char buff[512];
@@ -56,7 +52,7 @@ void state_debug(struct task_t *task)
 			      "Inert State:      %f\t%f\t%f\r\n\r\n",
 			sc->body_state_delta[AxisRoll], sc->body_state_delta[AxisPitch], sc->body_state_delta[AxisYaw],
 			sc->body_state_dt[AxisRoll], sc->body_state_dt[AxisPitch], sc->body_state_dt[AxisYaw],
-			sc->inertial_state[AxisRoll], sc->inertial_state[AxisPitch], sc->body_state_dt[AxisYaw]);
+			sc->inertial_state[AxisRoll], sc->inertial_state[AxisPitch], sc->inertial_state[AxisYaw]);
 	uartSend(buff, strlen(buff));
 }
 
@@ -77,27 +73,17 @@ void stateGyroUpdate(struct task_t *task)
 	_stateController.body_state_dt[AxisPitch] = _stateController.body_state_dt[AxisPitch] * (1 - CFG_GYRO_FILTER_ALPHA) + ((_stateController.gyros.Y + CFG_GYRO_Y_BIAS) * CFG_GYRO_FILTER_ALPHA);
 	_stateController.body_state_dt[AxisYaw] = _stateController.body_state_dt[AxisYaw] * (1 - CFG_GYRO_FILTER_ALPHA_YAW) + ((_stateController.gyros.Z + CFG_GYRO_Z_BIAS) * CFG_GYRO_FILTER_ALPHA_YAW);
 
-	// Integration for attenuation state
-	// Uses simpsons rule (requres 3 samples)
-	if(gyro_int_repetition == 2) {
-		_stateController.body_state_delta[AxisRoll] = SIMPSONS(gyro_old_vals[0][0], gyro_old_vals[1][0], _stateController.body_state_dt[AxisRoll], gyro_int_dt);
-		_stateController.body_state_delta[AxisPitch] = SIMPSONS(gyro_old_vals[0][1], gyro_old_vals[1][1], _stateController.body_state_dt[AxisPitch], gyro_int_dt);
-		_stateController.body_state_delta[AxisYaw] = SIMPSONS(gyro_old_vals[0][2], gyro_old_vals[1][2], _stateController.body_state_dt[AxisYaw], gyro_int_dt);
+	float dt = task_get_dt(task);
 
-		// Update the rotation matrix
-		rotation_matrix_update(&_stateController);
+	_stateController.body_state_delta[AxisRoll] = _stateController.body_state_dt[AxisRoll] * dt;
+	_stateController.body_state_delta[AxisPitch] = _stateController.body_state_dt[AxisPitch] * dt;
+	_stateController.body_state_delta[AxisYaw] = _stateController.body_state_dt[AxisYaw] * dt;
 
-		gyro_int_repetition = 0;
-		gyro_int_dt = 0;
-	} else {
-		// Load state_dt vals into buffer for simpsons rule
-		gyro_old_vals[gyro_int_repetition][0] = _stateController.body_state_dt[AxisRoll];
-		gyro_old_vals[gyro_int_repetition][1] = _stateController.body_state_dt[AxisPitch];
-		gyro_old_vals[gyro_int_repetition][2] = _stateController.body_state_dt[AxisYaw];
+	// Update the rotation matrix
+	rotation_matrix_update(&_stateController);
 
-		gyro_int_repetition++;
-		gyro_int_dt += task_get_dt(task);
-	}
+	// Store eulers as inertial state
+	rotation_matrix_get_eulers(_stateController.r_b_to_i, _stateController.inertial_state);
 }
 
 #undef SIMPSONS
@@ -111,6 +97,19 @@ void stateInit(void)
 {
 	// Initialize gyros
 	itg3200Init();
+
+	int i, j;
+	for(i = 0;i < 3;i++) {
+		_stateController.body_state_delta[i] = 0;
+		_stateController.body_state_dt[i] = 0;
+		_stateController.inertial_state[i] = 0;
+		for(j = 0;j < 3;j++) {
+			if(j == i)
+				_stateController.r_b_to_i[i][j] = 1;
+			else
+				_stateController.r_b_to_i[i][j] = 0;
+		}
+	}
 }
 
 void stateStart(void)

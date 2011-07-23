@@ -36,10 +36,10 @@
 #include "../utils/matrix.h"
 
 // Get euler angles (X, Y', Z'') from R
-void rotation_matrix_get_eulers(float **r, float *eulers) {
-	eulers[0] = atan2(r[2][0], r[2][1]);
-	eulers[1] = acos(r[2][2]);
-	eulers[2] = -atan2(r[0][2], r[1][2]);
+void rotation_matrix_get_eulers(float r[][3], float eulers[3]) {
+	eulers[0] = (float)atan2((double)r[0][2], (double)r[1][2]);
+	eulers[1] = (float)acos((double)r[2][2]);
+	eulers[2] = (float)-atan2((double)r[2][0], (double)r[2][1]);
 }
 
 void rotation_matrix_update(struct state_controller_t *sc) {
@@ -63,5 +63,8 @@ void rotation_matrix_update(struct state_controller_t *sc) {
 	r_dth_dt[2][1] = sc->body_state_delta[AxisRoll];
 	r_dth_dt[2][2] = 1;
 
-	matrix_multiply_3x3(sc->r_b_to_i, r_dth_dt, sc->r_b_to_i);
+	float tmp_matrix[3][3];
+
+	matrix_multiply_3x3(sc->r_b_to_i, r_dth_dt, tmp_matrix);
+	matrix_copy_3x3(tmp_matrix, sc->r_b_to_i);
 }
