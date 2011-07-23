@@ -48,12 +48,15 @@ static int gyro_int_repetition;
 
 void state_debug(struct task_t *task)
 {
-	char buff[256];
+	char buff[512];
 	struct state_controller_t *sc;
 	sc = stateControllerGet();
-	sprintf(buff, "State:  \t%f\t%f\t%f\r\ndState/dt\t%f\t%f\t%f\r\n\r\n",
+	sprintf(buff, "Body State:   \t%f\t%f\t%f\r\n"
+			      "Body State dt \t%f\t%f\t%f\r\n"
+			      "Inert State:  \t%f\t%f\t%f\r\n\r\n",
 			sc->body_state[AxisRoll], sc->body_state[AxisPitch], sc->body_state[AxisYaw],
-			sc->body_state_dt[AxisRoll], sc->body_state_dt[AxisPitch], sc->body_state_dt[AxisYaw]);
+			sc->body_state_dt[AxisRoll], sc->body_state_dt[AxisPitch], sc->body_state_dt[AxisYaw],
+			sc->inertial_state[AxisRoll], sc->inertial_state[AxisPitch], sc->body_state_dt[AxisYaw]);
 	uartSend(buff, strlen(buff));
 }
 
@@ -83,9 +86,8 @@ void stateGyroUpdate(struct task_t *task)
 		_stateController.body_state[AxisPitch] += SIMPSONS(gyro_old_vals[0][1], gyro_old_vals[1][1], _stateController.body_state_dt[AxisPitch], gyro_int_dt);
 		_stateController.body_state[AxisYaw] += SIMPSONS(gyro_old_vals[0][2], gyro_old_vals[1][2], _stateController.body_state_dt[AxisYaw], gyro_int_dt);
 
-		// Rotate from the Body frame to the Inertial (Earth) frame
-		// This loads inertial_state
-		translateB2I(&_stateController);
+		// Update the rotation matrix
+		rotation_matrix_update(&_stateController);
 
 		gyro_int_repetition = 0;
 		gyro_int_dt = 0;
@@ -121,7 +123,7 @@ void stateStart(void)
 	state_debug_task.msecs = CFG_STATE_OUTPUT_MSECS;
 
 	tasks_add_task(&gyro_update_task);
-	//tasks_add_task(&state_debug_task);
+	tasks_add_task(&state_debug_task);
 }
 
 void stateSubtract(float *a, float *b, float *dest)

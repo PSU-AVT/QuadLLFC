@@ -53,6 +53,7 @@ struct state_controller_t
     float body_state_dt[AXIS_CNT];
     float inertial_state[AXIS_CNT];
     float inertial_state_dt[AXIS_CNT];
+    float r_b_to_i[3][3];
 };
 
 struct state_controller_t *stateControllerGet(void);

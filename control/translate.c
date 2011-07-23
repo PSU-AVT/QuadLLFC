@@ -37,26 +37,26 @@
 //The Euler Kinematics Equations for transforming from the Body Fixed Frame
 //into the Intertial Fixed Frame
 
-void translateB2I(struct state_controller_t *state_controller) {
-    // Multiply the state vector by a super special rotation matrix:
-    // http://www.wolframalpha.com/input/?i={{1%2C0%2C0}%2C{0%2Ccos%28x%29%2Csin%28x%29}%2C{0%2C-sin%28x%29%2Ccos%28x%29}}*{{cos%28y%29%2C0%2C-sin%28y%29}%2C{0%2C1%2C0}%2C{sin%28y%29%2C0%2Ccos%28y%29}}*{{cos%28z%29%2Csin%28z%29%2C0}%2C{-sin%28z%29%2Ccos%28z%29%2C0}%2C{0%2C0%2C1}}
-    //    (cos(y) cos(z)                     | cos(y) sin(z)                      | -sin(y)
-    //    cos(z) sin(x) sin(y)-cos(x) sin(z) | cos(x) cos(z)+sin(x) sin(y) sin(z) | cos(y) sin(x)
-    //    cos(x) cos(z) sin(y)+sin(x) sin(z) | cos(x) sin(y) sin(z)-cos(z) sin(x) | cos(x) cos(y))
-    
-    // Multiplying the above matrix by [x
-    //                                  y
-    //                                  z]
-    // results in
-    //    [ x(cos(y) cos(z)) + y(cos(y) sin(z)) + z(-sin(y))
-    //      x(cos(z) sin(x) sin(y)-cos(x) sin(z)) + y(cos(x) cos(z)+sin(x) sin(y) sin(z)) + z(cos(y) sin(x))
-    //      x(cos(x) cos(z) sin(y)+sin(x) sin(z)) + y(cos(x) sin(y) sin(z)-cos(z) sin(x)) + z(cos(x) cos(y))]
+void rotation_matrix_update(struct state_controller_t *sc) {
+	// Rotation matrix R(t + dt) = R(t)*(R(t) crossprod (d_theta / dt))
+	// This comes out to be:
+	// R(t + dt) = R(t) * [  1,             -body_yaw_dt,   body_pitch_dt ;
+	//                       body_yaw_dt,    1,            -body_roll_dt  ;
+	//                      -body_pitch_dt,  body_roll_dt,  1             ]
 
-    double R = (double)(state_controller->body_state[AxisRoll]);
-    double P = (double)(state_controller->body_state[AxisPitch]);
-    double Y = (double)(state_controller->body_state[AxisYaw]);
+	float r_dth_dt[3][3];
+	// Row 1
+	r_dth_dt[0][0] = 1;
+	r_dth_dt[0][1] = -sc->body_state_dt[AxisYaw];
+	r_dth_dt[0][2] = sc->body_state_dt[AxisPitch];
+	// Row 2
+	r_dth_dt[1][0] = sc->body_state_dt[AxisYaw];
+	r_dth_dt[1][1] = 1;
+	r_dth_dt[1][2] = -sc->body_state_dt[AxisRoll];
+	// Row 3
+	r_dth_dt[2][0] = -sc->body_state_dt[AxisPitch];
+	r_dth_dt[2][1] = sc->body_state_dt[AxisRoll];
+	r_dth_dt[2][2] = 1;
 
-    state_controller->inertial_state[AxisRoll] = (float)(R * cos(P) * cos(Y) + P * cos(P) * sin(Y) + (Y * (0 - sin(P))));
-    state_controller->inertial_state[AxisPitch] = (float)(R * cos(Y) * sin(R) * (sin(P) - cos(R)) * sin(Y) + P * cos(R) * (cos(Y) + sin(R)) * sin(P) * sin(Y) + Y * cos(P) * sin(R));
-    state_controller->inertial_state[AxisYaw] = (float)(R * cos(R) * cos(Y) * (sin(P)+cos(R)) * sin(Y) + P * cos(R) * sin(P) * (sin(Y)-cos(Y)) * sin(R) + Y * cos(R) * cos(P));
+	matrix_multiply_3x3(sc->r_b_to_i, r_dth_dt, sc->r_b_to_i);
 }

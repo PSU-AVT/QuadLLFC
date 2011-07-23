@@ -34,6 +34,6 @@
 
 #include "state.h"
 
-void translateB2I(struct state_controller_t *state_controller);
+void rotation_matrix_update(struct state_controller_t *state_controller);
 
 #endif //TRANSLATE_H
