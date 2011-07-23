@@ -33,7 +33,7 @@
 #include "../config.h"
 #include "../control/motor.h"
 #include "../systick/systick.h"
-#include "../adc/adc.h"
+#include "../utils/matrix.h"
 #include "response.h"
 #include "translate.h"
 
@@ -51,10 +51,10 @@ void state_debug(struct task_t *task)
 	char buff[512];
 	struct state_controller_t *sc;
 	sc = stateControllerGet();
-	sprintf(buff, "Body State:   \t%f\t%f\t%f\r\n"
-			      "Body State dt \t%f\t%f\t%f\r\n"
-			      "Inert State:  \t%f\t%f\t%f\r\n\r\n",
-			sc->body_state[AxisRoll], sc->body_state[AxisPitch], sc->body_state[AxisYaw],
+	sprintf(buff, "Body State delta: %f\t%f\t%f\r\n"
+			      "Body State dt     %f\t%f\t%f\r\n"
+			      "Inert State:      %f\t%f\t%f\r\n\r\n",
+			sc->body_state_delta[AxisRoll], sc->body_state_delta[AxisPitch], sc->body_state_delta[AxisYaw],
 			sc->body_state_dt[AxisRoll], sc->body_state_dt[AxisPitch], sc->body_state_dt[AxisYaw],
 			sc->inertial_state[AxisRoll], sc->inertial_state[AxisPitch], sc->body_state_dt[AxisYaw]);
 	uartSend(buff, strlen(buff));
@@ -68,8 +68,6 @@ void state_debug(struct task_t *task)
 // We then add this to our inertial_state to obtain new inertial state
 void stateGyroUpdate(struct task_t *task)
 {
-	char buff[255];
-
 	// update gyro data
 	itg3200GetData(&_stateController.gyros);
 
@@ -82,9 +80,9 @@ void stateGyroUpdate(struct task_t *task)
 	// Integration for attenuation state
 	// Uses simpsons rule (requres 3 samples)
 	if(gyro_int_repetition == 2) {
-		_stateController.body_state[AxisRoll] += SIMPSONS(gyro_old_vals[0][0], gyro_old_vals[1][0], _stateController.body_state_dt[AxisRoll], gyro_int_dt);
-		_stateController.body_state[AxisPitch] += SIMPSONS(gyro_old_vals[0][1], gyro_old_vals[1][1], _stateController.body_state_dt[AxisPitch], gyro_int_dt);
-		_stateController.body_state[AxisYaw] += SIMPSONS(gyro_old_vals[0][2], gyro_old_vals[1][2], _stateController.body_state_dt[AxisYaw], gyro_int_dt);
+		_stateController.body_state_delta[AxisRoll] = SIMPSONS(gyro_old_vals[0][0], gyro_old_vals[1][0], _stateController.body_state_dt[AxisRoll], gyro_int_dt);
+		_stateController.body_state_delta[AxisPitch] = SIMPSONS(gyro_old_vals[0][1], gyro_old_vals[1][1], _stateController.body_state_dt[AxisPitch], gyro_int_dt);
+		_stateController.body_state_delta[AxisYaw] = SIMPSONS(gyro_old_vals[0][2], gyro_old_vals[1][2], _stateController.body_state_dt[AxisYaw], gyro_int_dt);
 
 		// Update the rotation matrix
 		rotation_matrix_update(&_stateController);

@@ -47,15 +47,15 @@ void rotation_matrix_update(struct state_controller_t *sc) {
 	float r_dth_dt[3][3];
 	// Row 1
 	r_dth_dt[0][0] = 1;
-	r_dth_dt[0][1] = -sc->body_state_dt[AxisYaw];
-	r_dth_dt[0][2] = sc->body_state_dt[AxisPitch];
+	r_dth_dt[0][1] = -sc->body_state_delta[AxisYaw];
+	r_dth_dt[0][2] = sc->body_state_delta[AxisPitch];
 	// Row 2
-	r_dth_dt[1][0] = sc->body_state_dt[AxisYaw];
+	r_dth_dt[1][0] = sc->body_state_delta[AxisYaw];
 	r_dth_dt[1][1] = 1;
-	r_dth_dt[1][2] = -sc->body_state_dt[AxisRoll];
+	r_dth_dt[1][2] = -sc->body_state_delta[AxisRoll];
 	// Row 3
-	r_dth_dt[2][0] = -sc->body_state_dt[AxisPitch];
-	r_dth_dt[2][1] = sc->body_state_dt[AxisRoll];
+	r_dth_dt[2][0] = -sc->body_state_delta[AxisPitch];
+	r_dth_dt[2][1] = sc->body_state_delta[AxisRoll];
 	r_dth_dt[2][2] = 1;
 
 	matrix_multiply_3x3(sc->r_b_to_i, r_dth_dt, sc->r_b_to_i);

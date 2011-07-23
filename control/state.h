@@ -49,7 +49,7 @@ enum axis_t {
 struct state_controller_t
 {
 	GyroData gyros;
-    float body_state[AXIS_CNT];
+    float body_state_delta[AXIS_CNT];
     float body_state_dt[AXIS_CNT];
     float inertial_state[AXIS_CNT];
     float inertial_state_dt[AXIS_CNT];
