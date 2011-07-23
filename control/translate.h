@@ -34,6 +34,8 @@
 
 #include "state.h"
 
-void rotation_matrix_update(struct state_controller_t *state_controller);
+void rotation_matrix_get_eulers(float **r, float *eulers);
+
+void rotation_matrix_update(struct state_controller_t *sc);
 
 #endif //TRANSLATE_H

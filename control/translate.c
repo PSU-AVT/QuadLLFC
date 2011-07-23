@@ -29,13 +29,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <math.h> //sin(), cos()
+#include <math.h>
 
 #include "translate.h"
 #include "state.h"
+#include "../utils/matrix.h"
 
-//The Euler Kinematics Equations for transforming from the Body Fixed Frame
-//into the Intertial Fixed Frame
+// Get euler angles (X, Y', Z'') from R
+void rotation_matrix_get_eulers(float **r, float *eulers) {
+	eulers[0] = atan2(r[2][0], r[2][1]);
+	eulers[1] = acos(r[2][2]);
+	eulers[2] = -atan2(r[0][2], r[1][2]);
+}
 
 void rotation_matrix_update(struct state_controller_t *sc) {
 	// Rotation matrix R(t + dt) = R(t)*(R(t) crossprod (d_theta / dt))
