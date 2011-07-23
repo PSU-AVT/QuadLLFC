@@ -112,7 +112,7 @@ itg3200Error_e itg3200Init(void)
     return itg3200_ERROR_I2CINIT;    /* Fatal error */
   }
 
-  response_error = itg3200Write8 (itg3200_REGISTER_CONFIG_DLPF, 0x1A);
+  response_error = itg3200Write8 (itg3200_REGISTER_CONFIG_DLPF, 0x19);
 
   if (response_error == itg3200_ERROR_OK)
         {

@@ -76,6 +76,9 @@ int main(void)
 	systickInit(1);
 	uartInit(38400);
 
+	uartSend("\r\n\r\n", 4);
+	uartSend("Leeeeroooooooy....\r\n\r\n", 22);
+
 	// Initialize motor pins
 	motorsInit();
 

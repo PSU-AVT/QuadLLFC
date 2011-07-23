@@ -83,11 +83,13 @@ void escsArm(void)
 	pwm16StartTimers(PWM16_TIMER0);
 	pwm16StartTimers(PWM16_TIMER1);
 
+	uartSend("Arming ESCs.", 12);
 	for(i = 0;i < ESC_ARM_SECS;i++)
 	{
 		systickDelay(1000);
 		uartSendByte('.');
 	}
+	uartSend("done\r\n", 6);
 }
 
 void escSetDutyCycle(struct esc_t *esc, uint16_t cycle)
