@@ -69,9 +69,9 @@ void stateGyroUpdate(struct task_t *task)
 
 	// Low pass filter on gyro vals into state_dt
 	// state_dt_(n) = state_dt(n-1) * (1 - alpha) + gyro_data * alpha
-	_stateController.body_state_dt[AxisRoll] = _stateController. body_state_dt[AxisRoll] * (1 - CFG_GYRO_FILTER_ALPHA) + ((_stateController.gyros.X + CFG_GYRO_X_BIAS) * CFG_GYRO_FILTER_ALPHA);
-	_stateController.body_state_dt[AxisPitch] = _stateController.body_state_dt[AxisPitch] * (1 - CFG_GYRO_FILTER_ALPHA) + ((_stateController.gyros.Y + CFG_GYRO_Y_BIAS) * CFG_GYRO_FILTER_ALPHA);
-	_stateController.body_state_dt[AxisYaw] = _stateController.body_state_dt[AxisYaw] * (1 - CFG_GYRO_FILTER_ALPHA_YAW) + ((_stateController.gyros.Z + CFG_GYRO_Z_BIAS) * CFG_GYRO_FILTER_ALPHA_YAW);
+	_stateController.body_state_dt[AxisRoll] = _stateController.gyros.X;
+	_stateController.body_state_dt[AxisPitch] = _stateController.gyros.Y;
+	_stateController.body_state_dt[AxisYaw] = _stateController.gyros.Z;
 
 	float dt = task_get_dt(task);
 
@@ -121,6 +121,22 @@ void stateStart(void)
 
 	tasks_add_task(&gyro_update_task);
 	tasks_add_task(&state_debug_task);
+
+	uartSend("\r\nDetermining gyro bias...", 26);
+	float x=0, y=0, z=0;
+	int i;
+	for(i = 0; i < CFG_GYRO_BIAS_N_SAMPLES;i++) {
+		itg3200GetData(&_stateController.gyros);
+		x += _stateController.gyros.X;
+		y += _stateController.gyros.Y;
+		z += _stateController.gyros.Z;
+		systickDelay(5);
+	}
+	_stateController.gyros.x_bias = -(x / CFG_GYRO_BIAS_N_SAMPLES);
+	_stateController.gyros.y_bias = -(y / CFG_GYRO_BIAS_N_SAMPLES);
+	_stateController.gyros.z_bias = -(z / CFG_GYRO_BIAS_N_SAMPLES);
+
+	uartSend("done\r\n", 6);
 }
 
 void stateSubtract(float *a, float *b, float *dest)

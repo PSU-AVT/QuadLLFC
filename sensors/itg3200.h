@@ -49,6 +49,7 @@
 #define itg3200_ADDRESS (0xD2) // device ID
 #define itg3200_READBIT (0x01)
 
+#define itg3200_REGISTER_CONFIG_SMPLDIV (0x15) // Sample rate divider - 1
 #define itg3200_REGISTER_CONFIG_DLPF (0x16) //Config byte required - must set bits 4 and 5 (i.e. 0x18)
 #define itg3200_REGISTER_CONFIG_PMU  (0x3E) //Config byte required - Power Mgmt.  Switch oscillator to gyro for stability (i.e. 0x01)
 
@@ -90,6 +91,9 @@ typedef struct
         float X;
         float Y;
         float Z;
+        float x_bias;
+        float y_bias;
+        float z_bias;
 }
 GyroData;
 

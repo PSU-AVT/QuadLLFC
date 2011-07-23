@@ -112,10 +112,27 @@ itg3200Error_e itg3200Init(void)
     return itg3200_ERROR_I2CINIT;    /* Fatal error */
   }
 
+  response_error = itg3200Write8 (itg3200_REGISTER_CONFIG_DLPF, 0x1A);
 
-  response_error = itg3200Write8 (itg3200_REGISTER_CONFIG_DLPF, 0x18);
+  if (response_error == itg3200_ERROR_OK)
+        {
+                gyro_init = 1;
+        } else {
+                gyro_init = 0;
+        }
+   return response_error;
 
   response_error = itg3200Write8 (itg3200_REGISTER_CONFIG_PMU, 0x01);
+
+  if (response_error == itg3200_ERROR_OK)
+        {
+                gyro_init = 1;
+        } else {
+                gyro_init = 0;
+        }
+   return response_error;
+
+  response_error = itg3200Write8 (itg3200_REGISTER_CONFIG_SMPLDIV, 0x07);
 
   if (response_error == itg3200_ERROR_OK)
         {
@@ -172,6 +189,10 @@ itg3200Error_e itg3200GetData (GyroData *data)
         data->X = data->raw_X / LSB_CORRECTION;
         data->Y = data->raw_Y / LSB_CORRECTION;
         data->Z = data->raw_Z / LSB_CORRECTION;
+
+        data->X += data->x_bias;
+        data->Y += data->y_bias;
+        data->Z += data->z_bias;
 
   return error;
 }

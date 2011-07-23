@@ -17,15 +17,11 @@
 #define CFG_CTL_K_PREDICT           (10)
 #define CFG_CTL_K_UPDATE            (2)
 
-#define CFG_GYRO_UPDATE_MSECS      (1) // msecs between sensor updates
+#define CFG_GYRO_UPDATE_MSECS      (5) // msecs between sensor updates
 #define CFG_RESPONSE_UPDATE_MSECS  (16) // msecs between responding to state
 #define CFG_STATE_OUTPUT_MSECS     (700)
 
-#define CFG_GYRO_X_BIAS            0.083
-#define CFG_GYRO_Y_BIAS            -.168
-#define CFG_GYRO_Z_BIAS	           0.275
-#define CFG_GYRO_FILTER_ALPHA      .03
-#define CFG_GYRO_FILTER_ALPHA_YAW  .02
+#define CFG_GYRO_BIAS_N_SAMPLES      500
 
 #define CFG_ESC_CNT                  4
 #define CFG_MOTOR_CNT                CFG_ESC_CNT
