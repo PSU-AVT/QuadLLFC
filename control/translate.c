@@ -37,9 +37,9 @@
 
 // Get euler angles (X, Y', Z'') from R
 void rotation_matrix_get_eulers(float r[][3], float eulers[3]) {
-	eulers[0] = (float)atan2((double)r[0][2], (double)r[1][2]);
-	eulers[1] = (float)acos((double)r[2][2]);
-	eulers[2] = (float)-atan2((double)r[2][0], (double)r[2][1]);
+	eulers[0] = (float)atan2((double)r[2][1], (double)r[2][2]);
+	eulers[1] = (float)asin((double)r[2][0]);
+	eulers[2] = (float)atan2((double)r[0][1], (double)r[0][0]);
 }
 
 void rotation_matrix_update(struct state_controller_t *sc) {
