@@ -155,7 +155,7 @@ int main(void)
 	stateStart();
 
 	// Set initial gains
-	response_set_p_gain(AxisY, 0.2);
+	response_set_p_gain(AxisY, 0.05);
 	response_set_p_gain(AxisRoll, 0.3);
 	response_set_p_gain(AxisPitch, 0.3);
 	response_set_d_gain(AxisRoll, .5);

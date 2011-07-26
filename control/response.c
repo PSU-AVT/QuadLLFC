@@ -130,8 +130,6 @@ void response_start(void)
 	_response_task.handler = response_update;
 	_response_task.msecs = CFG_RESPONSE_UPDATE_MSECS;
 	tasks_add_task(&_response_task);
-
-	response_off();
 }
 
 struct response_controller_t *response_controller_get(void)
