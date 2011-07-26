@@ -9,23 +9,8 @@ static struct task_t _response_task;
 
 static int _response_is_on;
 
-static float pid_gains_matrix[2][4][4];
-/*
-		{ 0,        PID_T_P, -PID_Z_P,  PID_Y_P },
-		{ PID_T_P, 0,         PID_Z_P, PID_Y_P },
-		{ 0,        -PID_T_P,-PID_Z_P,  PID_Y_P },
-		{ -PID_T_P,  0,       PID_Z_P, PID_Y_P }
-*/
-
-static float pid_gains_d[4][4];
-/*
-		{ 0,        -PID_T_D, PID_Z_D,  PID_Y_D },
-		{ -PID_T_D, 0,        -PID_Z_D, PID_Y_D },
-		{ 0,        PID_T_D,  PID_Z_D,  PID_Y_D },
-		{ PID_T_D,  0,        -PID_Z_D, PID_Y_D }
-*/
-
-static float pid_gains[2][AXIS_CNT];
+static float pid_gains_matrix[3][4][4];
+static float pid_gains[3][AXIS_CNT];
 
 void response_set_gains(int p_d) {
 	pid_gains_matrix[p_d][0][0] = 0;
@@ -59,12 +44,21 @@ void response_set_d_gain(int axis, float value) {
 	response_set_gains(1);
 }
 
+void response_set_i_gain(int axis, float value) {
+	pid_gains[2][axis] = value;
+	response_set_gains(2);
+}
+
 float response_get_p_gain(int axis) {
 	return pid_gains[0][axis];
 }
 
 float response_get_d_gain(int axis) {
 	return pid_gains[1][axis];
+}
+
+float response_get_i_gain(int axis) {
+	return pid_gains[2][axis];
 }
 
 static float response_state_last[AXIS_CNT];
@@ -81,15 +75,20 @@ void response_update(struct task_t *task)
 	sc = stateControllerGet();
 
 	// Figure out error
-	float state_error[2][AXIS_CNT];
-	float state_diff[AXIS_CNT];
+	float state_error[3][AXIS_CNT]; // P, D, I state errors
+	float state_diff[AXIS_CNT]; // Used for D
 	// P error
 	stateSubtract(_rc.state_setpoint, sc->inertial_state, state_error[0]);
 	// D error
 	stateSubtract(sc->inertial_state, response_state_last, state_diff);
-	// Convert to rad / s
+	// Convert diff to rad / s
 	stateScale(state_diff, (1000 / CFG_RESPONSE_UPDATE_MSECS));
 	stateSubtract(_rc.state_dt_setpoint, state_diff, state_error[1]);
+	// I error
+	stateCopy(sc->inertial_state, state_error[2]);
+	stateScale(state_error[2], (1000 / CFG_RESPONSE_UPDATE_MSECS));
+	stateAdd(sc->inertial_stat_accum, state_error[2], sc->inertial_stat_accum);
+	stateCopy(sc->inertial_stat_accum, state_error[2]);
 
 	// Store state in last_state
 	stateCopy(sc->inertial_state, response_state_last);
@@ -102,7 +101,7 @@ void response_update(struct task_t *task)
 
 	// Multiply gains for error P and D
 	int i, j;
-	for(i = 0;i < 2;i++) {
+	for(i = 0;i < 3;i++) {
 		for(j = 0;j < 4;j++) {
 			output[j] += state_error[i][AxisRoll]*pid_gains_matrix[i][j][0] + state_error[i][AxisPitch]*pid_gains_matrix[i][j][1] +
 			             state_error[i][AxisPitch]*pid_gains_matrix[i][j][2] + state_error[i][AxisY]*pid_gains_matrix[i][j][3];

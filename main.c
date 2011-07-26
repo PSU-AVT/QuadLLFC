@@ -47,6 +47,13 @@
 
 #define DEBUG 1
 
+void ctl_increment_i_gain(int axis, float value) {
+	char buff[256];
+	response_set_d_gain(axis, response_get_i_gain(axis)+value);
+	sprintf(buff, "Gain (%d) i value now at %f\r\n", axis, response_get_i_gain(axis)+value);
+	uartSend(buff, strlen(buff));
+}
+
 void ctl_increment_d_gain(int axis, float value) {
 	char buff[256];
 	response_set_d_gain(axis, response_get_d_gain(axis)+value);
@@ -107,6 +114,18 @@ void handle_control_input(char ch)
 		break;
 	case 'f':
 		ctl_increment_d_gain(AxisPitch, -.05);
+		break;
+	case 'z':
+		ctl_increment_i_gain(AxisRoll, .05);
+		break;
+	case 'x':
+		ctl_increment_i_gain(AxisRoll, -.05);
+		break;
+	case 'c':
+		ctl_increment_i_gain(AxisPitch, .05);
+		break;
+	case 'v':
+		ctl_increment_i_gain(AxisPitch, -.05);
 		break;
 	}
 	uartSend("Got ", 4);
