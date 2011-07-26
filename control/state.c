@@ -159,3 +159,9 @@ void stateAdd(float *a, float *b, float *dest)
 	for(i = 0;i < AXIS_CNT;++i)
 		dest[i] = a[i] + b[i];
 }
+
+void stateScale(float *a, float b) {
+	int i;
+	for(i = 0;i < AXIS_CNT;++i)
+		a[i] *= b;
+}

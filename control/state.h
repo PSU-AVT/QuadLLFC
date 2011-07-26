@@ -53,6 +53,7 @@ struct state_controller_t
     float body_state_dt[AXIS_CNT];
     float inertial_state[AXIS_CNT];
     float inertial_state_dt[AXIS_CNT];
+    float inertial_stat_accum[AXIS_CNT];
     float r_b_to_i[3][3];
 };
 
@@ -70,6 +71,8 @@ void stateSubtract(float *a, float *b, float *dest);
 void stateCopy(const float *src, float *dst);
 
 void stateAdd(float *a, float *b, float *dest);
+
+void stateScale(float *a, float b);
 
 #endif
 

@@ -9,13 +9,6 @@ static struct task_t _response_task;
 
 static int _response_is_on;
 
-#define PID_T_P 4 // Torque (roll, pitch) P gain
-#define PID_Z_P 0 // Torque (yaw) P gain
-#define PID_T_D 0 // Torque (roll, pitch) D gain
-#define PID_Z_D 0 // Torque (yaw) D gain
-#define PID_Y_P .2 // Vertical P gain
-#define PID_Y_D 0 // Vertical D gain
-
 static float pid_gains_matrix[2][4][4];
 /*
 		{ 0,        PID_T_P, -PID_Z_P,  PID_Y_P },
@@ -93,7 +86,9 @@ void response_update(struct task_t *task)
 	// P error
 	stateSubtract(_rc.state_setpoint, sc->inertial_state, state_error[0]);
 	// D error
-	stateSubtract(response_state_last, sc->inertial_state, state_diff);
+	stateSubtract(sc->inertial_state, response_state_last, state_diff);
+	// Convert to rad / s
+	stateScale(state_diff, (1000 / CFG_RESPONSE_UPDATE_MSECS));
 	stateSubtract(_rc.state_dt_setpoint, state_diff, state_error[1]);
 
 	// Store state in last_state

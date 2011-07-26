@@ -97,16 +97,16 @@ void handle_control_input(char ch)
 		ctl_increment_p_gain(AxisPitch, -.05);
 		break;
 	case 'e':
-		ctl_increment_d_gain(AxisRoll, .1);
+		ctl_increment_d_gain(AxisRoll, .05);
 		break;
 	case 'd':
-		ctl_increment_d_gain(AxisRoll, -.1);
+		ctl_increment_d_gain(AxisRoll, -.05);
 		break;
 	case 'r':
-		ctl_increment_d_gain(AxisPitch, .1);
+		ctl_increment_d_gain(AxisPitch, .05);
 		break;
 	case 'f':
-		ctl_increment_d_gain(AxisPitch, -.1);
+		ctl_increment_d_gain(AxisPitch, -.05);
 		break;
 	}
 	uartSend("Got ", 4);
@@ -137,8 +137,10 @@ int main(void)
 
 	// Set initial gains
 	response_set_p_gain(AxisY, 0.2);
-	//response_set_d_gain(AxisRoll, .001);
-	//response_set_d_gain(AxisPitch, .001);
+	response_set_p_gain(AxisRoll, 0.3);
+	response_set_p_gain(AxisPitch, 0.3);
+	response_set_d_gain(AxisRoll, .5);
+	response_set_d_gain(AxisPitch, .5);
 
 	// Start the control system
 	response_start();
