@@ -55,12 +55,12 @@ void motorsInit(void)
 		_motor_controller.motors[i] = 0;
 
 	ESC_SETUP(esc_controller->escs[0],
-	          ESC_0_PWM_PIN,
-	          ESC_0_PWM_TIMER,
-	          CFG_MOTOR_DEFAULT_DUTY_CYCLE)
-	ESC_SETUP(esc_controller->escs[1],
 	          ESC_1_PWM_PIN,
 	          ESC_1_PWM_TIMER,
+	          CFG_MOTOR_DEFAULT_DUTY_CYCLE)
+	ESC_SETUP(esc_controller->escs[1],
+	          ESC_0_PWM_PIN,
+	          ESC_0_PWM_TIMER,
 	          CFG_MOTOR_DEFAULT_DUTY_CYCLE)
 	ESC_SETUP(esc_controller->escs[2],
 	          ESC_2_PWM_PIN,

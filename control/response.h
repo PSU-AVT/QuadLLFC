@@ -45,4 +45,9 @@ struct response_controller_t *response_controller_get(void);
 void response_off(void);
 void response_on(void);
 
+void response_set_p_gain(int axis, float value);
+void response_set_d_gain(int axis, float value);
+float response_get_p_gain(int axis);
+float response_get_d_gain(int axis);
+
 #endif

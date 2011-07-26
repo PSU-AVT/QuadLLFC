@@ -47,6 +47,20 @@
 
 #define DEBUG 1
 
+void ctl_increment_d_gain(int axis, float value) {
+	char buff[256];
+	response_set_d_gain(axis, response_get_d_gain(axis)+value);
+	sprintf(buff, "Gain (%d) d value now at %f\r\n", axis, response_get_d_gain(axis)+value);
+	uartSend(buff, strlen(buff));
+}
+
+void ctl_increment_p_gain(int axis, float value) {
+	char buff[256];
+	response_set_p_gain(axis, response_get_p_gain(axis)+value);
+	sprintf(buff, "Gain (%d) p value now at %f\r\n", axis, response_get_p_gain(axis)+value);
+	uartSend(buff, strlen(buff));
+}
+
 void handle_control_input(char ch)
 {
 	switch(ch)
@@ -63,6 +77,36 @@ void handle_control_input(char ch)
 		break;
 	case 's': // Turn on
 		response_on();
+		break;
+	case 'y':
+		ctl_increment_p_gain(AxisY, .05);
+		break;
+	case 'h':
+		ctl_increment_p_gain(AxisY, -.05);
+		break;
+	case 'u':
+		ctl_increment_p_gain(AxisRoll, .05);
+		break;
+	case 'j':
+		ctl_increment_p_gain(AxisRoll, -.05);
+		break;
+	case 'i':
+		ctl_increment_p_gain(AxisPitch, .05);
+		break;
+	case 'k':
+		ctl_increment_p_gain(AxisPitch, -.05);
+		break;
+	case 'e':
+		ctl_increment_d_gain(AxisRoll, .1);
+		break;
+	case 'd':
+		ctl_increment_d_gain(AxisRoll, -.1);
+		break;
+	case 'r':
+		ctl_increment_d_gain(AxisPitch, .1);
+		break;
+	case 'f':
+		ctl_increment_d_gain(AxisPitch, -.1);
 		break;
 	}
 	uartSend("Got ", 4);
@@ -90,6 +134,11 @@ int main(void)
 
 	// Start state recording
 	stateStart();
+
+	// Set initial gains
+	response_set_p_gain(AxisY, 0.2);
+	//response_set_d_gain(AxisRoll, .001);
+	//response_set_d_gain(AxisPitch, .001);
 
 	// Start the control system
 	response_start();
