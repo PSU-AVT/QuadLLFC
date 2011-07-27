@@ -35,6 +35,27 @@
 #include "state.h"
 #include "../utils/matrix.h"
 
+void rotation_matrix_normalize(float r[][3]) {
+	float error;
+	error = r[0][0]*r[0][1] + r[1][0]*r[1][1] + r[2][0]*r[2][1];
+	error /= 2; // Distribute evenly between X and Y
+
+	// Reduce error in X col
+	r[0][0] -= error * r[0][1];
+	r[1][0] -= error * r[1][1];
+	r[2][0] -= error * r[2][1];
+	// Reduce error in Y col
+	r[0][1] -= error * r[0][0];
+	r[1][1] -= error * r[1][0];
+	r[2][1] -= error * r[2][0];
+
+	// Set Z col to be orthogonal to X and Y
+	// Z = Y cross X
+	r[0][2] = r[1][0]*r[2][1] - r[2][0]*r[1][1];
+	r[1][2] = r[2][0]*r[0][1] - r[0][0]*r[2][1];
+	r[2][2] = r[0][0]*r[1][1] - r[1][0]*r[0][1];
+}
+
 // Get euler angles (X, Y', Z'') from R
 void rotation_matrix_get_eulers(float r[][3], float eulers[3]) {
 	eulers[0] = (float)atan2((double)r[2][1], (double)r[2][2]);
@@ -67,4 +88,6 @@ void rotation_matrix_update(struct state_controller_t *sc) {
 
 	matrix_multiply_3x3(sc->r_b_to_i, r_dth_dt, tmp_matrix);
 	matrix_copy_3x3(tmp_matrix, sc->r_b_to_i);
+
+	rotation_matrix_normalize(sc->r_b_to_i);
 }
