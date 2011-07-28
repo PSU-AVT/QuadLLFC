@@ -47,7 +47,7 @@ void response_on(void);
 
 void response_set_p_gain(int axis, float value);
 void response_set_d_gain(int axis, float value);
-void response_set_d_gain(int axis, float value);
+void response_set_i_gain(int axis, float value);
 float response_get_p_gain(int axis);
 float response_get_d_gain(int axis);
 float response_get_i_gain(int axis);
