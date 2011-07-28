@@ -87,7 +87,8 @@ static itg3200Error_e itg3200Read8(uint8_t reg, int *value)
   I2CMasterBuffer[1] = reg;                       // Command register
   // Append address w/read bit
   I2CMasterBuffer[2] = itg3200_ADDRESS | itg3200_READBIT;
-  i2cEngine();
+  if(!i2cEngine())
+	  return itg3200_ERROR_LAST;
 
   // Shift values to create properly formed integer
   *value = I2CSlaveBuffer[0];
@@ -113,35 +114,23 @@ itg3200Error_e itg3200Init(void)
   }
 
   response_error = itg3200Write8 (itg3200_REGISTER_CONFIG_DLPF, 0x19);
-
-  if (response_error == itg3200_ERROR_OK)
-        {
-                gyro_init = 1;
-        } else {
-                gyro_init = 0;
-        }
-   return response_error;
+  if (response_error != itg3200_ERROR_OK)
+	  return response_error;
 
   response_error = itg3200Write8 (itg3200_REGISTER_CONFIG_PMU, 0x01);
 
-  if (response_error == itg3200_ERROR_OK)
-        {
-                gyro_init = 1;
-        } else {
-                gyro_init = 0;
-        }
-   return response_error;
+  if (response_error != itg3200_ERROR_OK)
+	  return response_error;
 
   response_error = itg3200Write8 (itg3200_REGISTER_CONFIG_SMPLDIV, 0x07);
 
   if (response_error == itg3200_ERROR_OK)
-        {
-                gyro_init = 1;
-        } else {
-                gyro_init = 0;
-        }
-   return response_error;
-
+  {
+	  gyro_init = 1;
+  } else {
+	  gyro_init = 0;
+  }
+  return response_error;
 }
 
 /**************************************************************************/
