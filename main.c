@@ -159,14 +159,26 @@ int main(void)
 
 	// Set initial gains
 	response_set_p_gain(AxisY, 0.1);
-	response_set_p_gain(AxisRoll, 0.17);
-	response_set_p_gain(AxisPitch, 0.17);
-	response_set_p_gain(AxisYaw, 0.2);
-	response_set_d_gain(AxisRoll, 0.19);
-	response_set_d_gain(AxisPitch, 0.19);
+	response_set_p_gain(AxisRoll, 1.05);
+	response_set_p_gain(AxisPitch, 1.05);
+	response_set_p_gain(AxisYaw, 0.4);
+	response_set_d_gain(AxisRoll, 0.27);
+	response_set_d_gain(AxisPitch, 0.27);
 	response_set_d_gain(AxisYaw, 0.2);
-	response_set_i_gain(AxisRoll, 0.0002);
-	response_set_i_gain(AxisPitch, 0.0002);
+	response_set_i_gain(AxisRoll, 0.0012);
+	response_set_i_gain(AxisPitch, 0.0012);
+
+	/*
+	response_set_p_gain(AxisY, 0.1);
+	response_set_p_gain(AxisRoll, 0.0);
+	response_set_p_gain(AxisPitch, 0.0);
+	response_set_p_gain(AxisYaw, 0.0);
+	response_set_d_gain(AxisRoll, 0.0);
+	response_set_d_gain(AxisPitch, 0.0);
+	response_set_d_gain(AxisYaw, 0.0);
+	response_set_i_gain(AxisRoll, 0.0);
+	response_set_i_gain(AxisPitch, 0.0);
+	*/
 
 	// Start the control system
 	response_start();

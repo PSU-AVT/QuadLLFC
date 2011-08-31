@@ -65,7 +65,8 @@ void state_debug(struct task_t *task)
 void stateGyroUpdate(struct task_t *task)
 {
 	// update gyro data
-	itg3200GetData(&_stateController.gyros);
+	if(itg3200GetData(&_stateController.gyros) == itg3200_ERROR_LAST) // Error reading gyro data
+		return;
 
 	// Low pass filter on gyro vals into state_dt
 	// state_dt_(n) = state_dt(n-1) * (1 - alpha) + gyro_data * alpha

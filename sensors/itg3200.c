@@ -146,6 +146,7 @@ itg3200Error_e itg3200GetData (GyroData *data)
   uint8_t i, tmpdat[8];
   int dat, tmp;
   itg3200Error_e error = itg3200_ERROR_OK;
+  uint8_t err_exp = 0;
 
 
     if (!gyro_init)
@@ -158,6 +159,7 @@ itg3200Error_e itg3200GetData (GyroData *data)
         {
                 error = itg3200Read8 (itg3200_REGISTER_TEMPH + i, &dat); //fill tmparray with data
                 if (!error) tmpdat[i] = dat;
+                else err_exp = 1;
         }
                 data->raw_temp = (short) ((int) tmpdat[0] << 8) | ((int) tmpdat[1]);
                 data->raw_X = (short) ((int) tmpdat[2] << 8) | ((int) tmpdat[3]);
@@ -183,7 +185,9 @@ itg3200Error_e itg3200GetData (GyroData *data)
         data->Y += data->y_bias;
         data->Z += data->z_bias;
 
-  return error;
+        if(err_exp)
+        	error = itg3200_ERROR_LAST;
+        return error;
 }
 
 /**************************************************************************/
