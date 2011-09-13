@@ -195,11 +195,11 @@ unsigned long Message_get_delimited_size(void *_buffer, int offset) {
 /*******************************************************************
  * Enum: control.proto, line 1
  *******************************************************************/
-int AxisType_write_with_tag(enum AxisType *_AxisType, void *_buffer, int offset, int tag) {
+int ControlAxisType_write_with_tag(enum ControlAxisType *_ControlAxisType, void *_buffer, int offset, int tag) {
     /* Write tag.*/
     offset = write_raw_varint32((tag<<3)+0, _buffer, offset);
     /* Write content.*/
-    offset = write_raw_varint32(*_AxisType, _buffer, offset);
+    offset = write_raw_varint32(*_ControlAxisType, _buffer, offset);
     
     return offset;
 }
@@ -217,112 +217,41 @@ int ControlMsgType_write_with_tag(enum ControlMsgType *_ControlMsgType, void *_b
 }
 
 /*******************************************************************
- * Message: control.proto, line 15
+ * Enum: control.proto, line 16
  *******************************************************************/
-int AxisSet_write(struct AxisSet *_AxisSet, void *_buffer, int offset) {
-    /* Write content of each message element.*/
-    offset = AxisType_write_with_tag(&_AxisSet->_axis, _buffer, offset, 1);
-    offset = write_raw_varint32((2<<3)+5, _buffer, offset);
-    unsigned long *value_ptr = (unsigned long *)&_AxisSet->_value;
-    offset = write_raw_little_endian32(*value_ptr, _buffer, offset);
-
-    
-    return offset;
-}
-
-int AxisSet_write_with_tag(struct AxisSet *_AxisSet, void *_buffer, int offset, int tag) {
+int ControlErrorType_write_with_tag(enum ControlErrorType *_ControlErrorType, void *_buffer, int offset, int tag) {
     /* Write tag.*/
-    offset = write_raw_varint32((tag<<3)+2, _buffer, offset);
+    offset = write_raw_varint32((tag<<3)+0, _buffer, offset);
     /* Write content.*/
-    offset = AxisSet_write(_AxisSet, _buffer, offset);
+    offset = write_raw_varint32(*_ControlErrorType, _buffer, offset);
     
     return offset;
 }
-
-int AxisSet_write_delimited_to(struct AxisSet *_AxisSet, void *_buffer, int offset) {
-    int i, shift, new_offset, size;
-    
-    new_offset = AxisSet_write(_AxisSet, _buffer, offset);
-    size = new_offset - offset;
-    shift = (size > 127) ? 2 : 1;
-    for (i = new_offset - 1; i >= offset; -- i)
-        *((char *)_buffer + i + shift) = *((char *)_buffer + i);
-    
-    write_raw_varint32((unsigned long) size, _buffer, offset);         
-        
-    return new_offset + shift;
-}
-
-void AxisSet_clear(struct AxisSet *_AxisSet) {
-    _memset(_AxisSet, 0, sizeof(struct AxisSet));
-}
-
-int AxisSet_read(void *_buffer, struct AxisSet *_AxisSet, int offset, int limit) {
-    int i = 0;
-    unsigned long tag = i;
-
-/* Reset all attributes to 0 in advance. */
-    AxisSet_clear(_AxisSet);
-
-    /* Read/interpret all attributes from buffer offset until upper limit is reached. */
-    while(offset < limit) {
-        offset = read_raw_varint32(&tag, _buffer, offset);
-        tag = tag>>3;
-        switch(tag){
-            //tag of: _AxisSet._axis 
-            case 1 :
-                offset = read_raw_varint32(&tag, _buffer, offset);
-                _AxisSet->_axis = tag;
-                break;
-            //tag of: _AxisSet._value 
-            case 2 :
-                offset = read_raw_little_endian32(&tag, _buffer, offset);
-                float *value = (float *)(&tag);
-                _AxisSet->_value = *value;
-                break;
-        }
-    }
-    
-    return offset;
-}
-
-int AxisSet_read_delimited_from(void *_buffer, struct AxisSet *_AxisSet, int offset) {
-    unsigned long size;
-    
-    offset = read_raw_varint32(&size, _buffer, offset);
-    AxisSet_read(_buffer, _AxisSet, offset, size + offset);
-    
-    return offset + size;
-}
-
 
 /*******************************************************************
  * Message: control.proto, line 21
  *******************************************************************/
-int AxisGet_write(struct AxisGet *_AxisGet, void *_buffer, int offset) {
+int ControlError_write(struct ControlError *_ControlError, void *_buffer, int offset) {
     /* Write content of each message element.*/
-    offset = AxisType_write_with_tag(&_AxisGet->_axis, _buffer, offset, 1);
-    offset = write_raw_varint32((2<<3)+5, _buffer, offset);
-    unsigned long *value_ptr = (unsigned long *)&_AxisGet->_value;
-    offset = write_raw_little_endian32(*value_ptr, _buffer, offset);
-
+    offset = ControlErrorType_write_with_tag(&_ControlError->_type, _buffer, offset, 1);
+    offset = ControlMsgType_write_with_tag(&_ControlError->_error_msg_type, _buffer, offset, 2);
     
     return offset;
 }
 
-int AxisGet_write_with_tag(struct AxisGet *_AxisGet, void *_buffer, int offset, int tag) {
+int ControlError_write_with_tag(struct ControlError *_ControlError, void *_buffer, int offset, int tag) {
     /* Write tag.*/
     offset = write_raw_varint32((tag<<3)+2, _buffer, offset);
     /* Write content.*/
-    offset = AxisGet_write(_AxisGet, _buffer, offset);
+    offset = ControlError_write(_ControlError, _buffer, offset);
     
     return offset;
 }
 
-int AxisGet_write_delimited_to(struct AxisGet *_AxisGet, void *_buffer, int offset) {
+int ControlError_write_delimited_to(struct ControlError *_ControlError, void *_buffer, int offset) {
     int i, shift, new_offset, size;
     
-    new_offset = AxisGet_write(_AxisGet, _buffer, offset);
+    new_offset = ControlError_write(_ControlError, _buffer, offset);
     size = new_offset - offset;
     shift = (size > 127) ? 2 : 1;
     for (i = new_offset - 1; i >= offset; -- i)
@@ -333,32 +262,31 @@ int AxisGet_write_delimited_to(struct AxisGet *_AxisGet, void *_buffer, int offs
     return new_offset + shift;
 }
 
-void AxisGet_clear(struct AxisGet *_AxisGet) {
-    _memset(_AxisGet, 0, sizeof(struct AxisGet));
+void ControlError_clear(struct ControlError *_ControlError) {
+    _memset(_ControlError, 0, sizeof(struct ControlError));
 }
 
-int AxisGet_read(void *_buffer, struct AxisGet *_AxisGet, int offset, int limit) {
+int ControlError_read(void *_buffer, struct ControlError *_ControlError, int offset, int limit) {
     int i = 0;
     unsigned long tag = i;
 
 /* Reset all attributes to 0 in advance. */
-    AxisGet_clear(_AxisGet);
+    ControlError_clear(_ControlError);
 
     /* Read/interpret all attributes from buffer offset until upper limit is reached. */
     while(offset < limit) {
         offset = read_raw_varint32(&tag, _buffer, offset);
         tag = tag>>3;
         switch(tag){
-            //tag of: _AxisGet._axis 
+            //tag of: _ControlError._type 
             case 1 :
                 offset = read_raw_varint32(&tag, _buffer, offset);
-                _AxisGet->_axis = tag;
+                _ControlError->_type = tag;
                 break;
-            //tag of: _AxisGet._value 
+            //tag of: _ControlError._error_msg_type 
             case 2 :
-                offset = read_raw_little_endian32(&tag, _buffer, offset);
-                float *value = (float *)(&tag);
-                _AxisGet->_value = *value;
+                offset = read_raw_varint32(&tag, _buffer, offset);
+                _ControlError->_error_msg_type = tag;
                 break;
         }
     }
@@ -366,11 +294,11 @@ int AxisGet_read(void *_buffer, struct AxisGet *_AxisGet, int offset, int limit)
     return offset;
 }
 
-int AxisGet_read_delimited_from(void *_buffer, struct AxisGet *_AxisGet, int offset) {
+int ControlError_read_delimited_from(void *_buffer, struct ControlError *_ControlError, int offset) {
     unsigned long size;
     
     offset = read_raw_varint32(&size, _buffer, offset);
-    AxisGet_read(_buffer, _AxisGet, offset, size + offset);
+    ControlError_read(_buffer, _ControlError, offset, size + offset);
     
     return offset + size;
 }
@@ -378,6 +306,166 @@ int AxisGet_read_delimited_from(void *_buffer, struct AxisGet *_AxisGet, int off
 
 /*******************************************************************
  * Message: control.proto, line 26
+ *******************************************************************/
+int ControlAxisSet_write(struct ControlAxisSet *_ControlAxisSet, void *_buffer, int offset) {
+    /* Write content of each message element.*/
+    offset = ControlAxisType_write_with_tag(&_ControlAxisSet->_axis, _buffer, offset, 1);
+    offset = write_raw_varint32((2<<3)+5, _buffer, offset);
+    unsigned long *value_ptr = (unsigned long *)&_ControlAxisSet->_value;
+    offset = write_raw_little_endian32(*value_ptr, _buffer, offset);
+
+    
+    return offset;
+}
+
+int ControlAxisSet_write_with_tag(struct ControlAxisSet *_ControlAxisSet, void *_buffer, int offset, int tag) {
+    /* Write tag.*/
+    offset = write_raw_varint32((tag<<3)+2, _buffer, offset);
+    /* Write content.*/
+    offset = ControlAxisSet_write(_ControlAxisSet, _buffer, offset);
+    
+    return offset;
+}
+
+int ControlAxisSet_write_delimited_to(struct ControlAxisSet *_ControlAxisSet, void *_buffer, int offset) {
+    int i, shift, new_offset, size;
+    
+    new_offset = ControlAxisSet_write(_ControlAxisSet, _buffer, offset);
+    size = new_offset - offset;
+    shift = (size > 127) ? 2 : 1;
+    for (i = new_offset - 1; i >= offset; -- i)
+        *((char *)_buffer + i + shift) = *((char *)_buffer + i);
+    
+    write_raw_varint32((unsigned long) size, _buffer, offset);         
+        
+    return new_offset + shift;
+}
+
+void ControlAxisSet_clear(struct ControlAxisSet *_ControlAxisSet) {
+    _memset(_ControlAxisSet, 0, sizeof(struct ControlAxisSet));
+}
+
+int ControlAxisSet_read(void *_buffer, struct ControlAxisSet *_ControlAxisSet, int offset, int limit) {
+    int i = 0;
+    unsigned long tag = i;
+
+/* Reset all attributes to 0 in advance. */
+    ControlAxisSet_clear(_ControlAxisSet);
+
+    /* Read/interpret all attributes from buffer offset until upper limit is reached. */
+    while(offset < limit) {
+        offset = read_raw_varint32(&tag, _buffer, offset);
+        tag = tag>>3;
+        switch(tag){
+            //tag of: _ControlAxisSet._axis 
+            case 1 :
+                offset = read_raw_varint32(&tag, _buffer, offset);
+                _ControlAxisSet->_axis = tag;
+                break;
+            //tag of: _ControlAxisSet._value 
+            case 2 :
+                offset = read_raw_little_endian32(&tag, _buffer, offset);
+                float *value = (float *)(&tag);
+                _ControlAxisSet->_value = *value;
+                break;
+        }
+    }
+    
+    return offset;
+}
+
+int ControlAxisSet_read_delimited_from(void *_buffer, struct ControlAxisSet *_ControlAxisSet, int offset) {
+    unsigned long size;
+    
+    offset = read_raw_varint32(&size, _buffer, offset);
+    ControlAxisSet_read(_buffer, _ControlAxisSet, offset, size + offset);
+    
+    return offset + size;
+}
+
+
+/*******************************************************************
+ * Message: control.proto, line 32
+ *******************************************************************/
+int ControlAxisGet_write(struct ControlAxisGet *_ControlAxisGet, void *_buffer, int offset) {
+    /* Write content of each message element.*/
+    offset = ControlAxisType_write_with_tag(&_ControlAxisGet->_axis, _buffer, offset, 1);
+    offset = write_raw_varint32((2<<3)+5, _buffer, offset);
+    unsigned long *value_ptr = (unsigned long *)&_ControlAxisGet->_value;
+    offset = write_raw_little_endian32(*value_ptr, _buffer, offset);
+
+    
+    return offset;
+}
+
+int ControlAxisGet_write_with_tag(struct ControlAxisGet *_ControlAxisGet, void *_buffer, int offset, int tag) {
+    /* Write tag.*/
+    offset = write_raw_varint32((tag<<3)+2, _buffer, offset);
+    /* Write content.*/
+    offset = ControlAxisGet_write(_ControlAxisGet, _buffer, offset);
+    
+    return offset;
+}
+
+int ControlAxisGet_write_delimited_to(struct ControlAxisGet *_ControlAxisGet, void *_buffer, int offset) {
+    int i, shift, new_offset, size;
+    
+    new_offset = ControlAxisGet_write(_ControlAxisGet, _buffer, offset);
+    size = new_offset - offset;
+    shift = (size > 127) ? 2 : 1;
+    for (i = new_offset - 1; i >= offset; -- i)
+        *((char *)_buffer + i + shift) = *((char *)_buffer + i);
+    
+    write_raw_varint32((unsigned long) size, _buffer, offset);         
+        
+    return new_offset + shift;
+}
+
+void ControlAxisGet_clear(struct ControlAxisGet *_ControlAxisGet) {
+    _memset(_ControlAxisGet, 0, sizeof(struct ControlAxisGet));
+}
+
+int ControlAxisGet_read(void *_buffer, struct ControlAxisGet *_ControlAxisGet, int offset, int limit) {
+    int i = 0;
+    unsigned long tag = i;
+
+/* Reset all attributes to 0 in advance. */
+    ControlAxisGet_clear(_ControlAxisGet);
+
+    /* Read/interpret all attributes from buffer offset until upper limit is reached. */
+    while(offset < limit) {
+        offset = read_raw_varint32(&tag, _buffer, offset);
+        tag = tag>>3;
+        switch(tag){
+            //tag of: _ControlAxisGet._axis 
+            case 1 :
+                offset = read_raw_varint32(&tag, _buffer, offset);
+                _ControlAxisGet->_axis = tag;
+                break;
+            //tag of: _ControlAxisGet._value 
+            case 2 :
+                offset = read_raw_little_endian32(&tag, _buffer, offset);
+                float *value = (float *)(&tag);
+                _ControlAxisGet->_value = *value;
+                break;
+        }
+    }
+    
+    return offset;
+}
+
+int ControlAxisGet_read_delimited_from(void *_buffer, struct ControlAxisGet *_ControlAxisGet, int offset) {
+    unsigned long size;
+    
+    offset = read_raw_varint32(&size, _buffer, offset);
+    ControlAxisGet_read(_buffer, _ControlAxisGet, offset, size + offset);
+    
+    return offset + size;
+}
+
+
+/*******************************************************************
+ * Message: control.proto, line 37
  *******************************************************************/
 int ControlMsgHeader_write(struct ControlMsgHeader *_ControlMsgHeader, void *_buffer, int offset) {
     /* Write content of each message element.*/

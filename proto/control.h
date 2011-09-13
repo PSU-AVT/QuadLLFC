@@ -39,7 +39,7 @@ int Message_can_read_delimited_from(void *_buffer, int offset, int length);
 /*******************************************************************
  * Enumeration: control.proto, line 1
  *******************************************************************/
-enum AxisType {
+enum ControlAxisType {
   _Roll = 1,
   _Pitch = 2,
   _Yaw = 3,
@@ -52,66 +52,102 @@ enum AxisType {
  * Enumeration: control.proto, line 10
  *******************************************************************/
 enum ControlMsgType {
-  _AxisSet = 1,
-  _AxisGet = 2
+  _Error = 1,
+  _AxisSet = 2,
+  _AxisGet = 3
 };
 
 /*******************************************************************
- * Message: control.proto, line 15
+ * Enumeration: control.proto, line 16
  *******************************************************************/
-
-/* Maximum size of a serialized AxisSet-message, useful for buffer allocation. */
-#define MAX_AxisSet_SIZE 11
-
-/* Structure that holds a deserialized AxisSet-message. */
-struct AxisSet {
-  enum AxisType _axis;
-  float _value;
+enum ControlErrorType {
+  _UnsupportedMsg = 1,
+  _InvalidMsg = 2
 };
-/*
- * Serialize a AxisSet-message into the given buffer at offset and return
- * new offset for optional next message.
- */
-int AxisSet_write_delimited_to(struct AxisSet *_AxisSet, void *_buffer, int offset);
-
-/*
- * Deserialize a AxisSet-message from the given buffer at offset and return
- * new offset for optional next message.
- *
- * Note: All fields in _AxisSet will be reset to 0 before _buffer is interpreted.
- */
-int AxisSet_read_delimited_from(void *_buffer, struct AxisSet *_AxisSet, int offset);
-
 
 /*******************************************************************
  * Message: control.proto, line 21
  *******************************************************************/
 
-/* Maximum size of a serialized AxisGet-message, useful for buffer allocation. */
-#define MAX_AxisGet_SIZE 11
+/* Maximum size of a serialized ControlError-message, useful for buffer allocation. */
+#define MAX_ControlError_SIZE 8
 
-/* Structure that holds a deserialized AxisGet-message. */
-struct AxisGet {
-  enum AxisType _axis;
-  float _value;
+/* Structure that holds a deserialized ControlError-message. */
+struct ControlError {
+  enum ControlErrorType _type;
+  enum ControlMsgType _error_msg_type;
 };
 /*
- * Serialize a AxisGet-message into the given buffer at offset and return
+ * Serialize a ControlError-message into the given buffer at offset and return
  * new offset for optional next message.
  */
-int AxisGet_write_delimited_to(struct AxisGet *_AxisGet, void *_buffer, int offset);
+int ControlError_write_delimited_to(struct ControlError *_ControlError, void *_buffer, int offset);
 
 /*
- * Deserialize a AxisGet-message from the given buffer at offset and return
+ * Deserialize a ControlError-message from the given buffer at offset and return
  * new offset for optional next message.
  *
- * Note: All fields in _AxisGet will be reset to 0 before _buffer is interpreted.
+ * Note: All fields in _ControlError will be reset to 0 before _buffer is interpreted.
  */
-int AxisGet_read_delimited_from(void *_buffer, struct AxisGet *_AxisGet, int offset);
+int ControlError_read_delimited_from(void *_buffer, struct ControlError *_ControlError, int offset);
 
 
 /*******************************************************************
  * Message: control.proto, line 26
+ *******************************************************************/
+
+/* Maximum size of a serialized ControlAxisSet-message, useful for buffer allocation. */
+#define MAX_ControlAxisSet_SIZE 11
+
+/* Structure that holds a deserialized ControlAxisSet-message. */
+struct ControlAxisSet {
+  enum ControlAxisType _axis;
+  float _value;
+};
+/*
+ * Serialize a ControlAxisSet-message into the given buffer at offset and return
+ * new offset for optional next message.
+ */
+int ControlAxisSet_write_delimited_to(struct ControlAxisSet *_ControlAxisSet, void *_buffer, int offset);
+
+/*
+ * Deserialize a ControlAxisSet-message from the given buffer at offset and return
+ * new offset for optional next message.
+ *
+ * Note: All fields in _ControlAxisSet will be reset to 0 before _buffer is interpreted.
+ */
+int ControlAxisSet_read_delimited_from(void *_buffer, struct ControlAxisSet *_ControlAxisSet, int offset);
+
+
+/*******************************************************************
+ * Message: control.proto, line 32
+ *******************************************************************/
+
+/* Maximum size of a serialized ControlAxisGet-message, useful for buffer allocation. */
+#define MAX_ControlAxisGet_SIZE 11
+
+/* Structure that holds a deserialized ControlAxisGet-message. */
+struct ControlAxisGet {
+  enum ControlAxisType _axis;
+  float _value;
+};
+/*
+ * Serialize a ControlAxisGet-message into the given buffer at offset and return
+ * new offset for optional next message.
+ */
+int ControlAxisGet_write_delimited_to(struct ControlAxisGet *_ControlAxisGet, void *_buffer, int offset);
+
+/*
+ * Deserialize a ControlAxisGet-message from the given buffer at offset and return
+ * new offset for optional next message.
+ *
+ * Note: All fields in _ControlAxisGet will be reset to 0 before _buffer is interpreted.
+ */
+int ControlAxisGet_read_delimited_from(void *_buffer, struct ControlAxisGet *_ControlAxisGet, int offset);
+
+
+/*******************************************************************
+ * Message: control.proto, line 37
  *******************************************************************/
 
 /* Maximum size of a serialized ControlMsgHeader-message, useful for buffer allocation. */

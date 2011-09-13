@@ -1,4 +1,4 @@
-enum AxisType {
+enum ControlAxisType {
 	Roll = 1;
 	Pitch = 2;
 	Yaw = 3;
@@ -8,18 +8,29 @@ enum AxisType {
 }
 
 enum ControlMsgType {
-	AxisSet = 1;
-	AxisGet = 2;
+	Error = 1;
+	AxisSet = 2;
+	AxisGet = 3;
 }
 
-message AxisSet {
-	required AxisType axis = 1;
+enum ControlErrorType {
+	UnsupportedMsg = 1;
+	InvalidMsg = 2;
+}
+
+message ControlError {
+	required ControlErrorType type = 1;
+	required ControlMsgType error_msg_type = 2;
+}
+
+message ControlAxisSet {
+	required ControlAxisType axis = 1;
 	required float value = 2;
 }
 
 
-message AxisGet {
-	required AxisType axis = 1;
+message ControlAxisGet {
+	required ControlAxisType axis = 1;
 	required float value = 2;
 }
 
