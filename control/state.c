@@ -37,11 +37,14 @@
 #include "response.h"
 #include "translate.h"
 
+// Global setinals
+static int state_just_reset = 0;
+
+// State Controller
 static struct state_controller_t _stateController;
 
+// Tasks
 static struct task_t gyro_update_task;
-
-#define SIMPSONS(S1, S2, S3, dt) ((dt/6.0) * (S1+(4*S2)+S3))
 
 // In this method we obtain our gyro inputs as body_state_dt
 // We then integrate using simpsons rule to obtain body_state
@@ -60,6 +63,11 @@ void stateGyroUpdate(struct task_t *task)
 	_stateController.body_state_dt[AxisYaw] = _stateController.gyros.Z;
 
 	float dt = task_get_dt(task);
+	// When we reset there is major blocking that causes the dt to get huge
+	if(state_just_reset) {
+		state_just_reset = 0;
+		dt = 0;
+	}
 
 	_stateController.body_state_delta[AxisRoll] = _stateController.body_state_dt[AxisRoll] * dt;
 	_stateController.body_state_delta[AxisPitch] = _stateController.body_state_dt[AxisPitch] * dt;
@@ -71,8 +79,6 @@ void stateGyroUpdate(struct task_t *task)
 	// Store eulers as inertial state
 	rotation_matrix_get_eulers(_stateController.r_b_to_i, _stateController.inertial_state);
 }
-
-#undef SIMPSONS
 
 struct state_controller_t *stateControllerGet(void)
 {
@@ -117,6 +123,15 @@ void stateGyroCalibrate(void) {
 }
 
 void stateReset(void) {
+	state_just_reset = 1;
+	stateGyroCalibrate();
+	int i;
+	for(i = 0;i < AXIS_CNT;++i) {
+		_stateController.body_state_delta[i] = 0;
+		_stateController.body_state_dt[i] = 0;
+		_stateController.inertial_stat_accum[i] = 0;
+		_stateController.inertial_state[i] = 0;
+	}
 }
 
 void stateStart(void)

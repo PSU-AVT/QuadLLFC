@@ -52,7 +52,6 @@ struct state_controller_t
     float body_state_delta[AXIS_CNT];
     float body_state_dt[AXIS_CNT];
     float inertial_state[AXIS_CNT];
-    float inertial_state_dt[AXIS_CNT];
     float inertial_stat_accum[AXIS_CNT];
     float r_b_to_i[3][3];
 };

@@ -47,27 +47,6 @@
 
 #define DEBUG 1
 
-void ctl_increment_i_gain(int axis, float value) {
-	char buff[256];
-	response_set_i_gain(axis, response_get_i_gain(axis)+value);
-	sprintf(buff, "Gain (%d) i value now at %f\r\n", axis, response_get_i_gain(axis));
-	uartSend(buff, strlen(buff));
-}
-
-void ctl_increment_d_gain(int axis, float value) {
-	char buff[256];
-	response_set_d_gain(axis, response_get_d_gain(axis)+value);
-	sprintf(buff, "Gain (%d) d value now at %f\r\n", axis, response_get_d_gain(axis));
-	uartSend(buff, strlen(buff));
-}
-
-void ctl_increment_p_gain(int axis, float value) {
-	char buff[256];
-	response_set_p_gain(axis, response_get_p_gain(axis)+value);
-	sprintf(buff, "Gain (%d) p value now at %f\r\n", axis, response_get_p_gain(axis));
-	uartSend(buff, strlen(buff));
-}
-
 void handle_control_input(char ch)
 {
 	switch(ch)
@@ -100,53 +79,6 @@ void handle_control_input(char ch)
 	case 'w':
 		response_controller_get()->state_setpoint[AxisPitch] -= .03;
 		break;
-	/*
-	case 'y':
-		ctl_increment_p_gain(AxisY, .01);
-		break;
-	case 'h':
-		ctl_increment_p_gain(AxisY, -.01);
-		break;
-	case 'u':
-		ctl_increment_p_gain(AxisRoll, .01);
-		break;
-	case 'j':
-		ctl_increment_p_gain(AxisRoll, -.01);
-		break;
-	case 'i':
-		ctl_increment_p_gain(AxisPitch, .01);
-		break;
-	case 'b':
-		ctl_increment_p_gain(AxisYaw, .01);
-		break;
-	case 'k':
-		ctl_increment_p_gain(AxisPitch, -.01);
-		break;
-	case 'e':
-		ctl_increment_d_gain(AxisRoll, .01);
-		break;
-	case 'd':
-		ctl_increment_d_gain(AxisRoll, -.01);
-		break;
-	case 'r':
-		ctl_increment_d_gain(AxisPitch, .01);
-		break;
-	case 'f':
-		ctl_increment_d_gain(AxisPitch, -.01);
-		break;
-	case 'z':
-		ctl_increment_i_gain(AxisRoll, .0001);
-		break;
-	case 'x':
-		ctl_increment_i_gain(AxisRoll, -.0001);
-		break;
-	case 'c':
-		ctl_increment_i_gain(AxisPitch, .0001);
-		break;
-	case 'v':
-		ctl_increment_i_gain(AxisPitch, -.0001);
-		break;
-		*/
 	}
 	uartSend("Got ", 4);
 	uartSendByte(ch);
@@ -174,20 +106,7 @@ int main(void)
 	// Start state recording
 	stateStart();
 
-	// Set initial gains
-	/*
-	response_set_p_gain(AxisY, 0.1);
-	response_set_p_gain(AxisRoll, 1.04);
-	response_set_p_gain(AxisPitch, 1.04);
-	response_set_p_gain(AxisYaw, 0.8);
-	response_set_d_gain(AxisRoll, 0.32);
-	response_set_d_gain(AxisPitch, 0.32);
-	response_set_d_gain(AxisYaw, 0.4);
-	response_set_i_gain(AxisRoll, 0.0023);
-	response_set_i_gain(AxisPitch, 0.0023);
-	response_set_i_gain(AxisYaw, 0.0002);
-	*/
-
+	// Set PID Gains
 	response_set_p_gain(AxisY, 0.1);
 	response_set_p_gain(AxisRoll, 1.2);
 	response_set_p_gain(AxisPitch, 1.1);
