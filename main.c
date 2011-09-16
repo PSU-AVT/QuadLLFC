@@ -82,9 +82,25 @@ void handle_control_input(char ch)
 		motors_off();
 		response_off();
 		break;
-	case 's': // Turn on
+	case 'o': // Turn on
+		response_off();
+		stateReset();
+		response_reset();
 		response_on();
 		break;
+	case 'd':
+		response_controller_get()->state_setpoint[AxisRoll] += .03;
+		break;
+	case 'a':
+		response_controller_get()->state_setpoint[AxisRoll] -= .03;
+		break;
+	case 's':
+		response_controller_get()->state_setpoint[AxisPitch] += .03;
+		break;
+	case 'w':
+		response_controller_get()->state_setpoint[AxisPitch] -= .03;
+		break;
+	/*
 	case 'y':
 		ctl_increment_p_gain(AxisY, .01);
 		break;
@@ -130,6 +146,7 @@ void handle_control_input(char ch)
 	case 'v':
 		ctl_increment_i_gain(AxisPitch, -.0001);
 		break;
+		*/
 	}
 	uartSend("Got ", 4);
 	uartSendByte(ch);
@@ -158,27 +175,29 @@ int main(void)
 	stateStart();
 
 	// Set initial gains
-	response_set_p_gain(AxisY, 0.1);
-	response_set_p_gain(AxisRoll, 1.05);
-	response_set_p_gain(AxisPitch, 1.05);
-	response_set_p_gain(AxisYaw, 0.4);
-	response_set_d_gain(AxisRoll, 0.27);
-	response_set_d_gain(AxisPitch, 0.27);
-	response_set_d_gain(AxisYaw, 0.2);
-	response_set_i_gain(AxisRoll, 0.0012);
-	response_set_i_gain(AxisPitch, 0.0012);
-
 	/*
 	response_set_p_gain(AxisY, 0.1);
-	response_set_p_gain(AxisRoll, 0.0);
-	response_set_p_gain(AxisPitch, 0.0);
-	response_set_p_gain(AxisYaw, 0.0);
-	response_set_d_gain(AxisRoll, 0.0);
-	response_set_d_gain(AxisPitch, 0.0);
-	response_set_d_gain(AxisYaw, 0.0);
-	response_set_i_gain(AxisRoll, 0.0);
-	response_set_i_gain(AxisPitch, 0.0);
+	response_set_p_gain(AxisRoll, 1.04);
+	response_set_p_gain(AxisPitch, 1.04);
+	response_set_p_gain(AxisYaw, 0.8);
+	response_set_d_gain(AxisRoll, 0.32);
+	response_set_d_gain(AxisPitch, 0.32);
+	response_set_d_gain(AxisYaw, 0.4);
+	response_set_i_gain(AxisRoll, 0.0023);
+	response_set_i_gain(AxisPitch, 0.0023);
+	response_set_i_gain(AxisYaw, 0.0002);
 	*/
+
+	response_set_p_gain(AxisY, 0.1);
+	response_set_p_gain(AxisRoll, 1.2);
+	response_set_p_gain(AxisPitch, 1.1);
+	response_set_p_gain(AxisYaw, 1.0);
+	response_set_d_gain(AxisRoll, 0.28);
+	response_set_d_gain(AxisPitch, 0.25);
+	response_set_d_gain(AxisYaw, 0.5);
+	response_set_i_gain(AxisRoll, 0.0007);
+	response_set_i_gain(AxisPitch, 0.0007);
+	response_set_i_gain(AxisYaw, 0.0001);
 
 	// Start the control system
 	response_start();

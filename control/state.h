@@ -74,5 +74,7 @@ void stateAdd(float *a, float *b, float *dest);
 
 void stateScale(float *a, float b);
 
+void stateReset(void);
+
 #endif
 

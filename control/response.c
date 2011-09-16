@@ -116,15 +116,18 @@ void response_update(struct task_t *task)
 	motors_set(output);
 }
 
-void response_start(void)
-{
-	int i = 0;
-
-	// Init _rc
+void response_reset(void) {
+	int i;
 	for(i = 0;i < AXIS_CNT;++i) {
+		response_state_last[i] = 0;
 		_rc.state_setpoint[i] = 0;
 		_rc.state_dt_setpoint[i] = 0;
 	}
+}
+
+void response_start(void)
+{
+	response_reset();
 
 	// Setup response update task
 	_response_task.handler = response_update;

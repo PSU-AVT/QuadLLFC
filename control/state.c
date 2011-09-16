@@ -113,16 +113,7 @@ void stateInit(void)
 	}
 }
 
-void stateStart(void)
-{
-	gyro_update_task.handler = stateGyroUpdate;
-	gyro_update_task.msecs = CFG_GYRO_UPDATE_MSECS;
-	state_debug_task.handler = state_debug;
-	state_debug_task.msecs = CFG_STATE_OUTPUT_MSECS;
-
-	tasks_add_task(&gyro_update_task);
-	tasks_add_task(&state_debug_task);
-
+void stateGyroCalibrate(void) {
 	uartSend("\r\nDetermining gyro bias...", 26);
 	float x=0, y=0, z=0;
 	int i;
@@ -138,6 +129,31 @@ void stateStart(void)
 	_stateController.gyros.z_bias = -(z / CFG_GYRO_BIAS_N_SAMPLES);
 
 	uartSend("done\r\n", 6);
+}
+
+void stateReset(void) {
+	//stateGyroCalibrate();
+	int i;
+	for(i = 0;i < AXIS_CNT;++i) {
+		_stateController.body_state_delta[i] = 0;
+		_stateController.body_state_dt[i] = 0;
+		_stateController.inertial_stat_accum[i] = 0;
+		_stateController.inertial_state[i] = 0;
+		_stateController.inertial_state_dt[i] = 0;
+	}
+}
+
+void stateStart(void)
+{
+	gyro_update_task.handler = stateGyroUpdate;
+	gyro_update_task.msecs = CFG_GYRO_UPDATE_MSECS;
+	state_debug_task.handler = state_debug;
+	state_debug_task.msecs = CFG_STATE_OUTPUT_MSECS;
+
+	tasks_add_task(&gyro_update_task);
+	tasks_add_task(&state_debug_task);
+
+	stateGyroCalibrate();
 }
 
 void stateSubtract(float *a, float *b, float *dest)
