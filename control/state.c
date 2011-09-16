@@ -131,7 +131,9 @@ void stateReset(void) {
 		_stateController.body_state_dt[i] = 0;
 		_stateController.inertial_stat_accum[i] = 0;
 		_stateController.inertial_state[i] = 0;
+		_stateController.r_b_to_i[i/2][i%3] = 0;
 	}
+
 }
 
 void stateStart(void)
