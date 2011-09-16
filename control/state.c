@@ -39,22 +39,7 @@
 
 static struct state_controller_t _stateController;
 
-static struct task_t gyro_update_task,
-                     state_debug_task;
-
-void state_debug(struct task_t *task)
-{
-	char buff[512];
-	struct state_controller_t *sc;
-	sc = stateControllerGet();
-	sprintf(buff, "Body State delta: %f\t%f\t%f\r\n"
-			      "Body State dt     %f\t%f\t%f\r\n"
-			      "Inert State:      %f\t%f\t%f\r\n\r\n",
-			sc->body_state_delta[AxisRoll], sc->body_state_delta[AxisPitch], sc->body_state_delta[AxisYaw],
-			sc->body_state_dt[AxisRoll], sc->body_state_dt[AxisPitch], sc->body_state_dt[AxisYaw],
-			sc->inertial_state[AxisRoll], sc->inertial_state[AxisPitch], sc->inertial_state[AxisYaw]);
-	uartSend(buff, strlen(buff));
-}
+static struct task_t gyro_update_task;
 
 #define SIMPSONS(S1, S2, S3, dt) ((dt/6.0) * (S1+(4*S2)+S3))
 
@@ -132,26 +117,14 @@ void stateGyroCalibrate(void) {
 }
 
 void stateReset(void) {
-	//stateGyroCalibrate();
-	int i;
-	for(i = 0;i < AXIS_CNT;++i) {
-		_stateController.body_state_delta[i] = 0;
-		_stateController.body_state_dt[i] = 0;
-		_stateController.inertial_stat_accum[i] = 0;
-		_stateController.inertial_state[i] = 0;
-		_stateController.inertial_state_dt[i] = 0;
-	}
 }
 
 void stateStart(void)
 {
 	gyro_update_task.handler = stateGyroUpdate;
 	gyro_update_task.msecs = CFG_GYRO_UPDATE_MSECS;
-	state_debug_task.handler = state_debug;
-	state_debug_task.msecs = CFG_STATE_OUTPUT_MSECS;
 
 	tasks_add_task(&gyro_update_task);
-	tasks_add_task(&state_debug_task);
 
 	stateGyroCalibrate();
 }
