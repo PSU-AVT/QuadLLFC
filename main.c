@@ -5,7 +5,7 @@
  *
  * Software License Agreement (BSD License)
  *
- * Copyright (c) 2010, Gregory Haynes, Spencer Krum
+ * Copyright (c) 2010-2011, Gregory Haynes, Spencer Krum
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,21 +31,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifdef __USE_CMSIS
-#include "LPC13xx.h"
-#endif
-
 #include <stdint.h>
-#include <string.h>
 
 #include "cpu/cpu.h"
-#include "systick/systick.h"
 #include "uart/uart.h"
+#include "systick/systick.h"
 #include "control/motor.h"
 #include "control/state.h"
 #include "control/response.h"
-
-#define DEBUG 1
+#include "proto/proto.h"
+#include "utils/string.h"
 
 void handle_control_input(char ch)
 {
@@ -80,9 +75,10 @@ void handle_control_input(char ch)
 		response_controller_get()->state_setpoint[AxisPitch] -= .03;
 		break;
 	}
-	uartSend("Got ", 4);
-	uartSendByte(ch);
-	uartSend("\r\n", 2);
+	char out[5];
+	strcpy(out, "Got ");
+	out[4] = ch;
+	proto_frame_and_send(out, 5);
 }
 
 int main(void)
@@ -91,8 +87,7 @@ int main(void)
 	systickInit(1);
 	uartInit(38400);
 
-	uartSend("\r\n\r\n", 4);
-	uartSend("Leeeeroooooooy....\r\n\r\n", 22);
+	proto_frame_and_send_string("Leeeerooooyyyyy");
 
 	// Initialize motor pins
 	motorsInit();
@@ -111,9 +106,11 @@ int main(void)
 	response_set_p_gain(AxisRoll, 1.2);
 	response_set_p_gain(AxisPitch, 1.1);
 	response_set_p_gain(AxisYaw, 1.0);
+
 	response_set_d_gain(AxisRoll, 0.28);
 	response_set_d_gain(AxisPitch, 0.25);
 	response_set_d_gain(AxisYaw, 0.5);
+
 	response_set_i_gain(AxisRoll, 0.0007);
 	response_set_i_gain(AxisPitch, 0.0007);
 	response_set_i_gain(AxisYaw, 0.0001);

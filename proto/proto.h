@@ -3,7 +3,7 @@
  *
  * Software License Agreement (BSD License)
  *
- * Copyright (c) 2010, Gregory Haynes, Spencer Krum
+ * Copyright (c) 2011, Gregory Haynes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,28 +29,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef RESPONSE_H
-#define RESPONSE_H
+void proto_frame_and_send(const char *buffer, int length);
 
-#include "state.h"
-
-struct response_controller_t {
-	float state_setpoint[AXIS_CNT]; // Desired state
-	float state_dt_setpoint[AXIS_CNT]; // Desired state dt
-};
-
-void response_start(void);
-struct response_controller_t *response_controller_get(void);
-
-void response_off(void);
-void response_on(void);
-void response_reset(void);
-
-void response_set_p_gain(int axis, float value);
-void response_set_d_gain(int axis, float value);
-void response_set_i_gain(int axis, float value);
-float response_get_p_gain(int axis);
-float response_get_d_gain(int axis);
-float response_get_i_gain(int axis);
-
-#endif
+void proto_frame_and_send_string(const char *string);

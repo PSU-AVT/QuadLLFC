@@ -36,6 +36,7 @@
 #include "../utils/matrix.h"
 #include "response.h"
 #include "translate.h"
+#include "../proto/proto.h"
 
 // Global setinals
 static int state_just_reset = 0;
@@ -57,7 +58,6 @@ void stateGyroUpdate(struct task_t *task)
 		return;
 
 	// Low pass filter on gyro vals into state_dt
-	// state_dt_(n) = state_dt(n-1) * (1 - alpha) + gyro_data * alpha
 	_stateController.body_state_dt[AxisRoll] = _stateController.gyros.X;
 	_stateController.body_state_dt[AxisPitch] = _stateController.gyros.Y;
 	_stateController.body_state_dt[AxisYaw] = _stateController.gyros.Z;
@@ -105,7 +105,7 @@ void stateInit(void)
 }
 
 void stateGyroCalibrate(void) {
-	uartSend("\r\nDetermining gyro bias...", 26);
+	proto_frame_and_send_string("Determining gyro bias");
 	float x=0, y=0, z=0;
 	int i;
 	for(i = 0; i < CFG_GYRO_BIAS_N_SAMPLES;i++) {
@@ -119,7 +119,7 @@ void stateGyroCalibrate(void) {
 	_stateController.gyros.y_bias = -(y / CFG_GYRO_BIAS_N_SAMPLES);
 	_stateController.gyros.z_bias = -(z / CFG_GYRO_BIAS_N_SAMPLES);
 
-	uartSend("done\r\n", 6);
+	proto_frame_and_send_string("Done determining gyro bias");
 }
 
 void stateReset(void) {
