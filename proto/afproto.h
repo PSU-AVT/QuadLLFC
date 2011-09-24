@@ -1,9 +1,7 @@
 #ifndef AFPROTO_H
 #define AFPROTO_H
 
-#if TEST_GCC
 #include <stdint.h>
-#endif
 
 #define AFPROTO_FRAME_START_BYTE 0xA3
 #define AFPROTO_FRAME_END_BYTE 0x5D

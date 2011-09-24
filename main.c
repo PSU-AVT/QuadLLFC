@@ -87,6 +87,11 @@ int main(void)
 	systickInit(1);
 	uartInit(38400);
 
+	while(1) {
+		systickDelay(500);
+		proto_frame_and_send_string("Hello");
+	}
+
 	proto_frame_and_send_string("Leeeerooooyyyyy");
 
 	// Initialize motor pins
@@ -104,7 +109,7 @@ int main(void)
 	// Set PID Gains
 	response_set_p_gain(AxisY, 0.1);
 	response_set_p_gain(AxisRoll, 1.2);
-	response_set_p_gain(AxisPitch, 1.1);
+	response_set_p_gain(AxisPitch, 1.0);
 	response_set_p_gain(AxisYaw, 1.0);
 
 	response_set_d_gain(AxisRoll, 0.28);

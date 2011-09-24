@@ -30,6 +30,7 @@
 */
 
 #include "afproto.h"
+#include "../utils/string.h"
 
 static char _proto_buff[256];
 
@@ -38,11 +39,9 @@ void proto_frame_and_send(const char *buffer, int length) {
 	afproto_create_frame(buffer, length, &f);
 	afproto_serialize_frame(_proto_buff, 0, &f);
 
-	uartSend(_proto_buff, f.length);
+	uartSend(_proto_buff, f.length+4);
 }
 
 void proto_frame_and_send_string(const char *string) {
-	int len = 0;
-	while(!string[len++]);
-	proto_frame_and_send(string, len);
+	proto_frame_and_send(string, strlen(string));
 }
