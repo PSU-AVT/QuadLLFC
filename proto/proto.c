@@ -35,11 +35,9 @@
 static char _proto_buff[256];
 
 void proto_frame_and_send(const char *buffer, int length) {
-	AfprotoFrame f;
-	afproto_create_frame(buffer, length, &f);
-	afproto_serialize_frame(_proto_buff, 0, &f);
+	afproto_serialize_payload(buffer, length, _proto_buff);
 
-	uartSend(_proto_buff, f.length+4);
+	uartSend(_proto_buff, length+4);
 }
 
 void proto_frame_and_send_string(const char *string) {
