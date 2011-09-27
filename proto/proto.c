@@ -32,12 +32,12 @@
 #include "afproto.h"
 #include "../utils/string.h"
 
-static char _proto_buff[256];
+static unsigned char _proto_buff[256];
 
 void proto_frame_and_send(const char *buffer, int length) {
-	afproto_serialize_payload(buffer, length, _proto_buff);
+	length = afproto_serialize_payload(buffer, length, _proto_buff);
 
-	uartSend(_proto_buff, length+4);
+	uartSend(_proto_buff, length);
 }
 
 void proto_frame_and_send_string(const char *string) {

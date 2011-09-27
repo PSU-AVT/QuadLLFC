@@ -89,7 +89,7 @@ int main(void)
 
 	while(1) {
 		systickDelay(500);
-		proto_frame_and_send_string("Hello");
+		proto_frame_and_send("Hello", 5);
 	}
 
 	proto_frame_and_send_string("Leeeerooooyyyyy");

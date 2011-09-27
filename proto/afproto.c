@@ -59,7 +59,6 @@ uint8_t afproto_serialize_payload(const unsigned char *payload,
 	uint8_t crc = 0;
 	uint8_t ndx = 3;
 	uint8_t payload_ndx = 0;
-	uint8_t i;
 	dest[0] = AFPROTO_FRAME_START_BYTE;
 
 	for(;payload_ndx<length;++payload_ndx) {
