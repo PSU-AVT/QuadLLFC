@@ -40,6 +40,8 @@
 #include "control/state.h"
 #include "control/response.h"
 #include "proto/proto.h"
+#include "proto/afproto.h"
+#include "proto/control.h"
 #include "utils/string.h"
 
 void handle_control_input(char ch)
@@ -81,16 +83,17 @@ void handle_control_input(char ch)
 	proto_frame_and_send(out, 5);
 }
 
+static unsigned char in_buff[256];
+static unsigned char payload_buff[256];
+static uint8_t in_buff_ndx;
+
 int main(void)
 {
 	cpuInit();
 	systickInit(1);
 	uartInit(38400);
 
-	while(1) {
-		systickDelay(500);
-		proto_frame_and_send("Hello", 5);
-	}
+	uint8_t payload_len;
 
 	proto_frame_and_send_string("Leeeerooooyyyyy");
 
@@ -122,15 +125,23 @@ int main(void)
 
 	// Start the control system
 	response_start();
-
-	motors_off();
-	response_off();
+	response_on();
 
 	while(1)
 	{
-		while(uartRxBufferDataPending())
-		{
-			handle_control_input(uartRxBufferRead());
+		if(uartRxBufferDataPending()) {
+			in_buff[in_buff_ndx++] = uartRxBufferRead();
+			if(in_buff_ndx >= 2 &&
+			   in_buff[in_buff_ndx-1] == AFPROTO_FRAME_END_BYTE &&
+			   in_buff[in_buff_ndx-2] != AFPROTO_FRAME_ESCAPE_BYTE) {
+				afproto_get_payload(in_buff, in_buff_ndx, payload_buff, &payload_len);
+				if(payload_len == 0)
+					in_buff_ndx = 0;
+				else {
+					in_buff_ndx = 0;
+					control_handle_msg(payload_buff, payload_len);
+				}
+			}
 		}
 		tasks_loop();
 	}
