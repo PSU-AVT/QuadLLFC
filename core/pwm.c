@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2011 Gregory Haynes <greg@greghaynes.net>
+ *
+ * Licensed under the BSD license. See LICENSE for more information.
+ */
+
 #include "pwm.h"
 
 #ifdef __USE_CMSIS
@@ -73,4 +79,42 @@ void pwm_16_init_pins(PWM_PIN_16 pins) {
         // Enable PWM
         LPC_TMR16B1->PWMC |= TMR_TMR16B1PWMC_PWM1_ENABLED;
     }
+}
+
+void pwm_16_start_timers(PWM_TIMER timers) {
+	if(timers & PWM_TIMER_16_0) {
+		LPC_TMR16B0->MCR  &= ~(TMR_TMR16B0MCR_MR3_INT_MASK);
+		LPC_TMR16B0->TCR = TMR_TMR16B0TCR_COUNTERENABLE_ENABLED;
+	}
+	if(timers & PWM_TIMER_16_1) {
+		LPC_TMR16B0->MCR  &= ~(TMR_TMR16B1MCR_MR3_INT_MASK);
+		LPC_TMR16B0->TCR = TMR_TMR16B1TCR_COUNTERENABLE_ENABLED;
+	}
+}
+
+void pwm_16_set_timer_prescaler(PWM_TIMER timer, unsigned int value) {
+    if(timer & PWM_TIMER_16_0)
+    	LPC_TMR16B0->PR = value;
+    if(timer & PWM_TIMER_16_1)
+    	LPC_TMR16B0->PR = value;
+}
+
+void pwm_16_set_timer_frequency_in_ticks(PWM_TIMER timer, unsigned int value) {
+    if(timer & PWM_TIMER_16_0)
+    	LPC_TMR16B0->MR3 = value;
+    if(timer & PWM_TIMER_16_1)
+    	LPC_TMR16B0->MR3 = value;
+}
+
+void pwm_16_set_duty_cycle_in_ticks(PWM_PIN_16 pins, unsigned int value) {
+    if(pins & PWM_PIN_16_0_0)
+    	LPC_TMR16B0->MR0 = value;
+    if(pins & PWM_PIN_16_0_1)
+    	LPC_TMR16B0->MR1 = value;
+    if(pins & PWM_PIN_16_0_2)
+    	LPC_TMR16B0->MR2 = value;
+    if(pins & PWM_PIN_16_1_0)
+    	LPC_TMR16B1->MR0 = value;
+    if(pins & PWM_PIN_16_1_1)
+    	LPC_TMR16B1->MR1 = value;
 }
