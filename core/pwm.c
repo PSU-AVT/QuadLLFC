@@ -1,5 +1,9 @@
 #include "pwm.h"
 
+#ifdef __USE_CMSIS
+#include "LPC13xx.h"
+#endif
+
 #define AHBCLKCTRL_CT16B0 0x80;
 #define AHBCLKCTRL_CT16B1 0x100;
 

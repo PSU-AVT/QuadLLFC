@@ -1,12 +1,8 @@
 /*
-===============================================================================
- Name        : main.c
- Author      : 
- Version     :
- Copyright   : Copyright (C)
- Description : main definition
-===============================================================================
-*/
+ * Copyright (c) 2011 Gregory Haynes <greg@greghaynes.net>
+ *
+ * Licensed under the BSD license. See LICENSE for more information.
+ */
 
 #ifdef __USE_CMSIS
 #include "LPC13xx.h"
@@ -20,18 +16,17 @@
 // See crp.h header for more information
 __CRP const unsigned int CRP_WORD = CRP_NO_CRP ;
 
-// TODO: insert other include files here
 
-// TODO: insert other definitions and declarations here
 
 int main(void) {
-	
-	// TODO: insert code here
-
-	// Enter an infinite loop, just incrementing a counter
-	volatile static int i = 0 ;
-	while(1) {
-		i++ ;
+	if (SysTick_Config (SystemCoreClock / 10000)) { /* Setup SysTick for 100 usec interrupts */
+		while (1); /* Dont continue if error */
 	}
+
+	// Main loop
+	while(1) {
+
+	}
+
 	return 0 ;
 }
