@@ -23,6 +23,9 @@ void esc_init_all(void);
  * throttle being 1
  */
 void esc_set_throttle(ESC_LABEL esc, float value);
+
+void esc_set_all_throttles(float *values);
+
 float esc_get_throttle(ESC_LABEL esc);
 void esc_arm_all(void);
 

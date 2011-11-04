@@ -88,6 +88,20 @@ void esc_set_throttle(ESC_LABEL esc, float value) {
 	esc_update_pwm(esc);
 }
 
+void esc_set_all_throttles(float *values) {
+	int i;
+	for(i = 0;i < ESC_CNT;++i) {
+		if(values[i] < 0)
+			continue;
+		_escs[i].throttle = values[i];
+	}
+
+	esc_rescale_all();
+
+	for(i = 0;i < ESC_CNT;++i)
+		esc_update_pwm(i);
+}
+
 void esc_arm_all(void) {
 	int i;
 	for(i = 0;i < ESC_CNT;++i)
