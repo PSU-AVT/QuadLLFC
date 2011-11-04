@@ -11,6 +11,8 @@
 #include <cr_section_macros.h>
 #include <NXP/crp.h>
 
+#include "esc.h"
+
 // Variable to store CRP value in. Will be placed automatically
 // by the linker when "Enable Code Read Protect" selected.
 // See crp.h header for more information
@@ -20,6 +22,9 @@ int main(void) {
 	if (SysTick_Config (SystemCoreClock / 10000)) { /* Setup SysTick for 100 usec interrupts */
 		while (1); /* Dont continue if error */
 	}
+
+	esc_init_all();
+	esc_arm_all();
 
 	// Main loop
 	while(1) {
