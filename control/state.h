@@ -34,6 +34,7 @@
 
 #include "../sys/tasks.h"
 #include "../sensors/itg3200.h"
+#include "../sensors/adxl345.h"
 
 enum axis_t {
 	AxisRoll,
@@ -49,6 +50,7 @@ enum axis_t {
 struct state_controller_t
 {
 	GyroData gyros;
+	AccelData accel;
     float body_state_delta[AXIS_CNT];
     float body_state_dt[AXIS_CNT];
     float inertial_state[AXIS_CNT];

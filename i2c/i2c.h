@@ -51,6 +51,8 @@
 #define I2C_SCLH_HS_SCLH        0x00000030  /* Fast Plus I2C SCL Duty Cycle High Reg */
 #define I2C_SCLL_HS_SCLL        0x00000030  /* Fast Plus I2C SCL Duty Cycle Low Reg */
 
+#define I2C_READBIT            0x01
+
 #include "../config.h"
 
 typedef enum i2cMode_e
@@ -94,5 +96,7 @@ extern uint32_t i2cInit( i2cMode_t mode );
 extern uint32_t i2cStart( void );
 extern uint32_t i2cStop( void );
 extern uint32_t i2cEngine( void );
+
+
 
 #endif

@@ -54,14 +54,14 @@ static struct task_t gyro_update_task;
 void stateGyroUpdate(struct task_t *task)
 {
 	// update gyro data
-	if(itg3200GetData(&_stateController.gyros) == itg3200_ERROR_LAST) // Error reading gyro data
+	if(itg3200GetData(&_stateController.gyros) == i2c_error_last) // Error reading gyro data
 		return;
 
 	// Low pass filter on gyro vals into state_dt
 	_stateController.body_state_dt[AxisRoll] = _stateController.gyros.X;
 	_stateController.body_state_dt[AxisPitch] = _stateController.gyros.Y;
 	_stateController.body_state_dt[AxisYaw] = _stateController.gyros.Z;
-
+d
 	float dt = task_get_dt(task);
 	// When we reset there is major blocking that causes the dt to get huge
 	if(state_just_reset) {
@@ -87,8 +87,9 @@ struct state_controller_t *stateControllerGet(void)
 
 void stateInit(void)
 {
-	// Initialize gyros
+	// Initialize sensors
 	itg3200Init();
+	adxl345_Init();
 
 	int i, j;
 	for(i = 0;i < 3;i++) {

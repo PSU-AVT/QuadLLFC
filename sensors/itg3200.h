@@ -40,13 +40,13 @@
 #define _itg3200_H_
 
 #include "../config.h"
-#include "../i2c/i2c.h"
+#include "../i2c/i2cError.h"
 
 //0.06956522 for degrees
 //0.00121414 for radians
 #define LSB_CORRECTION 823.626831
 
-#define itg3200_ADDRESS (0xD2) // device ID
+#define itg3200_ADDRESS (0xD0) // device ID was 0xD0
 #define itg3200_READBIT (0x01)
 
 #define itg3200_REGISTER_CONFIG_SMPLDIV (0x15) // Sample rate divider - 1
@@ -97,8 +97,8 @@ typedef struct
 }
 GyroData;
 
-itg3200Error_e itg3200Init(void);
-itg3200Error_e itg3200GetData (GyroData *data);
+i2c_error itg3200Init(void);
+i2c_error itg3200GetData (GyroData *data);
 unsigned char itg3200_Get_WhoAmI (void);
 
 #endif

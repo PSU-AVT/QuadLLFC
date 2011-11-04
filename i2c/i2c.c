@@ -209,7 +209,7 @@ uint32_t i2cStart( void )
   uint32_t retVal = FALSE;
 
   /*--- Issue a start condition ---*/
-  I2C_I2CCONSET = I2C_I2CCONSET_STA;    /* Set Start flag */
+  I2C_I2CCONSET = (I2C_I2CCONSET_STA|I2C_I2CCONSET_SI);    /* Set Start flag */
     
   /*--- Wait until START transmitted ---*/
   while( 1 )
@@ -384,3 +384,6 @@ uint32_t i2cEngine( void )
   }
   return ( TRUE );
 }
+
+
+
