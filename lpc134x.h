@@ -43,6 +43,15 @@
 #ifndef _LPC134X_H_
 #define _LPC134X_H_
 
+typedef volatile uint8_t REG8;
+typedef volatile uint16_t REG16;
+typedef volatile uint32_t REG32;
+typedef unsigned char byte_t;
+
+#define pREG8 (REG8 *)
+#define pREG16 (REG16 *)
+#define pREG32 (REG32 *)
+
 /*##############################################################################
 ## System Control Block
 ##############################################################################*/
