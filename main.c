@@ -4,9 +4,7 @@
  * Licensed under the BSD license. See LICENSE for more information.
  */
 
-#ifdef __USE_CMSIS
 #include "LPC13xx.h"
-#endif
 
 int main(void) {
 	if (SysTick_Config (SystemCoreClock / 10000)) { /* Setup SysTick for 100 usec interrupts */
