@@ -16,20 +16,20 @@ CRT=$(LPC_XPRESSO_DIR)/crt_emu_lpc11_13_nxp
 CRT_FLAGS=-wire=winusb  -pLPC1343 -load-base=0x1000
 
 CMSIS_INCLUDES=CMSIS/inc
-LDLIBS=
+LDLIBS=-lm
 OCFLAGS=--strip-unneeded
 
-CFLAGS=-c -g -O0 -I$(CMSIS_INCLUDES) -Wall -mthumb -ffunction-sections -fdata-sections -fmessage-length=0 -mcpu=cortex-m3 -fno-builtin
+CFLAGS=-c -O0 -I$(CMSIS_INCLUDES) -Wall -mthumb -ffunction-sections -fdata-sections -fmessage-length=0 -mcpu=cortex-m3 -fno-builtin -D__NEWLIB__
 LD_FLAGS= -nostartfiles -mthumb -mcpu=$(CPU_TYPE) -Wl,--gc-sections
-ASFLAGS = -c -g -O0 $(INCLUDE_PATHS) -Wall -mthumb -ffunction-sections -fdata-sections -fmessage-length=0 -mcpu=$(CPU_TYPE) -D__ASSEMBLY__ -x assembler-with-cpp
+ASFLAGS = -c -O0 $(INCLUDE_PATHS) -Wall -mthumb -ffunction-sections -fdata-sections -fmessage-length=0 -mcpu=$(CPU_TYPE) -D__ASSEMBLY__ -x assembler-with-cpp
 
-OBJFILES:=$(patsubst %.c,%.o,$(wildcard *.c)) $(patsubst CMSIS/src/%.c,CMSIS/src/%.o,$(wildcard CMSIS/src/*.c)) $(patsubst core/%.c,core/%.o,$(wildcard core/*.c))
+OBJFILES:=$(patsubst %.c,%.o,$(wildcard *.c)) $(patsubst CMSIS/src/%.c,CMSIS/src/%.o,$(wildcard CMSIS/src/*.c)) $(patsubst core/%.c,core/%.o,$(wildcard core/*.c)) $(patsubst sensors/%.c,sensors/%.o,$(wildcard sensors/*.c))
 
 all: firmware
 
 firmware: $(OBJFILES)
 	@ echo $(OBJFILES)
-	$(LD) $(LDFLAGS) -Tlinkscript.ld -o $(OUT).elf $(LDLIBS) $(OBJFILES)
+	$(LD) $(LD_FLAGS) -Tlinkscript.ld -o $(OUT).elf $(LDLIBS) $(OBJFILES)
 	$(OBJCOPY) $(OCFLAGS) -O binary $(OUT).elf $(OUT).bin
 	$(OBJCOPY) $(OCFLAGS) -O ihex $(OUT).elf $(OUT).hex
 
@@ -40,7 +40,7 @@ flash:
 	$(CRT) $(CRT_FLAGS) --flash-load-exec=$(OUT).bin
 
 clean:
-	rm *.o CMSIS/src/*.o core/*.o $(OUT).elf $(OUT).bin $(OUT).hex
+	rm $(OBJFILES) $(OUT).elf $(OUT).bin $(OUT).hex
 
 %.o: %.c
 	$(CC) $(CFLAGS) -o $@ $<
