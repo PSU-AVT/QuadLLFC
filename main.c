@@ -5,11 +5,14 @@
  */
 
 #include "LPC13xx.h"
+#include "esc.h"
 
 int main(void) {
 	if (SysTick_Config (SystemCoreClock / 10000)) { /* Setup SysTick for 100 usec interrupts */
 		while (1); /* Dont continue if error */
 	}
+
+	esc_init_all();
 
 	// Main loop
 	while(1) {
