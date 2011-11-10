@@ -9,6 +9,12 @@ SIZE= $(CROSS_COMPILE)size
 OBJCOPY= $(CROSS_COMPILE)objcopy
 OBJDUMP= $(CROSS_COMPILE)objdump
 
+LPC_XPRESSO_DIR=/usr/local/lpcxpresso_4.1.0_164/lpcxpresso/bin
+DFU=$(LPC_XPRESSO_DIR)/dfu-util
+DFU_FLAGS=-d 0x471:0xdf55 -c 0 -t 2048 -R -D $(LPC_XPRESSO_DIR)/LPCXpressoWIN.enc
+CRT=$(LPC_XPRESSO_DIR)/crt_emu_lpc11_13_nxp
+CRT_FLAGS=-wire=winusb  -pLPC1343 -load-base=0x1000
+
 CMSIS_INCLUDES=CMSIS/inc
 LDLIBS=
 OCFLAGS=--strip-unneeded
@@ -26,6 +32,12 @@ firmware: $(OBJFILES)
 	$(LD) $(LDFLAGS) -Tlinkscript.ld -o $(OUT).elf $(LDLIBS) $(OBJFILES)
 	$(OBJCOPY) $(OCFLAGS) -O binary $(OUT).elf $(OUT).bin
 	$(OBJCOPY) $(OCFLAGS) -O ihex $(OUT).elf $(OUT).hex
+
+boot:
+	$(DFU) $(DFU_FLAGS)
+
+flash:
+	$(CRT) $(CRT_FLAGS) --flash-load-exec=$(OUT).bin
 
 clean:
 	rm *.o CMSIS/src/*.o core/*.o $(OUT).elf $(OUT).bin $(OUT).hex
