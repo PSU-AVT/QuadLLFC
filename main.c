@@ -9,6 +9,9 @@
 #include "logging.h"
 #include "core/uart.h"
 #include "core/systick.h"
+#include "sensors/itg3200.h"
+#include "sensors/adxl345.h"
+#include "afproto.h"
 
 int main(void) {
 	systemInit();
@@ -18,11 +21,35 @@ int main(void) {
 	esc_init_all();
 	esc_arm_all();
 
+	// Init sensors
+	itg3200Init();
+	adxl345_Init();
+
+	unsigned char *afproto_buff = afproto_get_buffer();
+	GyroData gyro;
+	AccelData accel;
+
 	// Main loop
 	while(1) {
-		logging_send_string(LOGGING_DEBUG, "This is a debug message");
-		logging_send_string(LOGGING_ERROR, "This is an error message");
-		systickDelay(1000);
+
+		// Send gyro data
+		itg3200GetData(&gyro);
+		afproto_buff[0] = 4;
+		*(float*)&afproto_buff[1] = gyro.X;
+		*(float*)&afproto_buff[5] = gyro.Y;
+		*(float*)&afproto_buff[9] = gyro.Z;
+		int len = afproto_serialize_payload(afproto_buff, 13, uartGetOutputBuffer());
+		uartSend(uartGetOutputBuffer(), len);
+
+		adxl345GetData(&accel);
+		afproto_buff[0] = 5;
+		*(float*)&afproto_buff[1] = accel.x;
+		*(float*)&afproto_buff[5] = accel.y;
+		*(float*)&afproto_buff[9] = accel.z;
+		len = afproto_serialize_payload(afproto_buff, 13, uartGetOutputBuffer());
+		uartSend(uartGetOutputBuffer(), len);
+
+		systickDelay(200);
 	}
 
 	return 0;
