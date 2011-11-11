@@ -80,4 +80,7 @@ void uartRxBufferClearFIFO();
 uint8_t uartRxBufferDataPending();
 int uartRxBufferReadArray(unsigned char* rx, int* len);
 
+// Global buffer that can be used for output messagaes
+unsigned char *uartGetOutputBuffer(void);
+
 #endif

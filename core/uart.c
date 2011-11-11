@@ -344,5 +344,8 @@ void uartSendByte (uint8_t byte)
   return;
 }
 
+static unsigned char uart_out_buff[CFG_UART_BUFSIZE];
 
-
+unsigned char *uartGetOutputBuffer(void) {
+	return uart_out_buff;
+}
