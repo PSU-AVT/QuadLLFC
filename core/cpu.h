@@ -1,6 +1,6 @@
 /**************************************************************************/
 /*! 
-    @file     uart.h
+    @file     cpu.h
     @author   K. Townsend (microBuilder.eu)
     @date     22 March 2010
     @version  0.10
@@ -36,43 +36,42 @@
 */
 /**************************************************************************/
 
-#ifndef __UART_H__ 
-#define __UART_H__
+#ifndef _CPU_H_
+#define _CPU_H_
 
-#include "projectconfig.h"
+#include "../lpc134x.h"
 
-// Buffer used for circular fifo
-typedef struct _uart_buffer_t
+// Macro to initialise, reset and enable the cycle counter.
+// This can be used for rough timing and performance tests
+// by resetting the cycle counter before a function, and 
+// then reading the value after with "int count = DWT_CYCCNT"
+//
+//    CPU_RESET_CYCLECOUNTER;
+//    ... do something
+//    int count = DWT_CYCCNT;
+//
+#define CPU_RESET_CYCLECOUNTER    do { SCB_DEMCR = SCB_DEMCR | 0x01000000;  \
+                                       DWT_CYCCNT = 0;                      \
+                                       DWT_CTRL = DWT_CTRL | 1 ; } while(0)
+
+/**************************************************************************/
+/*! 
+    @brief Indicates the value for the PLL multiplier
+*/
+/**************************************************************************/
+typedef enum
 {
-  uint8_t ep_dir;
-  volatile uint8_t len;
-  volatile uint8_t wr_ptr;
-  volatile uint8_t rd_ptr;
-  uint8_t buf[CFG_UART_BUFSIZE];
-} uart_buffer_t;
+  CPU_MULTIPLIER_1 = 0,
+  CPU_MULTIPLIER_2,
+  CPU_MULTIPLIER_3,
+  CPU_MULTIPLIER_4,
+  CPU_MULTIPLIER_5,
+  CPU_MULTIPLIER_6
+}
+cpuMultiplier_t;
 
-// UART Protocol control block
-typedef struct _uart_pcb_t
-{
-  BOOL initialised;
-  uint32_t baudrate;
-  uint32_t status;
-  uint32_t pending_tx_data;
-  uart_buffer_t rxfifo;
-} uart_pcb_t;
-
-void UART_IRQHandler(void);
-uart_pcb_t *uartGetPCB();
-void uartInit(uint32_t Baudrate);
-void uartSend(uint8_t *BufferPtr, uint32_t Length);
-void uartSendByte (uint8_t byte);
-
-// Rx Buffer access control
-void uartRxBufferInit();
-uint8_t uartRxBufferRead();
-void uartRxBufferWrite(uint8_t data);
-void uartRxBufferClearFIFO();
-uint8_t uartRxBufferDataPending();
-bool uartRxBufferReadArray(byte_t* rx, size_t* len);
+void cpuPllSetup (cpuMultiplier_t multiplier);
+void cpuInit (void);
+void cpuReset (void);
 
 #endif

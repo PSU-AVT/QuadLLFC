@@ -4,20 +4,21 @@
  * Licensed under the BSD license. See LICENSE for more information.
  */
 
-#include "LPC13xx.h"
 #include "esc.h"
+#include "logging.h"
+#include "core/uart.h"
 
 int main(void) {
-	if (SysTick_Config (SystemCoreClock / 10000)) { /* Setup SysTick for 100 usec interrupts */
-		while (1); /* Dont continue if error */
-	}
-
+	systemInit();
+	uartInit(115200);
 	esc_init_all();
+	esc_arm_all();
 
 	// Main loop
 	while(1) {
-
+		uartSendByte('a');
+		systickDelay(1000);
 	}
 
-	return 0 ;
+	return 0;
 }

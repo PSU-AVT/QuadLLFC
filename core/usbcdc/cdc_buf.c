@@ -33,7 +33,7 @@
 
 /**************************************************************************/
 /*! 
-    @file     uart_buf.c
+    @file     cdc_buf.c
     @author   Christopher Wang (Freaklabs)
               Modified by: K. Townsend (microBuilder.eu)
     @date     19 May 2010
@@ -48,17 +48,28 @@
 */
 /**************************************************************************/
 
-#include "uart.h"
+#include "cdc_buf.h"
+
+static cdc_buffer_t cdcfifo;
+
+/**************************************************************************/
+/*!
+  Gets a pointer to the fifo buffer
+*/
+/**************************************************************************/
+cdc_buffer_t *cdcGetBuffer()
+{
+  return &cdcfifo;
+}
 
 /**************************************************************************/
 /*!
   Initialises the RX FIFO buffer
 */
 /**************************************************************************/
-void uartRxBufferInit()
+void cdcBufferInit()
 {
-  uart_pcb_t *pcb = uartGetPCB();
-  pcb->rxfifo.len = 0;
+  cdcfifo.len = 0;
 }
 
 /**************************************************************************/
@@ -69,35 +80,42 @@ void uartRxBufferInit()
   size, it will roll over to zero.
 */
 /**************************************************************************/
-uint8_t uartRxBufferRead()
+uint8_t cdcBufferRead()
 {
-  uart_pcb_t *pcb = uartGetPCB();
   uint8_t data;
 
-  data = pcb->rxfifo.buf[pcb->rxfifo.rd_ptr];
-  pcb->rxfifo.rd_ptr = (pcb->rxfifo.rd_ptr + 1) % CFG_UART_BUFSIZE;
-  pcb->rxfifo.len--;
+  data = cdcfifo.buf[cdcfifo.rd_ptr];
+  cdcfifo.rd_ptr = (cdcfifo.rd_ptr + 1) % CFG_USBCDC_BUFFERSIZE;
+  cdcfifo.len--;
   return data;
 }
 
 /**************************************************************************/
 /*!
-  Read byte array from uart
+  Reads x bytes from cdc buffer
  */
 /**************************************************************************/
-bool uartRxBufferReadArray(byte_t* rx, size_t* len)
+uint32_t cdcBufferReadLen(uint8_t* buf, uint32_t len)
 {
-  uart_pcb_t *pcb = uartGetPCB();
-  *len = 0;
-  
-  while(pcb->rxfifo.len != 0)
+  uint32_t counter, actual;
+  counter = actual = 0;
+
+  while(counter != len)
   {
-    (*rx) = uartRxBufferRead();
-    (*len)++;
-    rx++;
+    // Make sure we don't exceed buffer limits
+    if (cdcfifo.len > 0)
+    {
+      buf[counter] = cdcBufferRead();
+      actual++;
+      counter++;
+    }
+    else
+    {
+      return actual;
+    }
   }
-  
-  return (*len != 0);
+
+  return actual;
 }
 
 /**************************************************************************/
@@ -108,13 +126,11 @@ bool uartRxBufferReadArray(byte_t* rx, size_t* len)
   will roll over to zero.
 */
 /**************************************************************************/
-void uartRxBufferWrite(uint8_t data)
+void cdcBufferWrite(uint8_t data)
 {
-  uart_pcb_t *pcb = uartGetPCB();
-
-  pcb->rxfifo.buf[pcb->rxfifo.wr_ptr] = data;
-  pcb->rxfifo.wr_ptr = (pcb->rxfifo.wr_ptr + 1) % CFG_UART_BUFSIZE;
-  pcb->rxfifo.len++;
+  cdcfifo.buf[cdcfifo.wr_ptr] = data;
+  cdcfifo.wr_ptr = (cdcfifo.wr_ptr + 1) % CFG_USBCDC_BUFFERSIZE;
+  cdcfifo.len++;
 }
 
 /**************************************************************************/
@@ -122,13 +138,11 @@ void uartRxBufferWrite(uint8_t data)
     Clear the fifo read and write pointers and set the length to zero.
 */
 /**************************************************************************/
-void uartRxBufferClearFIFO()
+void cdcBufferClearFIFO()
 {
-  uart_pcb_t *pcb = uartGetPCB();
-
-  pcb->rxfifo.rd_ptr = 0;
-  pcb->rxfifo.wr_ptr = 0;
-  pcb->rxfifo.len = 0;
+  cdcfifo.rd_ptr = 0;
+  cdcfifo.wr_ptr = 0;
+  cdcfifo.len = 0;
 }
 
 /**************************************************************************/
@@ -136,11 +150,9 @@ void uartRxBufferClearFIFO()
     Check whether there is any data pending on the RX buffer.
 */
 /**************************************************************************/
-uint8_t uartRxBufferDataPending()
+uint8_t cdcBufferDataPending()
 {
-  uart_pcb_t *pcb = uartGetPCB();
-
-  if (pcb->rxfifo.len != 0)
+  if (cdcfifo.len != 0)
   {
     return 1;
   }

@@ -1,6 +1,6 @@
 /**************************************************************************/
 /*! 
-    @file     uart.h
+    @file     sysdefs.h
     @author   K. Townsend (microBuilder.eu)
     @date     22 March 2010
     @version  0.10
@@ -36,43 +36,35 @@
 */
 /**************************************************************************/
 
-#ifndef __UART_H__ 
-#define __UART_H__
+#ifndef _SYSDEFS_H_
+#define _SYSDEFS_H_
 
-#include "projectconfig.h"
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
 
-// Buffer used for circular fifo
-typedef struct _uart_buffer_t
-{
-  uint8_t ep_dir;
-  volatile uint8_t len;
-  volatile uint8_t wr_ptr;
-  volatile uint8_t rd_ptr;
-  uint8_t buf[CFG_UART_BUFSIZE];
-} uart_buffer_t;
+// Stay compatible with ugly "windows" style
+#define BOOL bool
 
-// UART Protocol control block
-typedef struct _uart_pcb_t
-{
-  BOOL initialised;
-  uint32_t baudrate;
-  uint32_t status;
-  uint32_t pending_tx_data;
-  uart_buffer_t rxfifo;
-} uart_pcb_t;
+#ifndef TRUE
+#define TRUE true
+#endif
+#ifndef FALSE
+#define FALSE false
+#endif
 
-void UART_IRQHandler(void);
-uart_pcb_t *uartGetPCB();
-void uartInit(uint32_t Baudrate);
-void uartSend(uint8_t *BufferPtr, uint32_t Length);
-void uartSendByte (uint8_t byte);
+typedef volatile uint8_t REG8;
+typedef volatile uint16_t REG16;
+typedef volatile uint32_t REG32;
+typedef unsigned char byte_t;
 
-// Rx Buffer access control
-void uartRxBufferInit();
-uint8_t uartRxBufferRead();
-void uartRxBufferWrite(uint8_t data);
-void uartRxBufferClearFIFO();
-uint8_t uartRxBufferDataPending();
-bool uartRxBufferReadArray(byte_t* rx, size_t* len);
+#define pREG8  (REG8 *)
+#define pREG16 (REG16 *)
+#define pREG32 (REG32 *)
+
+#ifndef NULL
+#define NULL ((void *) 0)
+#endif
 
 #endif
+

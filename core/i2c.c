@@ -14,9 +14,6 @@
  *
 *****************************************************************************/
 #include "i2c.h"
-#include "LPC13xx.h"
-#include "../lpc134x.h"
-#include <stdint.h>
 
 volatile uint32_t I2CMasterState = I2CSTATE_IDLE;
 volatile uint32_t I2CSlaveState = I2CSTATE_IDLE;
@@ -37,14 +34,14 @@ volatile uint32_t WrIndex = 0;
 **
 ** parameters:			None
 ** Returned value:		None
-**
+** 
 *****************************************************************************/
-void I2C_IRQHandler(void)
+void I2C_IRQHandler(void) 
 {
 	uint8_t StatValue;
 
 	/* this handler deals with master read and master write only */
-	StatValue = LPC_I2C->STAT;
+	StatValue = I2C_I2CSTAT;
 	switch ( StatValue )
 	{
 	case 0x08:
@@ -55,11 +52,11 @@ void I2C_IRQHandler(void)
 		 * (we always start with a write after START+SLA)
 		 */
 		WrIndex = 0;
-		LPC_I2C->DAT = I2CMasterBuffer[WrIndex++];
-		LPC_I2C->CONCLR = (I2CONCLR_SIC | I2CONCLR_STAC);
+		I2C_I2CDAT = I2CMasterBuffer[WrIndex++];
+		I2C_I2CCONCLR = (I2CONCLR_SIC | I2CONCLR_STAC);
 		I2CMasterState = I2CSTATE_PENDING;
 		break;
-
+	
 	case 0x10:
 		/*
 		 * A repeated START condition has been transmitted.
@@ -68,17 +65,17 @@ void I2C_IRQHandler(void)
 		 */
 		RdIndex = 0;
 		/* Send SLA with R bit set, */
-		LPC_I2C->DAT = I2CMasterBuffer[WrIndex++];
-		LPC_I2C->CONCLR = (I2CONCLR_SIC | I2CONCLR_STAC);
+		I2C_I2CDAT = I2CMasterBuffer[WrIndex++];
+		I2C_I2CCONCLR = (I2CONCLR_SIC | I2CONCLR_STAC);
 	break;
-
+	
 	case 0x18:
 		/*
 		 * SLA+W has been transmitted; ACK has been received.
 		 * We now start writing bytes.
 		 */
-		LPC_I2C->DAT = I2CMasterBuffer[WrIndex++];
-		LPC_I2C->CONCLR = I2CONCLR_SIC;
+		I2C_I2CDAT = I2CMasterBuffer[WrIndex++];
+		I2C_I2CCONCLR = I2CONCLR_SIC;
 		break;
 
 	case 0x20:
@@ -87,8 +84,8 @@ void I2C_IRQHandler(void)
 		 * Send a stop condition to terminate the transaction
 		 * and signal I2CEngine the transaction is aborted.
 		 */
-		LPC_I2C->CONSET = I2CONSET_STO;
-		LPC_I2C->CONCLR = I2CONCLR_SIC;
+		I2C_I2CCONSET = I2CONSET_STO;
+		I2C_I2CCONCLR = I2CONCLR_SIC;
 		I2CMasterState = I2CSTATE_SLA_NACK;
 		break;
 
@@ -101,7 +98,7 @@ void I2C_IRQHandler(void)
 		if ( WrIndex < I2CWriteLength )
 		{
 			/* Keep writing as long as bytes avail */
-			LPC_I2C->DAT = I2CMasterBuffer[WrIndex++];
+			I2C_I2CDAT = I2CMasterBuffer[WrIndex++];
 		}
 		else
 		{
@@ -109,15 +106,15 @@ void I2C_IRQHandler(void)
 			{
 				/* Send a Repeated START to initialize a read transaction */
 				/* (handled in state 0x10)                                */
-				LPC_I2C->CONSET = I2CONSET_STA;	/* Set Repeated-start flag */
+				I2C_I2CCONSET = I2CONSET_STA;	/* Set Repeated-start flag */
 			}
 			else
 			{
 				I2CMasterState = I2CSTATE_ACK;
-				LPC_I2C->CONSET = I2CONSET_STO;      /* Set Stop flag */
+				I2C_I2CCONSET = I2CONSET_STO;      /* Set Stop flag */
 			}
 		}
-		LPC_I2C->CONCLR = I2CONCLR_SIC;
+		I2C_I2CCONCLR = I2CONCLR_SIC;
 		break;
 
 	case 0x30:
@@ -126,8 +123,8 @@ void I2C_IRQHandler(void)
 		 * Send a STOP condition to terminate the transaction and inform the
 		 * I2CEngine that the transaction failed.
 		 */
-		LPC_I2C->CONSET = I2CONSET_STO;
-		LPC_I2C->CONCLR = I2CONCLR_SIC;
+		I2C_I2CCONSET = I2CONSET_STO;
+		I2C_I2CCONCLR = I2CONCLR_SIC;
 		I2CMasterState = I2CSTATE_NACK;
 		break;
 
@@ -140,7 +137,7 @@ void I2C_IRQHandler(void)
 		 * (this is automatically done by the I2C hardware)
 		 */
 		I2CMasterState = I2CSTATE_ARB_LOSS;
-		LPC_I2C->CONCLR = I2CONCLR_SIC;
+		I2C_I2CCONCLR = I2CONCLR_SIC;
 		break;
 
 	case 0x40:
@@ -153,14 +150,14 @@ void I2C_IRQHandler(void)
 		if ( I2CReadLength == 1 )
 		{
 			/* last (and only) byte: send a NACK after data is received */
-			LPC_I2C->CONCLR = I2CONCLR_AAC;
+			I2C_I2CCONCLR = I2CONCLR_AAC;
 		}
 		else
 		{
 			/* more bytes to follow: send an ACK after data is received */
-			LPC_I2C->CONSET = I2CONSET_AA;
+			I2C_I2CCONSET = I2CONSET_AA;
 		}
-		LPC_I2C->CONCLR = I2CONCLR_SIC;
+		I2C_I2CCONCLR = I2CONCLR_SIC;
 		break;
 
 	case 0x48:
@@ -169,8 +166,8 @@ void I2C_IRQHandler(void)
 		 * Send a stop condition to terminate the transaction
 		 * and signal I2CEngine the transaction is aborted.
 		 */
-		LPC_I2C->CONSET = I2CONSET_STO;
-		LPC_I2C->CONCLR = I2CONCLR_SIC;
+		I2C_I2CCONSET = I2CONSET_STO;
+		I2C_I2CCONCLR = I2CONCLR_SIC;
 		I2CMasterState = I2CSTATE_SLA_NACK;
 		break;
 
@@ -180,20 +177,20 @@ void I2C_IRQHandler(void)
 		 * Read the byte and check for more bytes to read.
 		 * Send a NOT ACK after the last byte is received
 		 */
-		I2CSlaveBuffer[RdIndex++] = LPC_I2C->DAT;
+		I2CSlaveBuffer[RdIndex++] = I2C_I2CDAT;
 		if ( RdIndex < (I2CReadLength-1) )
 		{
 			/* lmore bytes to follow: send an ACK after data is received */
-			LPC_I2C->CONSET = I2CONSET_AA;
+			I2C_I2CCONSET = I2CONSET_AA;
 		}
 		else
 		{
 			/* last byte: send a NACK after data is received */
-			LPC_I2C->CONCLR = I2CONCLR_AAC;
+			I2C_I2CCONCLR = I2CONCLR_AAC;
 		}
-		LPC_I2C->CONCLR = I2CONCLR_SIC;
+		I2C_I2CCONCLR = I2CONCLR_SIC;
 		break;
-
+	
 	case 0x58:
 		/*
 		 * Data byte has been received; NOT ACK has been returned.
@@ -201,15 +198,15 @@ void I2C_IRQHandler(void)
 		 * Generate a STOP condition and flag the I2CEngine that the
 		 * transaction is finished.
 		 */
-		I2CSlaveBuffer[RdIndex++] = LPC_I2C->DAT;
+		I2CSlaveBuffer[RdIndex++] = I2C_I2CDAT;
 		I2CMasterState = I2CSTATE_ACK;
-		LPC_I2C->CONSET = I2CONSET_STO;	/* Set Stop flag */
-		LPC_I2C->CONCLR = I2CONCLR_SIC;	/* Clear SI flag */
+		I2C_I2CCONSET = I2CONSET_STO;	/* Set Stop flag */
+		I2C_I2CCONCLR = I2CONCLR_SIC;	/* Clear SI flag */
 		break;
 
-
+	
 	default:
-		LPC_I2C->CONCLR = I2CONCLR_SIC;
+		I2C_I2CCONCLR = I2CONCLR_SIC;
 	break;
   }
   return;
@@ -224,15 +221,15 @@ void I2C_IRQHandler(void)
 **
 ** parameters:		None
 ** Returned value:	true or false, return false if timed out
-**
+** 
 *****************************************************************************/
 static uint32_t I2CStart( void )
 {
 	uint32_t timeout = 0;
 
 	/*--- Issue a start condition ---*/
-	LPC_I2C->CONSET = I2CONSET_STA;	/* Set Start flag */
-
+	I2C_I2CCONSET = I2CONSET_STA;	/* Set Start flag */
+    
 	while((I2CMasterState != I2CSTATE_PENDING) && (timeout < MAX_TIMEOUT))
 	{
 		timeout++;
@@ -248,17 +245,17 @@ static uint32_t I2CStart( void )
 **
 ** parameters:		None
 ** Returned value:	true or never return
-**
+** 
 *****************************************************************************/
 static uint32_t I2CStop( void )
 {
 	uint32_t timeout = 0;
 
-	LPC_I2C->CONSET = I2CONSET_STO;      /* Set Stop flag */
-	LPC_I2C->CONCLR = I2CONCLR_SIC;  /* Clear SI flag */
+	I2C_I2CCONSET = I2CONSET_STO;      /* Set Stop flag */
+	I2C_I2CCONCLR = I2CONCLR_SIC;  /* Clear SI flag */
 
 	/*--- Wait for STOP detected ---*/
-	while((LPC_I2C->CONSET & I2CONSET_STO) && (timeout < MAX_TIMEOUT))
+	while((I2C_I2CCONSET & I2CONSET_STO) && (timeout < MAX_TIMEOUT))
 	{
 		timeout++;
 	}
@@ -273,11 +270,11 @@ static uint32_t I2CStop( void )
 ** parameters:		I2c mode is either MASTER or SLAVE
 ** Returned value:	true or false, return false if the I2C
 **					interrupt handler was not installed correctly
-**
+** 
 *****************************************************************************/
-uint32_t i2cInit( uint32_t I2cMode )
+uint32_t i2cInit( uint32_t I2cMode ) 
 {
-  SCB_PRESETCTRL |= (0x1<<1);
+	SCB_PRESETCTRL |= (0x1<<1);
 
   // Enable I2C clock
   SCB_SYSAHBCLKCTRL |= (SCB_SYSAHBCLKCTRL_I2C);
@@ -291,32 +288,32 @@ uint32_t i2cInit( uint32_t I2cMode )
   IOCON_PIO0_5 |= IOCON_PIO0_5_FUNC_I2CSDA;
 
   // Clear flags
-  LPC_I2C->CONCLR = I2CONCLR_AAC |
-                  I2CONCLR_SIC |
-                  I2CONCLR_STAC |
-                  I2CONCLR_I2ENC;
+  I2C_I2CCONCLR = I2C_I2CCONCLR_AAC | 
+                  I2C_I2CCONCLR_SIC | 
+                  I2C_I2CCONCLR_STAC | 
+                  I2C_I2CCONCLR_I2ENC;
 
   // See p.128 for appropriate values for SCLL and SCLH
 #if I2C_FAST_MODE_PLUS
   IOCON_PIO0_4 |= (IOCON_PIO0_4_I2CMODE_FASTPLUSI2C);
   IOCON_PIO0_5 |= (IOCON_PIO0_5_I2CMODE_FASTPLUSI2C);
-  LPC_I2C->SCLL   = I2C_SCLL_HS_SCLL;
-  LPC_I2C->SCLH   = I2C_SCLH_HS_SCLH;
+  I2C_I2CSCLL   = I2C_SCLL_HS_SCLL;
+  I2C_I2CSCLH   = I2C_SCLH_HS_SCLH;
 #else
-  LPC_I2C->SCLL   = I2SCLL_SCLL;
-  LPC_I2C->SCLH   = I2SCLH_SCLH;
+  I2C_I2CSCLL   = I2SCLL_SCLL;
+  I2C_I2CSCLH   = I2SCLH_SCLH;
 #endif
 
   if ( I2cMode == I2CSLAVE )
   {
-    LPC_I2C->ADR0 = SLAVE_ADDR;
-  }
+    I2C_I2CADR0 = SLAVE_ADDR;
+  }    
 
   /* Enable the I2C Interrupt */
   NVIC_EnableIRQ(I2C_IRQn);
-  LPC_I2C->CONSET = I2CONSET_I2EN;
+  I2C_I2CCONSET = I2C_I2CCONSET_I2EN;
 
-  return 1;
+  return( TRUE );
 }
 
 /*****************************************************************************
@@ -331,17 +328,17 @@ uint32_t i2cInit( uint32_t I2cMode )
 **
 ** parameters:		None
 ** Returned value:	Any of the I2CSTATE_... values. See i2c.h
-**
+** 
 *****************************************************************************/
-uint32_t i2cEngine( void )
+uint32_t i2cEngine( void ) 
 {
   I2CMasterState = I2CSTATE_IDLE;
   RdIndex = 0;
   WrIndex = 0;
-  if (!I2CStart())
+  if ( I2CStart() != TRUE )
   {
 	I2CStop();
-	return 0;
+	return ( FALSE );
   }
 
   /* wait until the state is a terminal state */
@@ -353,3 +350,4 @@ uint32_t i2cEngine( void )
 /******************************************************************************
 **                            End Of File
 ******************************************************************************/
+

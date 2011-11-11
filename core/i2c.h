@@ -11,10 +11,10 @@
  *                           Updated to reflect new code
  *
 ******************************************************************************/
-#ifndef __I2C_H
+#ifndef __I2C_H 
 #define __I2C_H
 
-#include <stdint.h>
+#include "projectconfig.h"
 
 /*
  * These are states returned by the I2CEngine:

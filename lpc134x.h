@@ -43,16 +43,8 @@
 #ifndef _LPC134X_H_
 #define _LPC134X_H_
 
-#include <stdint.h>
-
-typedef volatile uint8_t REG8;
-typedef volatile uint16_t REG16;
-typedef volatile uint32_t REG32;
-typedef unsigned char byte_t;
-
-#define pREG8 (REG8 *)
-#define pREG16 (REG16 *)
-#define pREG32 (REG32 *)
+#include "sysdefs.h"
+#include "projectconfig.h"
 
 /*##############################################################################
 ## System Control Block
@@ -108,6 +100,7 @@ typedef unsigned char byte_t;
 #define SCB_DEVICEID                              (*(pREG32 (0x400483F4)))    // Device ID
 #define SCB_MMFAR                                 (*(pREG32 (0xE000ED34)))    // Memory Manage Address Register (MMAR)
 #define SCB_BFAR                                  (*(pREG32 (0xE000ED38)))    // Bus Fault Manage Address Register (BFAR)
+#define SCB_DEMCR                                 (*(pREG32 (0xE000EDFC)))
 
 /*  CPU ID Base Register */
 #define SCB_CPUID                                 (*(pREG32 (0xE000ED00)))
@@ -126,6 +119,22 @@ typedef unsigned char byte_t;
 #define SCB_SCR_SLEEPDEEP                         ((unsigned int) 0x00000004) // Enable deep sleep
 #define SCB_SCR_SEVONPEND_MASK                    ((unsigned int) 0x00000010) // Wake up from WFE is new int is pended regardless of priority
 #define SCB_SCR_SEVONPEND                         ((unsigned int) 0x00000010)
+
+/*  Application Interrupt and Reset Control Register */
+
+#define SCB_AIRCR                                 (*(pREG32 (0xE000ED0C)))
+#define SCB_AIRCR_VECTKEY_VALUE                   ((unsigned int) 0x05FA0000) // Vect key needs to be set to 05FA for reset to work
+#define SCB_AIRCR_VECTKEY_MASK                    ((unsigned int) 0xFFFF0000)
+#define SCB_AIRCR_ENDIANESS                       ((unsigned int) 0x00008000) // Read Endianness (1=Big, 0=Little)
+#define SCB_AIRCR_ENDIANESS_MASK                  ((unsigned int) 0x00008000)
+#define SCB_AIRCR_PRIGROUP                        ((unsigned int) 0x00000700)
+#define SCB_AIRCR_PRIGROUP_MASK                   ((unsigned int) 0x00000700)
+#define SCB_AIRCR_SYSRESETREQ                     ((unsigned int) 0x00000004) // Request system reset
+#define SCB_AIRCR_SYSRESETREQ_MASK                ((unsigned int) 0x00000004)
+#define SCB_AIRCR_VECTCLRACTIVE                   ((unsigned int) 0x00000002) // Used to prevent accidental reset
+#define SCB_AIRCR_VECTCLRACTIVE_MASK              ((unsigned int) 0x00000002)
+#define SCB_AIRCR_VECTRESET                       ((unsigned int) 0x00000001)
+#define SCB_AIRCR_VECTRESET_MASK                  ((unsigned int) 0x00000001)
 
 /*  Memory Management Fault Status Register */
 
@@ -223,45 +232,45 @@ typedef unsigned char byte_t;
     subsystem. Note that the USB subsystem has its own dedicated PLL. The PLL can
     produce a clock up to the maximum allowed for the CPU, which is 72 MHz. */
 
-#define SCB_PLLCTRL_MULT_1                        ((unsigned int) 0x00000000)
-#define SCB_PLLCTRL_MULT_2                        ((unsigned int) 0x00000001)
-#define SCB_PLLCTRL_MULT_3                        ((unsigned int) 0x00000002)
-#define SCB_PLLCTRL_MULT_4                        ((unsigned int) 0x00000003)
-#define SCB_PLLCTRL_MULT_5                        ((unsigned int) 0x00000004)
-#define SCB_PLLCTRL_MULT_6                        ((unsigned int) 0x00000005)
-#define SCB_PLLCTRL_MULT_7                        ((unsigned int) 0x00000006)
-#define SCB_PLLCTRL_MULT_8                        ((unsigned int) 0x00000007)
-#define SCB_PLLCTRL_MULT_9                        ((unsigned int) 0x00000008)
-#define SCB_PLLCTRL_MULT_10                       ((unsigned int) 0x00000009)
-#define SCB_PLLCTRL_MULT_11                       ((unsigned int) 0x0000000A)
-#define SCB_PLLCTRL_MULT_12                       ((unsigned int) 0x0000000B)
-#define SCB_PLLCTRL_MULT_13                       ((unsigned int) 0x0000000C)
-#define SCB_PLLCTRL_MULT_14                       ((unsigned int) 0x0000000D)
-#define SCB_PLLCTRL_MULT_15                       ((unsigned int) 0x0000000E)
-#define SCB_PLLCTRL_MULT_16                       ((unsigned int) 0x0000000F)
-#define SCB_PLLCTRL_MULT_17                       ((unsigned int) 0x00000010)
-#define SCB_PLLCTRL_MULT_18                       ((unsigned int) 0x00000011)
-#define SCB_PLLCTRL_MULT_19                       ((unsigned int) 0x00000012)
-#define SCB_PLLCTRL_MULT_20                       ((unsigned int) 0x00000013)
-#define SCB_PLLCTRL_MULT_21                       ((unsigned int) 0x00000014)
-#define SCB_PLLCTRL_MULT_22                       ((unsigned int) 0x00000015)
-#define SCB_PLLCTRL_MULT_23                       ((unsigned int) 0x00000016)
-#define SCB_PLLCTRL_MULT_24                       ((unsigned int) 0x00000017)
-#define SCB_PLLCTRL_MULT_25                       ((unsigned int) 0x00000018)
-#define SCB_PLLCTRL_MULT_26                       ((unsigned int) 0x00000019)
-#define SCB_PLLCTRL_MULT_27                       ((unsigned int) 0x0000001A)
-#define SCB_PLLCTRL_MULT_28                       ((unsigned int) 0x0000001B)
-#define SCB_PLLCTRL_MULT_29                       ((unsigned int) 0x0000001C)
-#define SCB_PLLCTRL_MULT_30                       ((unsigned int) 0x0000001D)
-#define SCB_PLLCTRL_MULT_31                       ((unsigned int) 0x0000001E)
-#define SCB_PLLCTRL_MULT_32                       ((unsigned int) 0x0000001F)
-#define SCB_PLLCTRL_MULT_MASK                     ((unsigned int) 0x0000001F)    
-#define SCB_PLLCTRL_DIV_2                         ((unsigned int) 0x00000000)       
-#define SCB_PLLCTRL_DIV_4                         ((unsigned int) 0x00000020)       
-#define SCB_PLLCTRL_DIV_8                         ((unsigned int) 0x00000040)       
-#define SCB_PLLCTRL_DIV_16                        ((unsigned int) 0x00000060)
-#define SCB_PLLCTRL_DIV_BIT                       (5)
-#define SCB_PLLCTRL_DIV_MASK                      ((unsigned int) 0x00000060)    
+#define SCB_PLLCTRL_MSEL_1                        ((unsigned int) 0x00000000)
+#define SCB_PLLCTRL_MSEL_2                        ((unsigned int) 0x00000001)
+#define SCB_PLLCTRL_MSEL_3                        ((unsigned int) 0x00000002)
+#define SCB_PLLCTRL_MSEL_4                        ((unsigned int) 0x00000003)
+#define SCB_PLLCTRL_MSEL_5                        ((unsigned int) 0x00000004)
+#define SCB_PLLCTRL_MSEL_6                        ((unsigned int) 0x00000005)
+#define SCB_PLLCTRL_MSEL_7                        ((unsigned int) 0x00000006)
+#define SCB_PLLCTRL_MSEL_8                        ((unsigned int) 0x00000007)
+#define SCB_PLLCTRL_MSEL_9                        ((unsigned int) 0x00000008)
+#define SCB_PLLCTRL_MSEL_10                       ((unsigned int) 0x00000009)
+#define SCB_PLLCTRL_MSEL_11                       ((unsigned int) 0x0000000A)
+#define SCB_PLLCTRL_MSEL_12                       ((unsigned int) 0x0000000B)
+#define SCB_PLLCTRL_MSEL_13                       ((unsigned int) 0x0000000C)
+#define SCB_PLLCTRL_MSEL_14                       ((unsigned int) 0x0000000D)
+#define SCB_PLLCTRL_MSEL_15                       ((unsigned int) 0x0000000E)
+#define SCB_PLLCTRL_MSEL_16                       ((unsigned int) 0x0000000F)
+#define SCB_PLLCTRL_MSEL_17                       ((unsigned int) 0x00000010)
+#define SCB_PLLCTRL_MSEL_18                       ((unsigned int) 0x00000011)
+#define SCB_PLLCTRL_MSEL_19                       ((unsigned int) 0x00000012)
+#define SCB_PLLCTRL_MSEL_20                       ((unsigned int) 0x00000013)
+#define SCB_PLLCTRL_MSEL_21                       ((unsigned int) 0x00000014)
+#define SCB_PLLCTRL_MSEL_22                       ((unsigned int) 0x00000015)
+#define SCB_PLLCTRL_MSEL_23                       ((unsigned int) 0x00000016)
+#define SCB_PLLCTRL_MSEL_24                       ((unsigned int) 0x00000017)
+#define SCB_PLLCTRL_MSEL_25                       ((unsigned int) 0x00000018)
+#define SCB_PLLCTRL_MSEL_26                       ((unsigned int) 0x00000019)
+#define SCB_PLLCTRL_MSEL_27                       ((unsigned int) 0x0000001A)
+#define SCB_PLLCTRL_MSEL_28                       ((unsigned int) 0x0000001B)
+#define SCB_PLLCTRL_MSEL_29                       ((unsigned int) 0x0000001C)
+#define SCB_PLLCTRL_MSEL_30                       ((unsigned int) 0x0000001D)
+#define SCB_PLLCTRL_MSEL_31                       ((unsigned int) 0x0000001E)
+#define SCB_PLLCTRL_MSEL_32                       ((unsigned int) 0x0000001F)
+#define SCB_PLLCTRL_MSEL_MASK                     ((unsigned int) 0x0000001F)    
+#define SCB_PLLCTRL_PSEL_2                        ((unsigned int) 0x00000000)       
+#define SCB_PLLCTRL_PSEL_4                        ((unsigned int) 0x00000020)       
+#define SCB_PLLCTRL_PSEL_8                        ((unsigned int) 0x00000040)       
+#define SCB_PLLCTRL_PSEL_16                       ((unsigned int) 0x00000060)
+#define SCB_PLLCTRL_PSEL_BIT                      (5)
+#define SCB_PLLCTRL_PSEL_MASK                     ((unsigned int) 0x00000060)    
 #define SCB_PLLCTRL_DIRECT_MASK                   ((unsigned int) 0x00000080) // Direct CCO clock output control
 #define SCB_PLLCTRL_BYPASS_MASK                   ((unsigned int) 0x00000100) // Input clock bypass control
 #define SCB_PLLCTRL_MASK                          ((unsigned int) 0x000001FF)    
@@ -1239,6 +1248,35 @@ typedef unsigned char byte_t;
 #define SCB_DEVICEID_LPC1343FBD48                 ((unsigned int) 0x3D00002B)
 
 /*##############################################################################
+## Data Watchpoint and Trace Unit (DWT)
+##############################################################################*/
+// For more information, see Cortex-M3 Technical Reference Manual 8.3
+// This block is optional and not all comparators or functionality may
+// be present on all chips, though basic DWT functionality is present
+// on the LPC1343 since CYCNT works
+
+#define DWT_CTRL                                  (*(pREG32 (0xE0001000)))    // Control register
+#define DWT_CYCCNT                                (*(pREG32 (0xE0001004)))    // Cycle counter (useful for rough performance testing)
+#define DWT_CPICNT                                (*(pREG32 (0xE0001008)))    // CPI Count Register
+#define DWT_EXCCNT                                (*(pREG32 (0xE000100C)))    // Exception overhead count register
+#define DWT_SLEEPCNT                              (*(pREG32 (0xE0001010)))    // Sleep count register
+#define DWT_LSUCNT                                (*(pREG32 (0xE0001014)))    // LSU count register
+#define DWT_FOLDCNT                               (*(pREG32 (0xE0001018)))    // Folder-instruction count register
+#define DWT_PCSR                                  (*(pREG32 (0xE000101C)))    // Program counter sample register
+#define DWT_COMP0                                 (*(pREG32 (0xE0001020)))    // Comparator register 0
+#define DWT_MASK0                                 (*(pREG32 (0xE0001024)))    // Mask register 0
+#define DWT_FUNCTION0                             (*(pREG32 (0xE0001028)))    // Function register 0
+#define DWT_COMP1                                 (*(pREG32 (0xE0001030)))    // Comparator register 1
+#define DWT_MASK1                                 (*(pREG32 (0xE0001034)))    // Mask register 1
+#define DWT_FUNCTION1                             (*(pREG32 (0xE0001038)))    // Function register 1
+#define DWT_COMP2                                 (*(pREG32 (0xE0001040)))    // Comparator register 2
+#define DWT_MASK2                                 (*(pREG32 (0xE0001044)))    // Mask register 2
+#define DWT_FUNCTION2                             (*(pREG32 (0xE0001048)))    // Function register 2
+#define DWT_COMP3                                 (*(pREG32 (0xE0001050)))    // Comparator register 3
+#define DWT_MASK3                                 (*(pREG32 (0xE0001054)))    // Mask register 3
+#define DWT_FUNCTION3                             (*(pREG32 (0xE0001058)))    // Function register 3
+
+/*##############################################################################
 ## Power Management Unit (PMU)
 ##############################################################################*/
 
@@ -1759,7 +1797,7 @@ typedef unsigned char byte_t;
 #define IOCON_SWDIO_PIO1_3_FUNC_SWDIO             ((unsigned int) 0x00000000)
 #define IOCON_SWDIO_PIO1_3_FUNC_GPIO              ((unsigned int) 0x00000001)
 #define IOCON_SWDIO_PIO1_3_FUNC_AD4               ((unsigned int) 0x00000002)
-#define IOCON_SWDIO_PIO1_3_FUNC_CT32B1_MAT2       ((unsigned int) 0x00000004)
+#define IOCON_SWDIO_PIO1_3_FUNC_CT32B1_MAT2       ((unsigned int) 0x00000003)
 #define IOCON_SWDIO_PIO1_3_HYS_MASK               ((unsigned int) 0x00000020)
 #define IOCON_SWDIO_PIO1_3_HYS_DISABLE            ((unsigned int) 0x00000000)
 #define IOCON_SWDIO_PIO1_3_HYS_ENABLE             ((unsigned int) 0x00000020)
@@ -1767,7 +1805,7 @@ typedef unsigned char byte_t;
 #define IOCON_SWDIO_PIO1_3_ADMODE_ANALOG          ((unsigned int) 0x00000000)
 #define IOCON_SWDIO_PIO1_3_ADMODE_DIGITAL         ((unsigned int) 0x00000080)
 
-#define IOCON_PIO1_4 (*(pREG32 (0x40044094)))
+#define IOCON_PIO1_4                              (*(pREG32 (0x40044094)))
 #define IOCON_PIO1_4_FUNC_MASK                    ((unsigned int) 0x00000007)
 #define IOCON_PIO1_4_FUNC_GPIO                    ((unsigned int) 0x00000000)
 #define IOCON_PIO1_4_FUNC_AD5                     ((unsigned int) 0x00000001)
@@ -1873,6 +1911,115 @@ typedef unsigned char byte_t;
 #define IOCON_SCKLOC_SCKPIN_PIO0_6                ((unsigned int) 0x00000003) // Set SCK function to pin 0.6
 
 /*##############################################################################
+## Nested Vectored Interrupt Controller
+##############################################################################*/
+
+#define NVIC_BASE_ADDRESS                         (0xE000E100)
+
+typedef struct
+{
+  volatile uint32_t ISER[8];                      /*!< Offset: 0x000  Interrupt Set Enable Register           */
+	 uint32_t RESERVED0[24];                                   
+  volatile uint32_t ICER[8];                      /*!< Offset: 0x080  Interrupt Clear Enable Register         */
+	  uint32_t RSERVED1[24];                                    
+  volatile uint32_t ISPR[8];                      /*!< Offset: 0x100  Interrupt Set Pending Register          */
+	 uint32_t RESERVED2[24];                                   
+  volatile uint32_t ICPR[8];                      /*!< Offset: 0x180  Interrupt Clear Pending Register        */
+	 uint32_t RESERVED3[24];                                   
+  volatile uint32_t IABR[8];                      /*!< Offset: 0x200  Interrupt Active bit Register           */
+	 uint32_t RESERVED4[56];                                   
+  volatile uint8_t  IP[240];                      /*!< Offset: 0x300  Interrupt Priority Register (8Bit wide) */
+	uint32_t RESERVED5[644];                                  
+  volatile  uint32_t STIR;                        /*!< Offset: 0xE00  Software Trigger Interrupt Register     */
+}  NVIC_Type;                                               
+
+#define NVIC                                      ((NVIC_Type *) NVIC_BASE_ADDRESS)
+
+static inline void __enable_irq()                 { __asm volatile ("cpsie i"); }
+static inline void __disable_irq()                { __asm volatile ("cpsid i"); }
+
+typedef enum IRQn
+{
+/******  Cortex-M3 Processor Exceptions Numbers ***************************************************/
+  NonMaskableInt_IRQn           = -14,      /*!< 2 Non Maskable Interrupt                         */
+  MemoryManagement_IRQn         = -12,      /*!< 4 Cortex-M3 Memory Management Interrupt          */
+  BusFault_IRQn                 = -11,      /*!< 5 Cortex-M3 Bus Fault Interrupt                  */
+  UsageFault_IRQn               = -10,      /*!< 6 Cortex-M3 Usage Fault Interrupt                */
+  SVCall_IRQn                   = -5,       /*!< 11 Cortex-M3 SV Call Interrupt                   */
+  DebugMonitor_IRQn             = -4,       /*!< 12 Cortex-M3 Debug Monitor Interrupt             */
+  PendSV_IRQn                   = -2,       /*!< 14 Cortex-M3 Pend SV Interrupt                   */
+  SysTick_IRQn                  = -1,       /*!< 15 Cortex-M3 System Tick Interrupt               */
+
+/******  LPC13xx Specific Interrupt Numbers *******************************************************/
+  WAKEUP0_IRQn                  = 0,        /*!< All I/O pins can be used as wakeup source.       */
+  WAKEUP1_IRQn                  = 1,        /*!< There are 40 pins in total for LPC17xx           */
+  WAKEUP2_IRQn                  = 2,
+  WAKEUP3_IRQn                  = 3,
+  WAKEUP4_IRQn                  = 4,   
+  WAKEUP5_IRQn                  = 5,        
+  WAKEUP6_IRQn                  = 6,        
+  WAKEUP7_IRQn                  = 7,        
+  WAKEUP8_IRQn                  = 8,        
+  WAKEUP9_IRQn                  = 9,        
+  WAKEUP10_IRQn                 = 10,       
+  WAKEUP11_IRQn                 = 11,       
+  WAKEUP12_IRQn                 = 12,       
+  WAKEUP13_IRQn                 = 13,       
+  WAKEUP14_IRQn                 = 14,       
+  WAKEUP15_IRQn                 = 15,       
+  WAKEUP16_IRQn                 = 16,       
+  WAKEUP17_IRQn                 = 17,       
+  WAKEUP18_IRQn                 = 18,       
+  WAKEUP19_IRQn                 = 19,       
+  WAKEUP20_IRQn                 = 20,       
+  WAKEUP21_IRQn                 = 21,       
+  WAKEUP22_IRQn                 = 22,       
+  WAKEUP23_IRQn                 = 23,       
+  WAKEUP24_IRQn                 = 24,       
+  WAKEUP25_IRQn                 = 25,       
+  WAKEUP26_IRQn                 = 26,       
+  WAKEUP27_IRQn                 = 27,       
+  WAKEUP28_IRQn                 = 28,       
+  WAKEUP29_IRQn                 = 29,       
+  WAKEUP30_IRQn                 = 30,       
+  WAKEUP31_IRQn                 = 31,       
+  WAKEUP32_IRQn                 = 32,       
+  WAKEUP33_IRQn                 = 33,       
+  WAKEUP34_IRQn                 = 34,       
+  WAKEUP35_IRQn                 = 35,       
+  WAKEUP36_IRQn                 = 36,       
+  WAKEUP37_IRQn                 = 37,       
+  WAKEUP38_IRQn                 = 38,       
+  WAKEUP39_IRQn                 = 39,       
+  I2C_IRQn                      = 40,       /*!< I2C Interrupt                                    */
+  TIMER_16_0_IRQn               = 41,       /*!< 16-bit Timer0 Interrupt                          */
+  TIMER_16_1_IRQn               = 42,       /*!< 16-bit Timer1 Interrupt                          */
+  TIMER_32_0_IRQn               = 43,       /*!< 32-bit Timer0 Interrupt                          */
+  TIMER_32_1_IRQn               = 44,       /*!< 32-bit Timer1 Interrupt                          */
+  SSP_IRQn                      = 45,       /*!< SSP Interrupt                                    */
+  UART_IRQn                     = 46,       /*!< UART Interrupt                                   */
+  USB_IRQn                      = 47,       /*!< USB Regular Interrupt                            */
+  USB_FIQn                      = 48,       /*!< USB Fast Interrupt                               */
+  ADC_IRQn                      = 49,       /*!< A/D Converter Interrupt                          */
+  WDT_IRQn                      = 50,       /*!< Watchdog timer Interrupt                         */  
+  BOD_IRQn                      = 51,       /*!< Brown Out Detect(BOD) Interrupt                  */
+  EINT3_IRQn                    = 53,       /*!< External Interrupt 3 Interrupt                   */
+  EINT2_IRQn                    = 54,       /*!< External Interrupt 2 Interrupt                   */
+  EINT1_IRQn                    = 55,       /*!< External Interrupt 1 Interrupt                   */
+  EINT0_IRQn                    = 56,       /*!< External Interrupt 0 Interrupt                   */
+} IRQn_t;
+
+static inline void NVIC_EnableIRQ(IRQn_t IRQn)
+{
+  NVIC->ISER[((uint32_t)(IRQn) >> 5)] = (1 << ((uint32_t)(IRQn) & 0x1F));
+}
+
+static inline void NVIC_DisableIRQ(IRQn_t IRQn)
+{
+  NVIC->ICER[((uint32_t)(IRQn) >> 5)] = (1 << ((uint32_t)(IRQn) & 0x1F));
+}
+
+/*##############################################################################
 ## GPIO - General Purpose I/O
 ##############################################################################*/
 
@@ -1962,8 +2109,8 @@ typedef unsigned char byte_t;
 #define USB_DEVINTST_EP6                          ((unsigned int) 0x00000080) // USB core interrupt for EP6
 #define USB_DEVINTST_EP7_MASK                     ((unsigned int) 0x00000100)
 #define USB_DEVINTST_EP7                          ((unsigned int) 0x00000100) // USB core interrupt for EP7
-#define USB_DEVINTST_DEV_START_MASK               ((unsigned int) 0x00000200)
-#define USB_DEVINTST_DEV_START                    ((unsigned int) 0x00000200)
+#define USB_DEVINTST_DEV_STAT_MASK                ((unsigned int) 0x00000200)
+#define USB_DEVINTST_DEV_STAT                     ((unsigned int) 0x00000200)
 #define USB_DEVINTST_CC_EMPTY_MASK                ((unsigned int) 0x00000400)
 #define USB_DEVINTST_CC_EMPTY                     ((unsigned int) 0x00000400)
 #define USB_DEVINTST_CD_FULL_MASK                 ((unsigned int) 0x00000800)
@@ -1993,8 +2140,8 @@ typedef unsigned char byte_t;
 #define USB_DEVINTEN_EP6                          ((unsigned int) 0x00000080)
 #define USB_DEVINTEN_EP7_MASK                     ((unsigned int) 0x00000100)
 #define USB_DEVINTEN_EP7                          ((unsigned int) 0x00000100)
-#define USB_DEVINTEN_DEV_START_MASK               ((unsigned int) 0x00000200)
-#define USB_DEVINTEN_DEV_START                    ((unsigned int) 0x00000200)
+#define USB_DEVINTEN_DEV_STAT_MASK                ((unsigned int) 0x00000200)
+#define USB_DEVINTEN_DEV_STAT                     ((unsigned int) 0x00000200)
 #define USB_DEVINTEN_CC_EMPTY_MASK                ((unsigned int) 0x00000400)
 #define USB_DEVINTEN_CC_EMPTY                     ((unsigned int) 0x00000400)
 #define USB_DEVINTEN_CD_FULL_MASK                 ((unsigned int) 0x00000800)
@@ -2024,8 +2171,8 @@ typedef unsigned char byte_t;
 #define USB_DEVINTCLR_EP6                         ((unsigned int) 0x00000080)
 #define USB_DEVINTCLR_EP7_MASK                    ((unsigned int) 0x00000100)
 #define USB_DEVINTCLR_EP7                         ((unsigned int) 0x00000100)
-#define USB_DEVINTCLR_DEV_START_MASK              ((unsigned int) 0x00000200)
-#define USB_DEVINTCLR_DEV_START                   ((unsigned int) 0x00000200)
+#define USB_DEVINTCLR_DEV_STAT_MASK               ((unsigned int) 0x00000200)
+#define USB_DEVINTCLR_DEV_STAT                    ((unsigned int) 0x00000200)
 #define USB_DEVINTCLR_CC_EMPTY_MASK               ((unsigned int) 0x00000400)
 #define USB_DEVINTCLR_CC_EMPTY                    ((unsigned int) 0x00000400)
 #define USB_DEVINTCLR_CD_FULL_MASK                ((unsigned int) 0x00000800)
@@ -2055,8 +2202,8 @@ typedef unsigned char byte_t;
 #define USB_DEVINTSET_EP6                         ((unsigned int) 0x00000080)
 #define USB_DEVINTSET_EP7_MASK                    ((unsigned int) 0x00000100)
 #define USB_DEVINTSET_EP7                         ((unsigned int) 0x00000100)
-#define USB_DEVINTSET_DEV_START_MASK              ((unsigned int) 0x00000200)
-#define USB_DEVINTSET_DEV_START                   ((unsigned int) 0x00000200)
+#define USB_DEVINTSET_DEV_STAT_MASK               ((unsigned int) 0x00000200)
+#define USB_DEVINTSET_DEV_STAT                    ((unsigned int) 0x00000200)
 #define USB_DEVINTSET_CC_EMPTY_MASK               ((unsigned int) 0x00000400)
 #define USB_DEVINTSET_CC_EMPTY                    ((unsigned int) 0x00000400)
 #define USB_DEVINTSET_CD_FULL_MASK                ((unsigned int) 0x00000800)
@@ -2068,8 +2215,8 @@ typedef unsigned char byte_t;
 
 /* USB Command Code Register */
 #define USB_CMDCODE                               (*(pREG32 (0x40020010)))
-#define USB_CMDCODE_CMD_PHASE_READ                ((unsigned int) 0x00000100)
-#define USB_CMDCODE_CMD_PHASE_WRITE               ((unsigned int) 0x00000200)
+#define USB_CMDCODE_CMD_PHASE_WRITE               ((unsigned int) 0x00000100)
+#define USB_CMDCODE_CMD_PHASE_READ                ((unsigned int) 0x00000200)
 #define USB_CMDCODE_CMD_PHASE_COMMAND             ((unsigned int) 0x00000500)
 #define USB_CMDCODE_CMD_PHASE_MASK                ((unsigned int) 0x0000FF00)
 #define USB_CMDCODE_CMD_CODE_MASK                 ((unsigned int) 0x00FF0000)
@@ -2347,7 +2494,7 @@ typedef unsigned char byte_t;
 /*  Serial Clock Rate. The number of prescaler-output clocks per
     bit on the bus, minus one. Given that CPSDVSR is the
     prescale divider, and the APB clock PCLK clocks the
-    prescaler, the bit frequency is PCLK / (CPSDVSR ï¿½ [SCR+1]). */
+    prescaler, the bit frequency is PCLK / (CPSDVSR — [SCR+1]). */
 
 #define SSP_SSP0CR0_SCR_MASK                      ((unsigned int) 0x0000FF00) // Serial clock rate
 #define SSP_SSP0CR0_SCR_1                         ((unsigned int) 0x00000100)
@@ -3176,17 +3323,17 @@ typedef unsigned char byte_t;
 #define ADC_AD0_BASE_ADDRESS                      (0x4001C000)
 
 #define ADC_AD0CR                                 (*(pREG32 (0x4001C000)))      // ADC Control Register
-#define ADC_AD0GDR                                (*(pREG32 (0x4001C004)))   // ADC Global Data Register
-#define ADC_AD0INTEN                              (*(pREG32 (0x4001C00C)))   // ADC Interrupt Enable Register
-#define ADC_AD0DR0                                (*(pREG32 (0x4001C010)))   // ADC Data Register 0
-#define ADC_AD0DR1                                (*(pREG32 (0x4001C014)))   // ADC Data Register 1
-#define ADC_AD0DR2                                (*(pREG32 (0x4001C018)))   // ADC Data Register 2
-#define ADC_AD0DR3                                (*(pREG32 (0x4001C01C)))   // ADC Data Register 3
-#define ADC_AD0DR4                                (*(pREG32 (0x4001C020)))   // ADC Data Register 4
-#define ADC_AD0DR5                                (*(pREG32 (0x4001C024)))   // ADC Data Register 5
-#define ADC_AD0DR6                                (*(pREG32 (0x4001C028)))   // ADC Data Register 6
-#define ADC_AD0DR7                                (*(pREG32 (0x4001C02C)))   // ADC Data Register 7
-#define ADC_AD0STAT                               (*(pREG32 (0x4001C030)))   // ADC Status Register
+#define ADC_AD0GDR                                ((unsigned int) 0x4001C004)   // ADC Global Data Register
+#define ADC_AD0INTEN                              ((unsigned int) 0x4001C00C)   // ADC Interrupt Enable Register
+#define ADC_AD0DR0                                ((unsigned int) 0x4001C010)   // ADC Data Register 0
+#define ADC_AD0DR1                                ((unsigned int) 0x4001C014)   // ADC Data Register 1
+#define ADC_AD0DR2                                ((unsigned int) 0x4001C018)   // ADC Data Register 2
+#define ADC_AD0DR3                                ((unsigned int) 0x4001C01C)   // ADC Data Register 3
+#define ADC_AD0DR4                                ((unsigned int) 0x4001C020)   // ADC Data Register 4
+#define ADC_AD0DR5                                ((unsigned int) 0x4001C024)   // ADC Data Register 5
+#define ADC_AD0DR6                                ((unsigned int) 0x4001C028)   // ADC Data Register 6
+#define ADC_AD0DR7                                ((unsigned int) 0x4001C02C)   // ADC Data Register 7
+#define ADC_AD0STAT                               ((unsigned int) 0x4001C030)   // ADC Status Register
 
 #define ADC_AD0CR_SEL_MASK                        (0x000000FF)
 #define ADC_AD0CR_SEL_AD0                         (0x00000001)
@@ -3367,5 +3514,21 @@ typedef unsigned char byte_t;
 */
 /**************************************************************************/
 static inline uint32_t RBIT(uint32_t value)     { uint32_t result=0; __asm volatile ("rbit %0, %1" : "=r" (result) : "r" (value) ); return(result); }
+
+/**************************************************************************/
+/*! 
+    @brief  Causes a system reset and enters the USB Bootloader
+
+    Resets the system using the AIRCR register, and waits in a loop until
+    reset occurs.  The resistor/divider on the LPC1343 Reference Design
+    Base Board [1] causes the AIRCR reset to enter the bootloader rather
+    than executing the existing firmware.  If you wish to reset and execute
+    the existing firmware, you need to use the watchdog timer to reset
+    (see "wdt/wdt.c").
+
+    [1] http://www.microbuilder.eu/Projects/LPC1343ReferenceDesign.aspx
+*/
+/**************************************************************************/
+static inline void __resetBootloader()          { __disable_irq(); SCB_AIRCR = SCB_AIRCR_VECTKEY_VALUE | SCB_AIRCR_SYSRESETREQ; while(1); }
 
 #endif

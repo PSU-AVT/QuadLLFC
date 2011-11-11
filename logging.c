@@ -1,5 +1,6 @@
 #include "logging.h"
 #include "core/uart.h"
+#include "afproto.h"
 
 #include <string.h>
 

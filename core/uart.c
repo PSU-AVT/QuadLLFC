@@ -94,7 +94,6 @@
 #include <string.h>
 
 #include "uart.h"
-#include "LPC13xx.h"
 
 #ifdef CFG_INTERFACE_UART
   #include "core/cmd/cmd.h"
@@ -242,7 +241,7 @@ void uartInit(uint32_t baudrate)
 
   /* Baud rate */
   regVal = SCB_UARTCLKDIV;
-  fDiv = (((SystemCoreClock * SCB_SYSAHBCLKDIV)/regVal)/16)/baudrate;
+  fDiv = (((CFG_CPU_CCLK * SCB_SYSAHBCLKDIV)/regVal)/16)/baudrate;
 
   UART_U0DLM = fDiv / 256;
   UART_U0DLL = fDiv % 256;
@@ -344,8 +343,5 @@ void uartSendByte (uint8_t byte)
   return;
 }
 
-static unsigned char uart_out_buff[CFG_UART_BUFSIZE];
 
-unsigned char *uartGetOutputBuffer(void) {
-	return uart_out_buff;
-}
+

@@ -28,8 +28,6 @@
  *
  */
 
-INCLUDE memory.ld
-
 sram_top = ORIGIN(sram) + LENGTH(sram);
 ENTRY(boot_entry)
 
