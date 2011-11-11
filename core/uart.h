@@ -75,4 +75,6 @@ void uartRxBufferClearFIFO();
 uint8_t uartRxBufferDataPending();
 bool uartRxBufferReadArray(byte_t* rx, size_t* len);
 
+unsigned char *uartGetOutputBuffer(void);
+
 #endif
