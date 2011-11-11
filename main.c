@@ -20,7 +20,8 @@ int main(void) {
 
 	// Main loop
 	while(1) {
-		logging_send_string(LOGGING_DEBUG, "a");
+		logging_send_string(LOGGING_DEBUG, "This is a debug message");
+		logging_send_string(LOGGING_ERROR, "This is an error message");
 		systickDelay(1000);
 	}
 

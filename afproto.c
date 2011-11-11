@@ -83,6 +83,12 @@ uint8_t afproto_serialize_payload(const unsigned char *payload,
 	return ndx;
 }
 
+static unsigned char afproto_buffer[256];
+
+unsigned char *afproto_get_buffer(void) {
+	return afproto_buffer;
+}
+
 #if TEST_GCC
 int main(int argc, char **argv) {
 	char buff[256];

@@ -5,7 +5,8 @@
 #include <string.h>
 
 void logging_send_string(LOGGING_LEVEL level, const char *str) {
-	uint16_t len = strlen(str);
+	uint16_t len = 0;
+	while(str[++len]);
 	logging_send_buff(level, (const unsigned char*)str, len);
 }
 
@@ -14,8 +15,10 @@ void logging_send_buff(LOGGING_LEVEL level, const unsigned char *buff, uint16_t 
 		return;
 
 	unsigned char *out_buff = uartGetOutputBuffer();
+	unsigned char *afproto_buff = afproto_get_buffer();
 	out_buff[0] = level+1; // Convert to command id
-	strncpy((char*)&out_buff[1], (char*)buff, buff_len);
-	buff_len = afproto_serialize_payload(out_buff, buff_len, out_buff);
-	uartSend(out_buff, buff_len);
+	int i = 1;
+	while(buff_len--) { out_buff[i] = buff[i-1]; i++; }
+	buff_len = afproto_serialize_payload(out_buff, i, afproto_buff);
+	uartSend(afproto_buff, buff_len);
 }
