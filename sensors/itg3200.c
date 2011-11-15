@@ -149,7 +149,7 @@ int itg3200Init(void)
   int x;
   int response_error;
 
-  response_error = itg3200WriteByte(itg3200_ADDRESS, itg3200_REGISTER_CONFIG_DLPF, 0x19);
+  response_error = itg3200WriteByte(itg3200_ADDRESS, itg3200_REGISTER_CONFIG_DLPF, 0x1A);
   itg3200ReadByte(itg3200_ADDRESS, itg3200_REGISTER_CONFIG_DLPF, &x);
 
   response_error = itg3200WriteByte (itg3200_ADDRESS, itg3200_REGISTER_CONFIG_PMU, 0x01);

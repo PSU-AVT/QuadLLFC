@@ -15,6 +15,7 @@
 
 int main(void) {
 	systemInit();
+	systickInit(1);
 
 	uartInit(115200);
 
@@ -31,7 +32,6 @@ int main(void) {
 
 	// Main loop
 	while(1) {
-
 		// Send gyro data
 		itg3200GetData(&gyro);
 		afproto_buff[0] = 4;
@@ -41,6 +41,7 @@ int main(void) {
 		int len = afproto_serialize_payload(afproto_buff, 13, uartGetOutputBuffer());
 		uartSend(uartGetOutputBuffer(), len);
 
+		// Send accelero data
 		adxl345GetData(&accel);
 		afproto_buff[0] = 5;
 		*(float*)&afproto_buff[1] = accel.x;
@@ -49,7 +50,7 @@ int main(void) {
 		len = afproto_serialize_payload(afproto_buff, 13, uartGetOutputBuffer());
 		uartSend(uartGetOutputBuffer(), len);
 
-		systickDelay(200);
+		systickDelay(10);
 	}
 
 	return 0;

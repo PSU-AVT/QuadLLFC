@@ -6,6 +6,7 @@
 
 #include "esc.h"
 #include "core/pwm.h"
+#include "core/systick.h"
 
 #define ESC_PWM_MAX 20000
 #define ESC_PWM_MIN 36000
