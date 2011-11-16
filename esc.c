@@ -43,6 +43,7 @@ void esc_init(ESC_LABEL ndx) {
 		_escs[ndx].pwm_pin = PWM_PIN_16_1_1;
 		break;
 	}
+	pwm_16_init_pins(_escs[ndx].pwm_pin);
 }
 
 void esc_init_all(void) {

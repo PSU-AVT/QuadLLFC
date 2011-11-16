@@ -1,0 +1,2 @@
+target  extended-remote | crt_emu_lpc11_13_nxp -2 -pLPC1343 -wire=winusb 
+load
