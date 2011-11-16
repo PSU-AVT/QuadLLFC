@@ -1,0 +1,14 @@
+Before you begin:
+Add the folder containing the arm-none-eabi-* binaries to your path. This can be done using the following command:
+export PATH=$PATH:/usr/local/lpcxpresso_4.1.0_164/lpcxpresso/tools/bin/
+
+To compile:
+make
+
+To flash:
+make boot
+make flash
+
+To debug:
+make debug
+
