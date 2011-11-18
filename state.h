@@ -13,6 +13,6 @@ typedef struct state_t {
 void state_add(state_t *s1, state_t *s2, state_t *sum);
 void state_scale(state_t *s1, float val, state_t *result);
 
-state_t *state_get_inertial(void);
+void state_update_from_gyro(void);
 
 #endif 

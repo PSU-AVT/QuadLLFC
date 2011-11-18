@@ -1,8 +1,7 @@
 #include "state.h"
+#include "sensors/itg3200.h"
 
 #define STATE_DOF_CNT 6
-
-static state_t _state_inertial;
 
 void state_add(state_t *s1, state_t *s2, state_t *sum) {
 	float *s1_arr = (float*)s1;
@@ -19,5 +18,12 @@ void state_scale(state_t *s1, float val, state_t *dest) {
 
 	int i;
 	for(i = 0;i < STATE_DOF_CNT;++i) dest_arr[i] = s1_arr[i] * val;
+}
+
+void state_update_from_gyro(void) {
+	GyroData gd;
+	if(itg3200GetData(&gd)) {
+		
+	}
 }
 
