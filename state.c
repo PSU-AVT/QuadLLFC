@@ -1,4 +1,5 @@
 #include "state.h"
+#include "rotation.h"
 #include "sensors/itg3200.h"
 #include "core/systick.h"
 
@@ -27,10 +28,11 @@ static uint32_t last_gyro_update_ticks;
 
 void state_update_from_gyro(void) {
 	GyroData gd;
-	uint32_t tick_diff = systickGetTicks() - last_gyro_update_ticks;
-	float dt = tick_diff / 1000;
 	if(itg3200GetData(&gd)) {
+		uint32_t tick_diff = systickGetTicks() - last_gyro_update_ticks;
+		float dt = tick_diff / 1000;
 		rotation_matrix_velocity_update(rotation_b_to_i, gd.X, gd.Y, gd.Z, dt);
+		last_gyro_update_ticks = systickGetTicks();
 	}
 }
 
