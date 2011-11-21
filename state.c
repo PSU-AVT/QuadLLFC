@@ -6,6 +6,8 @@
 #define STATE_DOF_CNT 6
 
 static float rotation_b_to_i[3][3]; // Body to inertial rotation matrix
+static state_t inertial_state;
+static int inertial_needs_update = 0;
 
 void state_add(state_t *s1, state_t *s2, state_t *sum) {
 	float *s1_arr = (float*)s1;
@@ -34,5 +36,23 @@ void state_update_from_gyro(void) {
 		rotation_matrix_velocity_update(rotation_b_to_i, gd.X, gd.Y, gd.Z, dt);
 		last_gyro_update_ticks = systickGetTicks();
 	}
+
+	inertial_needs_update = 0;
+}
+
+void state_inertial_update(void) {
+	if(!inertial_needs_update)
+		return;
+	float atten[3];
+	rotation_matrix_get_eulers(rotation_b_to_i, atten);
+	inertial_state.roll = atten[0];
+	inertial_state.pitch = atten[1];
+	inertial_state.yaw = atten[2];
+	inertial_needs_update = 0;
+}
+
+state_t *state_get_inertial(void) {
+	state_inertial_update();
+	return &inertial_state;
 }
 
