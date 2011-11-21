@@ -10,6 +10,7 @@
 #include "proto.h"
 #include "core/uart.h"
 #include "core/systick.h"
+#include "core/pwm.h"
 #include "sensors/itg3200.h"
 #include "sensors/adxl345.h"
 
@@ -28,6 +29,9 @@ int main(void) {
 
 	float throttle = 0;
 	int i;
+
+	pwm_16_set_duty_cycle_in_ticks(PWM_PIN_16_0_0, 30000);
+	while(1);
 
 	// Main loop
 	while(1) {
