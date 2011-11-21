@@ -26,9 +26,29 @@ int main(void) {
 	itg3200Init();
 	adxl345_Init();
 
+	float throttle = 0;
+	int i;
+
 	// Main loop
 	while(1) {
-		proto_update();
+		if(uartRxBufferDataPending()) {
+			switch(uartRxBufferRead()) {
+			case 'w':
+				throttle = esc_get_throttle(0);
+				for(i = 0;i < 3;++i)
+					esc_set_throttle(i, throttle+.05);
+				break;
+			case 's':
+				throttle = esc_get_throttle(0);
+				for(i = 0;i < 3;++i)
+					esc_set_throttle(i, throttle-.05);
+				break;
+			case 'p':
+				for(i = 0;i < 3;++i)
+					esc_set_throttle(i, 0);
+				break;
+			}
+		}
 	}
 
 	return 0;

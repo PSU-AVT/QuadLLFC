@@ -90,6 +90,10 @@ void esc_set_throttle(ESC_LABEL esc, float value) {
 	esc_update_pwm(esc);
 }
 
+float esc_get_throttle(ESC_LABEL esc) {
+	return _escs[esc].throttle;
+}
+
 void esc_set_all_throttles(float *values) {
 	int i;
 	for(i = 0;i < ESC_CNT;++i) {
