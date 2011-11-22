@@ -16,7 +16,7 @@
 
 static float throttle_to_pwm_factor = ESC_PWM_MAX - ESC_PWM_MIN;
 
-#define ESC_CNT 4
+//#define ESC_CNT 4
 
 typedef struct esc {
 	float throttle; // Between 0 and 1 where 1 is 100%

@@ -14,6 +14,8 @@ typedef enum ESC {
 	ESC_RIGHT = 3
 } ESC_LABEL;
 
+#define ESC_CNT 4
+
 void esc_init(ESC_LABEL esc);
 void esc_init_all(void);
 
@@ -24,6 +26,9 @@ void esc_init_all(void);
  */
 void esc_set_throttle(ESC_LABEL esc, float value);
 
+/* Takes an array of float values the size of ESC_CNT
+   and sets each esc in the order listed in ESC_LABEL
+ */
 void esc_set_all_throttles(float *values);
 
 float esc_get_throttle(ESC_LABEL esc);
