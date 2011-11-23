@@ -1,9 +1,9 @@
 #ifndef SETPOINT_H
 #define SETPOINT_H
 
-#include <state.h>
+#include "state.h"
 
-state_t setpoint_get(void);
+state_t *setpoint_get(void);
 
 #endif
 
