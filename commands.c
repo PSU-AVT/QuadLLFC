@@ -7,6 +7,7 @@
 #include "commands.h"
 #include "esc.h"
 #include "setpoint.h"
+#include "control.h"
 
 #define COMMAND_HANDLER_MAX 0
 
@@ -20,11 +21,11 @@ typedef union throt_data {
 
 void commands_handle_message(unsigned char *buff, uint8_t length) {
 	uint8_t ndx = buff[0];
-	state_t current_state;// = setpoint_get();
+	state_t current_state;
 	float val;
-	//if(ndx > COMMAND_HANDLER_MAX)
-	//	return;
-	//command_handlers[ndx](buff, length);
+	float motor_vals[ESC_CNT];
+	int i;
+
 	switch(ndx) 
 	{
 		case 1: //increase roll setpoint
@@ -38,12 +39,10 @@ void commands_handle_message(unsigned char *buff, uint8_t length) {
 		case 3: //Set  motor speed. This is demo/debug purpose ONLY!
 			//This will be a floating point from 0 - 1
 			val = *((float *)&(buff[1]));
-			float temp[ESC_CNT];
-			int i;
 			for (i = 0; i < ESC_CNT; i++) {
-				temp[i] = val;
+				motor_vals[i] = val;
 			}
-			esc_set_all_throttles(temp); //This is for testing ONLY!
+			esc_set_all_throttles(motor_vals); //This is for testing ONLY!
 			break;
 		case 4: //Increase altitude setpoint (state monitored altitude)
 			//Not yet implemented...
@@ -51,6 +50,12 @@ void commands_handle_message(unsigned char *buff, uint8_t length) {
 		case 5: //Set yaw setpoint
 			val = *((float *)&buff[1]);
 			current_state.yaw = val;
+			break;
+		case 6: // shutdown
+			control_set_enabled(0);
+			for(i = 0;i < ESC_CNT;++i)
+				motor_vals[i] = 0;
+			esc_set_all_throttles(motor_vals);
 			break;
 		default:
 			//Should send back some sort of error message here...
