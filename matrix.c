@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2011 Gregory Haynes <greg@greghaynes.net>
+ *
+ * Licensed under the BSD license. See LICENSE for more information.
+ */
+
 #include "matrix.h"
 
 void matrix_3_3_multiply(float a[][3], float b[][3], float result[][3]) {

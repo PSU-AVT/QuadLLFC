@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2011 Gregory Haynes <greg@greghaynes.net>
+ *
+ * Licensed under the BSD license. See LICENSE for more information.
+ */
+
 #ifndef MATRIX_H
 #define MATRIX_H
 
