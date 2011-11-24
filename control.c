@@ -13,9 +13,15 @@ static uint32_t _control_last_update;
 static state_t _control_setpoint_error_last;
 static state_t _control_setpoint_error_integral;
 
+static uint32_t _control_enabled;
+
 void control_init(void) {
 	// TODO
 	// Set the gain values
+}
+
+void control_set_enabled(int value) {
+	_control_enabled = value;
 }
 
 void control_state_gains_multiply_to_motors(float *gains,
@@ -30,6 +36,10 @@ void control_state_gains_multiply_to_motors(float *gains,
 }
 
 void control_update(void) {
+	// Check if control is enabled
+	if(!_control_enabled)
+		return;
+
 	// Has enough time passed since last control update
 	if((systickGetTicks() - _control_last_update) < 5)
 		return;
