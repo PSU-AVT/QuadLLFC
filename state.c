@@ -46,6 +46,10 @@ void state_copy(state_t *src, state_t *dest) {
 	for(i = 0;i < STATE_DOF_CNT;++i) dest_arr[i] = src_arr[i];
 }
 
+void state_init(void) {
+	rotation_matrix_init(rotation_b_to_i);
+}
+
 static uint32_t last_gyro_update_ticks;
 
 void state_update_from_gyro(void) {

@@ -9,6 +9,16 @@
 
 #include <math.h>
 
+void rotation_matrix_init(float r[][3]) {
+	int i, j;
+	for(i = 0;i < 3;++i) {
+		for(j = 0;j < 3;++j) {
+			if(i == j) r[i][i] = 1;
+			else r[i][j] = 0;
+		}
+	}
+}
+
 void rotation_matrix_normalize(float r[][3]) {
 	float error;
 	error = r[0][0]*r[0][1] + r[1][0]*r[1][1] + r[2][0]*r[2][1];
