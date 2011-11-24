@@ -8,6 +8,7 @@
 #define CONTROL_H
 
 void control_init(void);
+void control_reset(void);
 void control_set_enabled(int value);
 void control_update(void);
 

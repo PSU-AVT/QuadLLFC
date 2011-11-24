@@ -20,6 +20,12 @@ void control_init(void) {
 	// Set the gain values
 }
 
+void control_reset(void) {
+	state_scale(&_control_setpoint_error_last, 0, &_control_setpoint_error_last);
+	state_scale(&_control_setpoint_error_integral, 0,
+	            &_control_setpoint_error_integral);
+}
+
 void control_set_enabled(int value) {
 	_control_enabled = value;
 }

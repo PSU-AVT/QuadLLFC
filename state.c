@@ -50,6 +50,11 @@ void state_init(void) {
 	rotation_matrix_init(rotation_b_to_i);
 }
 
+void state_reset(void) {
+	inertial_needs_update = 1;
+	state_init();
+}
+
 static uint32_t last_gyro_update_ticks;
 
 void state_update_from_gyro(void) {
