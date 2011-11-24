@@ -45,7 +45,9 @@ void control_update(void) {
 
 	// Calculate error integral
 	state_scale(&setpoint_error, dt, &error_integral_slice);
-	state_add(&error_integral_slice, &_control_setpoint_error_integral, &_control_setpoint_error_integral);
+	state_add(&error_integral_slice,
+	          &_control_setpoint_error_integral,
+	          &_control_setpoint_error_integral);
 
 	// Update error_last
 	state_copy(&setpoint_error, &_control_setpoint_error_last);
