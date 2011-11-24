@@ -21,13 +21,13 @@ CFLAGS=-g -c -I./ -Wall -mthumb -ffunction-sections -fdata-sections -fmessage-le
 LD_FLAGS= -nostartfiles -mthumb -mcpu=$(CPU_TYPE) -Wl,--gc-sections -lm
 ASFLAGS = -c -O0 $(INCLUDE_PATHS) -Wall -mthumb -ffunction-sections -fdata-sections -fmessage-length=0 -mcpu=$(CPU_TYPE) -D__ASSEMBLY__ -x assembler-with-cpp
 
-OBJFILES:=$(patsubst %.c,%.o,$(wildcard *.c)) $(patsubst core/%.c,core/%.o,$(wildcard core/*.c)) $(patsubst sensors/%.c,sensors/%.o,$(wildcard sensors/*.c))
+OBJFILES:=$(patsubst %.c,%.o,$(wildcard *.c)) $(patsubst startup/%.c,startup/%.o,$(wildcard startup/*.c)) $(patsubst core/%.c,core/%.o,$(wildcard core/*.c)) $(patsubst sensors/%.c,sensors/%.o,$(wildcard sensors/*.c))
 
 all: firmware
 
 firmware: $(OBJFILES)
 	@ echo $(OBJFILES)
-	$(LD) -Tmemory.ld -o $(OUT).elf $(OBJFILES) $(LD_FLAGS)
+	$(LD) -Tstartup/memory.ld -o $(OUT).elf $(OBJFILES) $(LD_FLAGS)
 	$(OBJCOPY) $(OCFLAGS) -O binary $(OUT).elf $(OUT).bin
 	$(OBJCOPY) $(OCFLAGS) -O ihex $(OUT).elf $(OUT).hex
 
