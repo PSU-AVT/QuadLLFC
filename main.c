@@ -28,9 +28,6 @@ int main(void) {
 	itg3200Init();
 	adxl345_Init();
 
-	// Initialize state system
-	state_init();
-
 	// Main loop
 	while(1) {
 		proto_update();

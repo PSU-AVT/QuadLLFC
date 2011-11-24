@@ -8,6 +8,7 @@
 #include "esc.h"
 #include "setpoint.h"
 #include "control.h"
+#include "state.h"
 
 #define COMMAND_HANDLER_MAX 0
 
@@ -56,6 +57,10 @@ void commands_handle_message(unsigned char *buff, uint8_t length) {
 			for(i = 0;i < ESC_CNT;++i)
 				motor_vals[i] = 0;
 			esc_set_all_throttles(motor_vals);
+			break;
+		case 7: // turn on
+			state_reset();
+			control_set_enabled(1);
 			break;
 		default:
 			//Should send back some sort of error message here...
