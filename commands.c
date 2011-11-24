@@ -10,13 +10,7 @@
 
 #define COMMAND_HANDLER_MAX 0
 
-typedef void (*command_handler)(unsigned char *buff, uint8_t length);
-
 void commands_set_motor(unsigned char *buff, uint8_t length);
-
-static command_handler command_handlers[] = {
-	commands_set_motor,
-};
 
 //This is for debugging purposes - should not be used!
 typedef union throt_data {
@@ -45,8 +39,8 @@ void commands_handle_message(unsigned char *buff, uint8_t length) {
 	    //This will be a floating point from 0 - 1
 	    val = *((float *)&(buff[1]));
 	    float temp[ESC_CNT];
-	    int i = 0;
-	    for (i; i < ESC_CNT; i++)
+	    int i;
+	    for (i = 0; i < ESC_CNT; i++)
 	      {
 		temp[i] = val;
 	      }
