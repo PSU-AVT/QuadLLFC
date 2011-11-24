@@ -53,8 +53,20 @@ void control_update(void) {
 	state_copy(&setpoint_error, &_control_setpoint_error_last);
 
 	// Accumulate gains * error
-	float motor_accum[4];
+	float motor_accum[4] = { 0, 0, 0, 0 };
+
+	// Accumulate P
 	control_state_gains_multiply_to_motors((float*)&_control_p_gains,
+	                                       (float*)&setpoint_error,
+	                                       motor_accum);
+
+	// Accumulate I
+	control_state_gains_multiply_to_motors((float*)&_control_i_gains,
+	                                       (float*)&setpoint_error,
+	                                       motor_accum);
+
+	// Accumulate D
+	control_state_gains_multiply_to_motors((float*)&_control_d_gains,
 	                                       (float*)&setpoint_error,
 	                                       motor_accum);
 }
