@@ -8,6 +8,8 @@
 #include "esc.h"
 #include "logging.h"
 #include "proto.h"
+#include "state.h"
+#include "control.h"
 #include "core/uart.h"
 #include "core/systick.h"
 #include "sensors/itg3200.h"
@@ -29,6 +31,8 @@ int main(void) {
 	// Main loop
 	while(1) {
 		proto_update();
+		state_update();
+		control_update();
 	}
 
 	return 0;

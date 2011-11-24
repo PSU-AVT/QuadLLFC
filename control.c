@@ -3,6 +3,8 @@
 #include "core/systick.h"
 #include "state.h"
 
+#define CONTROL_UPDATE_INTERVAL 20
+
 static state_t _control_p_gains;
 static state_t _control_i_gains;
 static state_t _control_d_gains;
@@ -28,6 +30,10 @@ void control_state_gains_multiply_to_motors(float *gains,
 }
 
 void control_update(void) {
+	// Has enough time passed since last control update
+	if((systickGetTicks() - _control_last_update) < 5)
+		return;
+
 	state_t setpoint_error;
 	state_t error_dt;
 	state_t error_integral_slice;

@@ -3,11 +3,14 @@
 #include "sensors/itg3200.h"
 #include "core/systick.h"
 
+#define STATE_GYRO_UPDATE_INTERVAL 5
 #define STATE_DOF_CNT 6
 
 static float rotation_b_to_i[3][3]; // Body to inertial rotation matrix
 static state_t inertial_state;
 static int inertial_needs_update;
+
+static uint32_t _state_gyro_last_update;
 
 void state_add(state_t *s1, state_t *s2, state_t *sum) {
 	float *s1_arr = (float*)s1;
@@ -70,5 +73,11 @@ void state_inertial_update(void) {
 state_t *state_inertial_get(void) {
 	state_inertial_update();
 	return &inertial_state;
+}
+
+void state_update(void) {
+	uint32_t ticks = systickGetTicks();
+	if((ticks - _state_gyro_last_update) >= STATE_GYRO_UPDATE_INTERVAL)
+		state_update_from_gyro();
 }
 

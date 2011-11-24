@@ -17,6 +17,7 @@ void state_scale(state_t *s1, float val, state_t *result);
 void state_copy(state_t *src, state_t *dest);
 
 void state_update_from_gyro(void);
+void state_update(void);
 
 state_t *state_inertial_get(void);
 
