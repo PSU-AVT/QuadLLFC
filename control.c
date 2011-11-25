@@ -92,3 +92,15 @@ void control_update(void) {
 	                                       (float*)&setpoint_error,
 	                                       motor_accum);
 }
+
+void control_set_p_gains(const state_t *gains) {
+	state_copy(gains, &_control_p_gains);
+}
+
+void control_set_i_gains(const state_t *gains) {
+	state_copy(gains, &_control_i_gains);
+}
+
+void control_set_d_gains(const state_t *gains) {
+	state_copy(gains, &_control_d_gains);
+}

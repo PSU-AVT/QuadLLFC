@@ -14,7 +14,7 @@ void state_add(state_t *s1, state_t *s2, state_t *sum);
 /* diff = s1 - s2 */
 void state_subtract(state_t *s1, state_t *s2, state_t *diff);
 void state_scale(state_t *s1, float val, state_t *result);
-void state_copy(state_t *src, state_t *dest);
+void state_copy(const state_t *src, state_t *dest);
 
 void state_init(void);
 void state_reset(void);

@@ -38,7 +38,7 @@ void state_scale(state_t *s1, float val, state_t *dest) {
 	for(i = 0;i < STATE_DOF_CNT;++i) dest_arr[i] = s1_arr[i] * val;
 }
 
-void state_copy(state_t *src, state_t *dest) {
+void state_copy(const state_t *src, state_t *dest) {
 	float *src_arr = (float*)src;
 	float *dest_arr = (float*)dest;
 

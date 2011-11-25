@@ -62,12 +62,21 @@ void commands_handle_message(unsigned char *buff, uint8_t length) {
 			state_reset();
 			control_set_enabled(1);
 			break;
+		case 8: // Set P gains
+			if(length == sizeof(state_t)+1)
+				control_set_p_gains((state_t*)(&buff[1]));
+			break;
+		case 9: // Set I gains
+			if(length == sizeof(state_t)+1)
+				control_set_i_gains((state_t*)(&buff[1]));
+			break;
+		case 10: // Set I gains
+			if(length == sizeof(state_t)+1)
+				control_set_d_gains((state_t*)(&buff[1]));
+			break;
 		default:
 			//Should send back some sort of error message here...
 			break;
 	}
-}
-
-void commands_set_motor(unsigned char *buff, uint8_t length) {
 }
 
