@@ -23,6 +23,7 @@ typedef union throt_data {
 	float f;
 } throt_data;
 
+//Despite the name command_send, can also be used to send messages to HLFC
 void command_send(command_out_id id, const unsigned char *data, uint16_t len) {
 	unsigned char msg_buff[256];
 	unsigned char out_buff[256];
@@ -39,7 +40,7 @@ void command_send(command_out_id id, const unsigned char *data, uint16_t len) {
 
 void commands_handle_message(unsigned char *buff, uint8_t length) {
 	uint8_t ndx = buff[0];
-	state_t current_state;
+	state_t *current_state = setpoint_get();
 	float val;
 	float motor_vals[ESC_CNT];
 	int i;
@@ -48,11 +49,11 @@ void commands_handle_message(unsigned char *buff, uint8_t length) {
 	{
 		case 1: //increase roll setpoint
 			val = *((float *)&buff[1]);
-			current_state.roll = val;
+			current_state->roll = val;
 			break;
 		case 2: //Increase pitch setpoint
 			val = *((float *)&buff[1]);
-			current_state.pitch = val;
+			current_state->pitch = val;
 			break;
 		case 3: //Set  motor speed. This is demo/debug purpose ONLY!
 			//This will be a floating point from 0 - 1
@@ -67,7 +68,7 @@ void commands_handle_message(unsigned char *buff, uint8_t length) {
 			break;
 		case 5: //Set yaw setpoint
 			val = *((float *)&buff[1]);
-			current_state.yaw = val;
+			current_state->yaw = val;
 			break;
 		case 6: // shutdown
 			control_set_enabled(0);
@@ -87,13 +88,14 @@ void commands_handle_message(unsigned char *buff, uint8_t length) {
 			if(length == sizeof(state_t)+1)
 				control_set_i_gains((state_t*)(&buff[1]));
 			break;
-		case 10: // Set I gains
+		case 10: // Set D gains
 			if(length == sizeof(state_t)+1)
 				control_set_d_gains((state_t*)(&buff[1]));
 			break;
 		default:
 			//Should send back some sort of error message here...
 			logging_send_string(LOGGING_ERROR, "Received invalid command id");
+                        logging_send_buff(LOGGING_ERROR, buff[0], 1);
 			break;
 	}
 }
