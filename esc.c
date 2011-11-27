@@ -8,7 +8,9 @@
 #include "core/pwm.h"
 #include "core/systick.h"
 
-#define ESC_PWM_MAX 20000
+//Need to find out what 100% throttle on the esc coresponds to what pulse width
+#define ESC_PWM_MAX 20000 //Gives a pwm width of 1.67 ms
+//#define ESC_PWM_MAX 12000 //Gives a pwm width of 2.0ms
 #define ESC_PWM_MIN 36000
 #define ESC_PWM_PRESCALE 2
 #define ESC_PWM_FREQUENCY 60000
@@ -68,16 +70,20 @@ void esc_update_pwm(ESC_LABEL esc) {
 
 void esc_rescale_all() {
 	int max_ndx=0, i;
+        float scale_fact = 0.0;
 	for(i = 1;i < ESC_CNT;++i) {
 		if(_escs[max_ndx].throttle <= _escs[i].throttle)
 			max_ndx = i;
 	}
 
-	// Return if we dont need to rescale
+	// If we don't need to rescale set the scale factor to 1 so the 
+        // scaled_throttle field will get correctly filled.
 	if(_escs[max_ndx].throttle <= 1)
-		return;
+                scale_fact = 1.0;
+        else 
+                scale_fact = 1.0 / _escs[max_ndx].throttle;
+                
 
-	float scale_fact = 1 / _escs[max_ndx].throttle;
 	for(i = 0; i < ESC_CNT;++i)
 		_escs[i].scaled_throttle = _escs[i].throttle * scale_fact;
 }
