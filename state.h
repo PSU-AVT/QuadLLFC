@@ -23,4 +23,6 @@ void state_update(void);
 
 state_t *state_inertial_get(void);
 
+void state_send(void);
+
 #endif 
