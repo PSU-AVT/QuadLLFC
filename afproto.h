@@ -22,6 +22,4 @@ uint8_t afproto_serialize_payload(const unsigned char *payload,
                                   uint8_t length,
                                   unsigned char *dest);
 
-unsigned char *afproto_get_buffer(void);
-
 #endif

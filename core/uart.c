@@ -343,8 +343,3 @@ void uartSendByte (uint8_t byte)
   return;
 }
 
-static unsigned char uart_out_buff[512];
-
-unsigned char *uartGetOutputBuffer(void) {
-	return uart_out_buff;
-}

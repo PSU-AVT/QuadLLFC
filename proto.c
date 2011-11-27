@@ -10,6 +10,7 @@
 #include "core/uart.h"
 
 static unsigned char proto_buff[256];
+static unsigned char cmd_buff[256];
 static uint8_t proto_buff_ndx = 0;
 
 void proto_update(void) {
@@ -20,8 +21,8 @@ void proto_update(void) {
 		   proto_buff[proto_buff_ndx-1] != AFPROTO_FRAME_ESCAPE_BYTE)) {
 			// Message end
 			uint8_t len;
-			afproto_get_payload(proto_buff, proto_buff_ndx+1, afproto_get_buffer(), &len);
-			commands_handle_message(afproto_get_buffer(), len);
+			afproto_get_payload(proto_buff, proto_buff_ndx+1, cmd_buff, &len);
+			commands_handle_message(cmd_buff, len);
 			proto_buff_ndx = 0;
 		} else
 			++proto_buff_ndx;

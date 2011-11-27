@@ -9,8 +9,11 @@
 #include "setpoint.h"
 #include "control.h"
 #include "state.h"
+#include "core/uart.h"
+#include "afproto.h"
+#include "logging.h"
 
-#define COMMAND_HANDLER_MAX 0
+#include <string.h>
 
 void commands_set_motor(unsigned char *buff, uint8_t length);
 
@@ -19,6 +22,20 @@ typedef union throt_data {
 	int i;
 	float f;
 } throt_data;
+
+void command_send(command_out_id id, const unsigned char *data, uint16_t len) {
+	unsigned char msg_buff[256];
+	unsigned char out_buff[256];
+
+	if(len > 128) {
+		logging_send_string(LOGGING_ERROR, "Attempting to send string over 128 chars");
+		return;
+	}
+
+	strncpy((char*)msg_buff, (char*)data, len);
+	afproto_serialize_payload(msg_buff, len+1, out_buff);
+	uartSend(out_buff, len+1);
+}
 
 void commands_handle_message(unsigned char *buff, uint8_t length) {
 	uint8_t ndx = buff[0];
@@ -76,6 +93,7 @@ void commands_handle_message(unsigned char *buff, uint8_t length) {
 			break;
 		default:
 			//Should send back some sort of error message here...
+			logging_send_string(LOGGING_ERROR, "Received invalid command id");
 			break;
 	}
 }

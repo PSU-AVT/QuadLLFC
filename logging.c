@@ -5,8 +5,7 @@
  */
 
 #include "logging.h"
-#include "core/uart.h"
-#include "afproto.h"
+#include "commands.h"
 
 #include <string.h>
 
@@ -20,11 +19,14 @@ void logging_send_buff(LOGGING_LEVEL level, const unsigned char *buff, uint16_t 
 	if(level < LOG_LEVEL)
 		return;
 
-	unsigned char *out_buff = uartGetOutputBuffer();
-	unsigned char *afproto_buff = afproto_get_buffer();
-	out_buff[0] = level+1; // Convert to command id
-	int i = 1;
-	while(buff_len--) { out_buff[i] = buff[i-1]; i++; }
-	buff_len = afproto_serialize_payload(out_buff, i, afproto_buff);
-	uartSend(afproto_buff, buff_len);
+	uint8_t command_id;
+	switch(level) {
+	case LOGGING_DEBUG:
+		command_id = COMMAND_DEBUG;
+		break;
+	default:
+		command_id = COMMAND_ERROR;
+	}
+
+	command_send(command_id, buff, buff_len);
 }
