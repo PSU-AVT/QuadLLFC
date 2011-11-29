@@ -8,9 +8,8 @@
 #include "core/pwm.h"
 #include "core/systick.h"
 
-//Need to find out what 100% throttle on the esc coresponds to what pulse width
-#define ESC_PWM_MAX 20000 //Gives a pwm width of 1.67 ms
-//#define ESC_PWM_MAX 12000 //Gives a pwm width of 2.0ms
+//1.92ms coresponds to 100% Throttle with our esc's.
+#define ESC_PWM_MAX 14000 //Gives a pwm width of 1.916ms. 
 #define ESC_PWM_MIN 36000
 #define ESC_PWM_PRESCALE 2
 #define ESC_PWM_FREQUENCY 60000
