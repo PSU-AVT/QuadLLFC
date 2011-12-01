@@ -2,6 +2,7 @@
 #include "setpoint.h"
 #include "core/systick.h"
 #include "state.h"
+#include "esc.h"
 
 #define CONTROL_UPDATE_INTERVAL 20
 
@@ -30,14 +31,16 @@ void control_set_enabled(int value) {
 	_control_enabled = value;
 }
 
-void control_state_gains_multiply_to_motors(float *gains,
-                                            float *error,
+
+void control_state_gains_multiply_to_motors(state_t *gains,
+                                            state_t *error,
                                             float *motors) {
 	int i, j;
-	for(i = 0;i < 4;i++) {
-		for(j = 0;j < 4;j++) {
-			motors[i] += gains[j] * error[j];
-		}
+	for(i = 0;i < ESC_CNT;i++) {
+                motors[i] += gains->roll * error->roll;
+                motors[i] += gains->pitch * error->pitch;
+                motors[i] += gains->yaw * error->yaw;
+                motors[i] += gains->z * error->z;
 	}
 }
 
@@ -78,18 +81,18 @@ void control_update(void) {
 	float motor_accum[4] = { 0, 0, 0, 0 };
 
 	// Accumulate P
-	control_state_gains_multiply_to_motors((float*)&_control_p_gains,
-	                                       (float*)&setpoint_error,
+	control_state_gains_multiply_to_motors(&_control_p_gains,
+	                                       &setpoint_error,
 	                                       motor_accum);
 
 	// Accumulate I
-	control_state_gains_multiply_to_motors((float*)&_control_i_gains,
-	                                       (float*)&setpoint_error,
+	control_state_gains_multiply_to_motors(&_control_i_gains,
+	                                       &setpoint_error,
 	                                       motor_accum);
 
 	// Accumulate D
-	control_state_gains_multiply_to_motors((float*)&_control_d_gains,
-	                                       (float*)&setpoint_error,
+	control_state_gains_multiply_to_motors(&_control_d_gains,
+	                                       &setpoint_error,
 	                                       motor_accum);
 }
 

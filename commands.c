@@ -55,7 +55,7 @@ void commands_handle_message(unsigned char *buff, uint8_t length) {
 			val = *((float *)&buff[1]);
 			current_state->pitch = val;
 			break;
-		case 3: //Set  motor speed. This is demo/debug purpose ONLY!
+		case 0xD3: //Set  motor speed. This is demo/debug purpose ONLY!
 			//This will be a floating point from 0 - 1
 			val = *((float *)&(buff[1]));
 			for (i = 0; i < ESC_CNT; i++) {
@@ -63,8 +63,9 @@ void commands_handle_message(unsigned char *buff, uint8_t length) {
 			}
 			esc_set_all_throttles(motor_vals); //This is for testing ONLY!
 			break;
-		case 4: //Increase altitude setpoint (state monitored altitude)
-			//Not yet implemented...
+		case 4: //Set motor speed (state monitored)
+                        val = *((float *)&buff[1]);
+			current_state->z = val;
 			break;
 		case 5: //Set yaw setpoint
 			val = *((float *)&buff[1]);
