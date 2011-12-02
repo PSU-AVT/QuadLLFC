@@ -94,8 +94,8 @@ void commands_handle_message(unsigned char *buff, uint8_t length) {
 				logging_set_level(buff[1]);
 			break;
 		case 13: // Set state send interval
-			if(length == 2)
-				state_set_send_interval(buff[2]);
+			if(length == 5)
+				state_set_send_interval(*((uint32_t*)&buff[2]));
 		case 0xD3: //Set  motor speed. This is demo/debug purpose ONLY!
 			//This will be a floating point from 0 - 1
 			val = *((float *)&(buff[1]));
