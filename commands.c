@@ -23,6 +23,7 @@ typedef union throt_data {
 	float f;
 } throt_data;
 
+//Despite the name command_send, can also be used to send messages to HLFC
 void command_send(command_out_id id, const unsigned char *data, uint16_t len) {
 	unsigned char msg_buff[256];
 	unsigned char out_buff[256];
@@ -39,7 +40,7 @@ void command_send(command_out_id id, const unsigned char *data, uint16_t len) {
 
 void commands_handle_message(unsigned char *buff, uint8_t length) {
 	uint8_t ndx = buff[0];
-	state_t current_state;
+	state_t *current_state = setpoint_get();
 	float val;
 	float motor_vals[ESC_CNT];
 	int i;
@@ -48,20 +49,21 @@ void commands_handle_message(unsigned char *buff, uint8_t length) {
 	{
 		case 1: //set roll setpoint
 			val = *((float *)&buff[1]);
-			current_state.roll = val;
+			current_state->roll = val;
 			break;
 		case 2: //set pitch setpoint
 			val = *((float *)&buff[1]);
-			current_state.pitch = val;
+			current_state->pitch = val;
 			break;
 		case 3: //ping
 			break;
-		case 4: //Increase altitude setpoint (state monitored altitude)
-			//Not yet implemented...
+		case 4: //Set motor speed (state monitored)
+                        val = *((float *)&buff[1]);
+			current_state->z = val;
 			break;
 		case 5: //Set yaw setpoint
 			val = *((float *)&buff[1]);
-			current_state.yaw = val;
+			current_state->yaw = val;
 			break;
 		case 6: // shutdown
 			control_set_enabled(0);
@@ -90,6 +92,14 @@ void commands_handle_message(unsigned char *buff, uint8_t length) {
 		case 12: // Set log level
 			if(length == 2)
 				logging_set_level(buff[1]);
+			break;
+		case 0xD3: //Set  motor speed. This is demo/debug purpose ONLY!
+			//This will be a floating point from 0 - 1
+			val = *((float *)&(buff[1]));
+			for (i = 0; i < ESC_CNT; i++) {
+				motor_vals[i] = val;
+			}
+			esc_set_all_throttles(motor_vals); //This is for testing ONLY!
 			break;
 		default:
 			//Should send back some sort of error message here...
