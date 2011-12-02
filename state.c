@@ -5,8 +5,9 @@
 #include "commands.h"
 
 #define STATE_GYRO_UPDATE_INTERVAL 5
-#define STATE_SEND_INTERVAL 20
 #define STATE_DOF_CNT 6
+
+static uint32_t _state_send_interval;
 
 static float rotation_b_to_i[3][3]; // Body to inertial rotation matrix
 static state_t inertial_state;
@@ -91,8 +92,12 @@ void state_update(void) {
 	uint32_t ticks = systickGetTicks();
 	if((ticks - _state_gyro_last_update) >= STATE_GYRO_UPDATE_INTERVAL)
 		state_update_from_gyro();
-	if((ticks - _state_send_last) >= STATE_SEND_INTERVAL)
+	if(_state_send_interval && (ticks - _state_send_last) >= _state_send_interval)
 		state_send();
+}
+
+void state_set_send_interval(unsigned int msecs) {
+	_state_send_interval = msecs;
 }
 
 void state_send(void) {

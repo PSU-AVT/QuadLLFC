@@ -23,6 +23,7 @@ void state_update(void);
 
 state_t *state_inertial_get(void);
 
+void state_set_send_interval(unsigned int msecs);
 void state_send(void);
 
 #endif 
