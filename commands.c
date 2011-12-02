@@ -46,21 +46,15 @@ void commands_handle_message(unsigned char *buff, uint8_t length) {
 
 	switch(ndx) 
 	{
-		case 1: //increase roll setpoint
+		case 1: //set roll setpoint
 			val = *((float *)&buff[1]);
 			current_state.roll = val;
 			break;
-		case 2: //Increase pitch setpoint
+		case 2: //set pitch setpoint
 			val = *((float *)&buff[1]);
 			current_state.pitch = val;
 			break;
-		case 3: //Set  motor speed. This is demo/debug purpose ONLY!
-			//This will be a floating point from 0 - 1
-			val = *((float *)&(buff[1]));
-			for (i = 0; i < ESC_CNT; i++) {
-				motor_vals[i] = val;
-			}
-			esc_set_all_throttles(motor_vals); //This is for testing ONLY!
+		case 3: //ping
 			break;
 		case 4: //Increase altitude setpoint (state monitored altitude)
 			//Not yet implemented...
@@ -87,9 +81,15 @@ void commands_handle_message(unsigned char *buff, uint8_t length) {
 			if(length == sizeof(state_t)+1)
 				control_set_i_gains((state_t*)(&buff[1]));
 			break;
-		case 10: // Set I gains
+		case 10: // Set D gains
 			if(length == sizeof(state_t)+1)
 				control_set_d_gains((state_t*)(&buff[1]));
+			break;
+		case 11: // Set Setpoint
+			break;
+		case 12: // Set log level
+			if(length == 2)
+				logging_set_level(buff[1]);
 			break;
 		default:
 			//Should send back some sort of error message here...

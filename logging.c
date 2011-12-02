@@ -9,6 +9,8 @@
 
 #include <string.h>
 
+static LOGGING_LEVEL LOG_LEVEL = 3;
+
 void logging_send_string(LOGGING_LEVEL level, const char *str) {
 	uint16_t len = 0;
 	while(str[++len]);
@@ -29,4 +31,8 @@ void logging_send_buff(LOGGING_LEVEL level, const unsigned char *buff, uint16_t 
 	}
 
 	command_send(command_id, buff, buff_len);
+}
+
+void logging_set_level(LOGGING_LEVEL level) {
+	LOG_LEVEL = level;
 }
