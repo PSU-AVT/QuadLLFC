@@ -60,6 +60,7 @@ void control_update(void) {
 	// Calculate dt and update last_ticks
 	uint32_t d_msecs = systickGetTicks() - _control_last_update;
 	float dt = d_msecs / 1000.0f;
+	_control_last_update = systickGetTicks();
 
 	// Calculate error
 	state_subtract(state_inertial_get(), setpoint_get(), &setpoint_error);

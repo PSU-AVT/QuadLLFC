@@ -15,6 +15,7 @@ static int inertial_needs_update;
 
 static uint32_t _state_gyro_last_update;
 static uint32_t _state_send_last;
+static GyroData _state_gyro_last;
 
 void state_add(state_t *s1, state_t *s2, state_t *sum) {
 	float *s1_arr = (float*)s1;
@@ -62,11 +63,10 @@ void state_reset(void) {
 static uint32_t last_gyro_update_ticks;
 
 void state_update_from_gyro(void) {
-	GyroData gd;
-	if(itg3200GetData(&gd)) {
+	if(itg3200GetData(&_state_gyro_last)) {
 		uint32_t tick_diff = systickGetTicks() - last_gyro_update_ticks;
-		float dt = tick_diff / 1000;
-		rotation_matrix_velocity_update(rotation_b_to_i, gd.X, gd.Y, gd.Z, dt);
+		float dt = tick_diff / 1000.0;
+		rotation_matrix_velocity_update(rotation_b_to_i, _state_gyro_last.X, _state_gyro_last.Y, _state_gyro_last.Z, dt);
 		last_gyro_update_ticks = systickGetTicks();
 	}
 	inertial_needs_update = 1;
