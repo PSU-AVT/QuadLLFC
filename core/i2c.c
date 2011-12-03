@@ -14,6 +14,7 @@
  *
 *****************************************************************************/
 #include "i2c.h"
+#include "systick.h"
 
 volatile uint32_t I2CMasterState = I2CSTATE_IDLE;
 volatile uint32_t I2CSlaveState = I2CSTATE_IDLE;
@@ -342,7 +343,8 @@ uint32_t i2cEngine( void )
   }
 
   /* wait until the state is a terminal state */
-  while (I2CMasterState < 0x100);
+  uint32_t start_ticks = systickGetTicks();
+  while (I2CMasterState < 0x100 && (systickGetTicks() - start_ticks) < 2);
 
   return ( I2CMasterState );
 }
