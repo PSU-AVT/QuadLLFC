@@ -33,9 +33,10 @@ void command_send(command_out_id id, const unsigned char *data, uint16_t len) {
 		return;
 	}
 
-	strncpy((char*)msg_buff, (char*)data, len);
-	afproto_serialize_payload(msg_buff, len+1, out_buff);
-	uartSend(out_buff, len+1);
+	msg_buff[0] = id;
+	memcpy((char*)msg_buff+1, (char*)data, len);
+	len = afproto_serialize_payload(msg_buff, len+1, out_buff);
+	uartSend(out_buff, len);
 }
 
 void commands_handle_message(unsigned char *buff, uint8_t length) {
@@ -95,7 +96,8 @@ void commands_handle_message(unsigned char *buff, uint8_t length) {
 			break;
 		case 13: // Set state send interval
 			if(length == 5)
-				state_set_send_interval(*((uint32_t*)&buff[2]));
+				state_set_send_interval(*((uint32_t*)&buff[1]));
+			break;
 		case 0xD3: //Set  motor speed. This is demo/debug purpose ONLY!
 			//This will be a floating point from 0 - 1
 			val = *((float *)&(buff[1]));
