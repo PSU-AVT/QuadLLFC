@@ -99,5 +99,6 @@ GyroData;
 int itg3200Init(void);
 int itg3200GetData (GyroData *data);
 unsigned char itg3200_Get_WhoAmI (void);
+void itg3200Calibrate(GyroData *data, uint32_t cnt, uint32_t delay);
 
 #endif

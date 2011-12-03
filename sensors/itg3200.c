@@ -47,6 +47,7 @@
 /**************************************************************************/
 
 #include "itg3200.h"
+#include "core/systick.h"
 
 #include <stdint.h>
 
@@ -247,4 +248,24 @@ unsigned char itg3200_Get_WhoAmI (void)
           return(1);
         }
           return(0);
+}
+
+void itg3200Calibrate(GyroData *data, uint32_t cnt, uint32_t delay) {
+	int i;
+	float x, y, z;
+	GyroData gd;
+	gd.x_bias = 0;
+	gd.y_bias = 0;
+	gd.z_bias = 0;
+	for(i = 0;i < cnt;++i)  {
+		itg3200GetData(&gd);
+		x += gd.raw_X;
+		y += gd.raw_Y;
+		z += gd.raw_Z;
+		systickDelay(delay);
+	}
+
+	gd.x_bias = x / cnt;
+	gd.y_bias = y / cnt;
+	gd.z_bias = z / cnt;
 }

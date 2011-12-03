@@ -53,6 +53,7 @@ void state_copy(const state_t *src, state_t *dest) {
 
 void state_init(void) {
 	rotation_matrix_init(rotation_b_to_i);
+	itg3200Calibrate(&_state_gyro_last, 100, STATE_GYRO_UPDATE_INTERVAL);
 }
 
 void state_reset(void) {
