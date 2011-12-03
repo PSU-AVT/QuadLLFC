@@ -27,6 +27,7 @@ int main(void) {
 	// Init sensors
 	itg3200Init();
 	adxl345_Init();
+	state_init();
 
 	// Main loop
 	while(1) {
