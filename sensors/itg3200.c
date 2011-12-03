@@ -219,9 +219,9 @@ int itg3200GetData (GyroData *data)
         data->Y = data->raw_Y / LSB_CORRECTION;
         data->Z = data->raw_Z / LSB_CORRECTION;
 
-        data->X += data->x_bias;
-        data->Y += data->y_bias;
-        data->Z += data->z_bias;
+        data->X = data->x_bias;
+        data->Y = data->y_bias;
+        data->Z = data->z_bias;
 
         //if(err_exp)
         	//error = itg3200_ERROR_LAST;
@@ -253,19 +253,18 @@ unsigned char itg3200_Get_WhoAmI (void)
 void itg3200Calibrate(GyroData *data, uint32_t cnt, uint32_t delay) {
 	int i;
 	float x, y, z;
-	GyroData gd;
-	gd.x_bias = 0;
-	gd.y_bias = 0;
-	gd.z_bias = 0;
+	data->x_bias = 0;
+	data->y_bias = 0;
+	data->z_bias = 0;
 	for(i = 0;i < cnt;++i)  {
-		itg3200GetData(&gd);
-		x += gd.raw_X;
-		y += gd.raw_Y;
-		z += gd.raw_Z;
+		itg3200GetData(data);
+		x += data->X;
+		y += data->Y;
+		z += data->Z;
 		systickDelay(delay);
 	}
 
-	gd.x_bias = x / cnt;
-	gd.y_bias = y / cnt;
-	gd.z_bias = z / cnt;
+	data->x_bias = x / cnt;
+	data->y_bias = y / cnt;
+	data->z_bias = z / cnt;
 }
