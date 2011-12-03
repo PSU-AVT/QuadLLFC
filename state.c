@@ -90,10 +90,15 @@ state_t *state_inertial_get(void) {
 
 void state_update(void) {
 	uint32_t ticks = systickGetTicks();
-	if((ticks - _state_gyro_last_update) >= STATE_GYRO_UPDATE_INTERVAL)
+	if((ticks - _state_gyro_last_update) >= STATE_GYRO_UPDATE_INTERVAL) {
 		state_update_from_gyro();
-	if(_state_send_interval && (ticks - _state_send_last) >= _state_send_interval)
+		_state_gyro_last_update = ticks;
+	}
+	ticks = systickGetTicks();
+	if(_state_send_interval && (ticks - _state_send_last) >= _state_send_interval) {
 		state_send();
+		_state_send_last = ticks;
+	}
 }
 
 void state_set_send_interval(unsigned int msecs) {
