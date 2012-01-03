@@ -88,7 +88,13 @@ void commands_handle_message(unsigned char *buff, uint8_t length) {
 			if(length == sizeof(state_t)+1)
 				control_set_d_gains((state_t*)(&buff[1]));
 			break;
-		case 11: // Set Setpoint
+		case 11: // Set Atten Setpoint
+			val = *((float *)&buff[1]);
+			current_state->roll = val;
+			val = *((float *)&buff[5]);
+			current_state->pitch = val;
+			val = *((float *)&buff[9]);
+			current_state->yaw = val;
 			break;
 		case 12: // Set log level
 			if(length == 2)
