@@ -39,6 +39,7 @@ uint8_t afproto_get_payload(const unsigned char *buffer,
 	// Copy payload, gen crc, and unescape
 	uint8_t end_ndx = length + ndx;
 	uint8_t payload_ndx = 0;
+
 	for(;ndx < end_ndx && ndx < buff_length;++ndx) {
 		if(buffer[ndx] == AFPROTO_FRAME_ESCAPE_BYTE) {
 			crc = crc_8_update(crc, buffer[ndx]);
@@ -82,7 +83,7 @@ uint8_t afproto_serialize_payload(const unsigned char *payload,
 	}
 
 	dest[0] = AFPROTO_FRAME_START_BYTE;
-	dest[1] = length;
+	dest[1] = ndx-3;
 	dest[2] = crc;
 	dest[ndx++] = AFPROTO_FRAME_END_BYTE;
 
@@ -101,7 +102,7 @@ int main(int argc, char **argv) {
 		printf("%x ", (uint8_t)buff[i]);
 	printf("\n");
 
-	afproto_get_payload("\xa3\x05\xeb\x48\x65\x6c\x6c\x6f\x59", 9, buff2, &length);
+	afproto_get_payload("\xa3\x0e\x09\x04\x00\x00\x00\x00\x1a\xdf\x85\xa3\xc\x00\x00\x00\x00\x59", 18, buff2, &length);
 	printf("%d: ", length);
 	for(i = 0;i < length;i++)
 		printf("%c", buff2[i]);
