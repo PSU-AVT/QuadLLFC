@@ -7,7 +7,7 @@
 #define STATE_GYRO_UPDATE_INTERVAL 5
 #define STATE_DOF_CNT 6
 
-static uint32_t _state_send_interval;
+static uint32_t _state_send_interval = 20;
 
 static float rotation_b_to_i[3][3]; // Body to inertial rotation matrix
 static state_t inertial_state;
