@@ -8,8 +8,10 @@
 #ifndef ADXL345_H_
 #define ADXL345_H_
 
-#include <stdint.h>
+//#include "../config.h"
+#include "../lpc134x.h"
 #include "../core/i2cError.h"
+#include "../core/i2c.h"
 
 #define adxl345_LSB_CORRECTION .0039 //For the 2g range
 

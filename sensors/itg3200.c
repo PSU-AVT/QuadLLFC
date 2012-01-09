@@ -47,9 +47,6 @@
 /**************************************************************************/
 
 #include "itg3200.h"
-#include "core/systick.h"
-
-#include <stdint.h>
 
 extern volatile uint8_t   I2CMasterBuffer[I2C_BUFSIZE];
 extern volatile uint8_t   I2CSlaveBuffer[I2C_BUFSIZE];
@@ -58,7 +55,7 @@ extern volatile uint32_t  I2CReadLength, I2CWriteLength;
 uint32_t i;
 uint8_t gyro_init;
 
-static int itg3200WriteByte (uint8_t address, uint8_t reg, uint32_t value)
+static i2c_error itg3200WriteByte (uint8_t address, uint8_t reg, uint32_t value)
 {
   // Clear write buffers
   for ( i = 0; i < I2C_BUFSIZE; i++ )
@@ -71,12 +68,11 @@ static int itg3200WriteByte (uint8_t address, uint8_t reg, uint32_t value)
   I2CMasterBuffer[0] = address;             // I2C device address
   I2CMasterBuffer[1] = reg;                       // Command register
   I2CMasterBuffer[2] = (value & 0xFF);            // Value to write
-  i2cEngine();
-  return 1;
+  return i2cEngine();
 }
 
 
-static int itg3200ReadByte(uint8_t address, uint8_t reg, int *value)
+static i2c_error itg3200ReadByte(uint8_t address, uint8_t reg, int *value)
 {
   // Clear write buffers
   for ( i = 0; i < I2C_BUFSIZE; i++ )
@@ -90,16 +86,16 @@ static int itg3200ReadByte(uint8_t address, uint8_t reg, int *value)
   I2CMasterBuffer[1] = reg;                       // Command register
   // Append address w/read bit
   I2CMasterBuffer[2] = address | itg3200_READBIT;
-  if(!i2cEngine())
-	  return 1;
-
-  // Shift values to create properly formed integer
-  *value = I2CSlaveBuffer[0];
-
-  return 0;
+  i2c_error status = i2cEngine();
+  if(status == i2c_ok)
+  {
+          // Shift values to create properly formed integer
+          *value = I2CSlaveBuffer[0];
+  }
+  return status;
 }
 
-static uint32_t itg3200ReadMultiByte(uint8_t address, uint8_t reg, uint8_t numBytes, uint8_t value[])
+static i2c_error itg3200ReadMultiByte(uint8_t address, uint8_t reg, uint8_t numBytes, uint8_t value[])
 {
   // Clear write buffers
   uint32_t i;
@@ -114,8 +110,8 @@ static uint32_t itg3200ReadMultiByte(uint8_t address, uint8_t reg, uint8_t numBy
   I2CMasterBuffer[1] = reg;                       // Command register
   // Append address w/read bit
   I2CMasterBuffer[2] = address | itg3200_READBIT;
-  uint32_t returned = i2cEngine();
-  if(returned)
+  i2c_error returned = i2cEngine();
+  if(returned == i2c_ok)
   {
 	  // Shift values to create properly formed integer
 	  int i;
@@ -134,35 +130,36 @@ static uint32_t itg3200ReadMultiByte(uint8_t address, uint8_t reg, uint8_t numBy
     @brief  Initialises the I2C block
 */
 /**************************************************************************/
-int itg3200Init(void)
+i2c_error itg3200Init(void)
 {
+  i2c_error response_error= i2c_ok;
   // Initialise I2C
-  if (i2cInit(I2CMASTER))
+  if (i2cInit(I2CMODE_MASTER) == FALSE)
   {
-    return 1;    /* Fatal error */
+    return i2c_init;    /* Fatal error */
   }
 
-  /*response_error = itg3200Write8 (itg3200_ADDRESS, itg3200_REGISTER_CONFIG_DLPF, 0x19);
-  if (response_error != itg3200_ERROR_OK)
-	  return response_error;
-	*/
+  int checkValue;
 
-  int x;
-  int response_error;
+  response_error = itg3200WriteByte(itg3200_ADDRESS, itg3200_REGISTER_CONFIG_DLPF, 0x19);
+  response_error = itg3200ReadByte(itg3200_ADDRESS, itg3200_REGISTER_CONFIG_DLPF, &checkValue);
 
-  response_error = itg3200WriteByte(itg3200_ADDRESS, itg3200_REGISTER_CONFIG_DLPF, 0x1A);
-  itg3200ReadByte(itg3200_ADDRESS, itg3200_REGISTER_CONFIG_DLPF, &x);
+  if (checkValue != 0x19)
+          return i2c_error_last;
 
   response_error = itg3200WriteByte (itg3200_ADDRESS, itg3200_REGISTER_CONFIG_PMU, 0x01);
-  itg3200ReadByte(itg3200_ADDRESS, itg3200_REGISTER_CONFIG_PMU, &x);
+  response_error = itg3200ReadByte(itg3200_ADDRESS, itg3200_REGISTER_CONFIG_PMU, &checkValue);
 
-  //if (!response_error)
-	  //return response_error;
+  if (checkValue != 0x01)
+          return i2c_error_last;
 
   response_error = itg3200WriteByte (itg3200_ADDRESS, itg3200_REGISTER_CONFIG_SMPLDIV, 0x07);
-  itg3200ReadByte(itg3200_ADDRESS, itg3200_REGISTER_CONFIG_SMPLDIV, &x);
+  response_error = itg3200ReadByte(itg3200_ADDRESS, itg3200_REGISTER_CONFIG_SMPLDIV, &checkValue);
 
-  if (!response_error)
+  if (checkValue != 0x07)
+          return i2c_error_last;
+
+  if (response_error == i2c_ok)
   {
 	  gyro_init = 1;
   } else {
@@ -179,10 +176,10 @@ int itg3200Init(void)
                         it in the gyro structure.
 */
 /**************************************************************************/
-int itg3200GetData (GyroData *data)
+i2c_error itg3200GetData (GyroData *data)
 {
   uint8_t tmpdat[8];
-  int error = 1;
+  i2c_error error = i2c_error_last;
 
 
     if (!gyro_init)
@@ -199,10 +196,12 @@ int itg3200GetData (GyroData *data)
                 else err_exp = 1;
         }*/
     	error = itg3200ReadMultiByte(itg3200_ADDRESS, itg3200_REGISTER_TEMPH, 8, tmpdat);
-                data->raw_temp = (short) ((int) tmpdat[0] << 8) | ((int) tmpdat[1]);
-                data->raw_X = (short) ((int) tmpdat[2] << 8) | ((int) tmpdat[3]);
-                data->raw_Y = (short) ((int) tmpdat[4] << 8) | ((int) tmpdat[5]);
-                data->raw_Z = (short) ((int) tmpdat[6] << 8) | ((int) tmpdat[7]);
+        if (error != i2c_ok)
+                return error;
+        data->raw_temp = (short) ((int) tmpdat[0] << 8) | ((int) tmpdat[1]);
+        data->raw_X = (short) ((int) tmpdat[2] << 8) | ((int) tmpdat[3]);
+        data->raw_Y = (short) ((int) tmpdat[4] << 8) | ((int) tmpdat[5]);
+        data->raw_Z = (short) ((int) tmpdat[6] << 8) | ((int) tmpdat[7]);
         //Note:  Temperature scaling:
         //Offset = -35 degrees, 13200 counts. 280 counts/degrees C.
         data->temp = 35.0 + ((data->raw_temp + 13200)/280.0);
@@ -219,9 +218,9 @@ int itg3200GetData (GyroData *data)
         data->Y = data->raw_Y / LSB_CORRECTION;
         data->Z = data->raw_Z / LSB_CORRECTION;
 
-        data->X = data->x_bias;
-        data->Y = data->y_bias;
-        data->Z = data->z_bias;
+        data->X += data->x_bias;
+        data->Y += data->y_bias;
+        data->Z += data->z_bias;
 
         //if(err_exp)
         	//error = itg3200_ERROR_LAST;
@@ -251,20 +250,20 @@ unsigned char itg3200_Get_WhoAmI (void)
 }
 
 void itg3200Calibrate(GyroData *data, uint32_t cnt, uint32_t delay) {
-	int i;
-	float x, y, z;
-	data->x_bias = 0;
-	data->y_bias = 0;
-	data->z_bias = 0;
-	for(i = 0;i < cnt;++i)  {
-		itg3200GetData(data);
-		x += data->X;
-		y += data->Y;
-		z += data->Z;
-		systickDelay(delay);
-	}
-
-	data->x_bias = x / cnt;
-	data->y_bias = y / cnt;
-	data->z_bias = z / cnt;
+        int i;
+        float x, y, z;
+        data->x_bias = 0;
+        data->y_bias = 0;
+        data->z_bias = 0;
+        for(i = 0;i < cnt;++i) {
+                itg3200GetData(data);
+                x += data->X;
+                y += data->Y;
+                z += data->Z;
+                systickDelay(delay);
+        }
+        
+        data->x_bias = x / cnt;
+        data->y_bias = y / cnt;
+        data->z_bias = z / cnt;
 }

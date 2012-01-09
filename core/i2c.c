@@ -54,6 +54,7 @@
 
 #include "i2c.h"
 #include "systick.h"
+#include "i2cError.h"
 
 volatile i2cState_t I2CMasterState = I2CSTATE_IDLE;
 volatile i2cState_t I2CSlaveState = I2CSTATE_IDLE;
@@ -368,7 +369,7 @@ uint32_t i2cEngine( void )
   if ( i2cStart() != TRUE )
   {
     i2cStop();
-    return ( FALSE );
+    return ( i2c_could_not_start );
   }
 
   uint32_t start_ticks = systickGetTicks();
@@ -380,9 +381,9 @@ uint32_t i2cEngine( void )
       break;
     }
     if((systickGetTicks() - start_ticks) > CFG_I2C_TIMEOUT)
-    	return ( FALSE );
+            return ( i2c_timeout );
   }
-  return ( TRUE );
+  return ( i2c_ok );
 }
 
 

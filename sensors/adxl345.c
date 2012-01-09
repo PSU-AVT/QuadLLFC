@@ -8,6 +8,7 @@
 #include "adxl345.h"
 #include <math.h>
 
+
 extern volatile uint8_t   I2CMasterBuffer[I2C_BUFSIZE];
 extern volatile uint8_t   I2CSlaveBuffer[I2C_BUFSIZE];
 extern volatile uint32_t  I2CReadLength, I2CWriteLength;
@@ -38,6 +39,8 @@ static uint32_t adxl345ReadByte(uint8_t address, uint8_t reg, int *value)
     I2CMasterBuffer[i] = 0x00;
   }
 
+  I2CSlaveBuffer[0] = 0x00;
+
   I2CWriteLength = 0;
   I2CReadLength = 1;
   I2CMasterBuffer[0] = address;             // I2C device address
@@ -45,7 +48,7 @@ static uint32_t adxl345ReadByte(uint8_t address, uint8_t reg, int *value)
   // Append address w/read bit
   I2CMasterBuffer[2] = address | adxl345_READBIT;
   uint32_t returned = i2cEngine();
-  if(returned)
+  if(returned == i2c_ok)
   {
 	  // Shift values to create properly formed integer
 	  *value = I2CSlaveBuffer[0];
@@ -70,7 +73,7 @@ static uint32_t adxl345ReadMultiByte(uint8_t address, uint8_t reg, uint8_t numBy
   // Append address w/read bit
   I2CMasterBuffer[2] = address | adxl345_READBIT;
   uint32_t returned = i2cEngine();
-  if(returned)
+  if(returned == i2c_ok)
   {
 	  int i;
 	  for(i = 0; i < numBytes; i++)
@@ -87,8 +90,8 @@ i2c_error adxl345_Init(void)
 	int checkValue;
 	i2c_error response;
 	// Initialise I2C
-	if (!i2cInit(I2CMASTER)) {
-		return i2c_error_last; /* Fatal error */
+	if (i2cInit(I2CMODE_MASTER) == FALSE) {
+		return false; /* Fatal error */
 	}
 
 	response = adxl345WriteByte(adxl345_ADDRESS, adxl345_REGISTER_POWER_CTL, adxl345_REGISTER_CONFIG_POWER_CTL);
@@ -115,6 +118,9 @@ i2c_error adxl345GetData(AccelData *data)
 
 	//Doing a multibyte read like the data sheet suggests
 	response = adxl345ReadMultiByte(adxl345_ADDRESS, adxl345_REGISTER_DATAX0, 6, tempData);
+
+        if (response != i2c_ok)
+                return response;
 
 	//Data comes over in two 8 bit chunks, assembling them into one short.
 	data->raw_x = (short) ((int)tempData[1] << 8) | ((int) tempData[0]);

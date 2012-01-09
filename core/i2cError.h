@@ -7,13 +7,15 @@
 
 #ifndef I2CHELPER_H_
 #define I2CHELPER_H_
-#include "i2c.h"
+//#include "i2c.h"
 
 typedef enum {
 	i2c_ok,
 	i2c_init,
 	i2c_busy,
-	i2c_error_last
+	i2c_error_last,
+        i2c_could_not_start,
+        i2c_timeout //should this be i2c_busy?
 } i2c_error;
 
 #endif

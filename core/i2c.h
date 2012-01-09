@@ -57,6 +57,7 @@
 #define CFG_I2C_TIMEOUT        2
 //#include "../config.h"
 #include <stdint.h>
+#include "i2cError.h"
 
 typedef enum i2cMode_e
 {

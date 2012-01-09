@@ -39,7 +39,10 @@
 #ifndef _itg3200_H_
 #define _itg3200_H_
 
+//#include "../config.h"
+#include "../lpc134x.h"
 #include "../core/i2c.h"
+#include "../core/i2cError.h"
 
 //0.06956522 for degrees
 //0.00121414 for radians
@@ -96,8 +99,8 @@ typedef struct
 }
 GyroData;
 
-int itg3200Init(void);
-int itg3200GetData (GyroData *data);
+i2c_error itg3200Init(void);
+i2c_error itg3200GetData (GyroData *data);
 unsigned char itg3200_Get_WhoAmI (void);
 void itg3200Calibrate(GyroData *data, uint32_t cnt, uint32_t delay);
 
