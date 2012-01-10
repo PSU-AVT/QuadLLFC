@@ -98,6 +98,7 @@ typedef struct
         float z_bias;
 }
 GyroData;
+#pragma push (pop)
 
 i2c_error itg3200Init(void);
 i2c_error itg3200GetData (GyroData *data);

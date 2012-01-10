@@ -57,11 +57,15 @@
 
 uint8_t accel_init;
 
-//unsure if we need these or if they are only for memory optimization?
-//#pragma pack (push)
-//#pragma pack (1)
+//The pack is very important, if omited we have byte alignment issues
+#pragma pack (push)
+#pragma pack (1)
 typedef struct
 {
+
+        short raw_x;
+	short raw_y;
+	short raw_z;
 	//Should be x and y? Check with Greg.
 	float x;
 	float y;
@@ -69,14 +73,10 @@ typedef struct
 
 	float roll;
 	float pitch;
-        
-        //These shorts HAVE TO COME AFTER THE FLOATS!
-        //Otherwise there is a byte alignment error. WTF CODERED?!
-        short raw_x;
-	short raw_y;
-	short raw_z;
 }
 AccelData;
+
+#pragma pack (pop)
 
 //Initializes the accel and starts the sending of data
 i2c_error adxl345_Init(void);
