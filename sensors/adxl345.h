@@ -12,6 +12,7 @@
 #include "../lpc134x.h"
 #include "../core/i2cError.h"
 #include "../core/i2c.h"
+#include "../commands.h"
 
 #define adxl345_LSB_CORRECTION .0039 //For the 2g range
 
@@ -61,9 +62,6 @@ uint8_t accel_init;
 //#pragma pack (1)
 typedef struct
 {
-	short raw_x;
-	short raw_y;
-	short raw_z;
 	//Should be x and y? Check with Greg.
 	float x;
 	float y;
@@ -71,6 +69,12 @@ typedef struct
 
 	float roll;
 	float pitch;
+        
+        //These shorts HAVE TO COME AFTER THE FLOATS!
+        //Otherwise there is a byte alignment error. WTF CODERED?!
+        short raw_x;
+	short raw_y;
+	short raw_z;
 }
 AccelData;
 

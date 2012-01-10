@@ -18,4 +18,10 @@ void command_send(command_out_id id, const unsigned char *data, uint16_t len);
 /* Called after receiving an afproto frame */
 void commands_handle_message(unsigned char *buff, uint8_t lenth);
 
+//This is for debugging purposes - should not be used!
+typedef union throt_data {
+	int i;
+	float f;
+} throt_data;
+
 #endif

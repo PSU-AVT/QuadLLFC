@@ -131,12 +131,16 @@ i2c_error adxl345GetData(AccelData *data)
 	data->x = data->raw_x * adxl345_LSB_CORRECTION;
 	data->y = data->raw_y * adxl345_LSB_CORRECTION;
 	data->z = data->raw_z * adxl345_LSB_CORRECTION;
+        //data->x.f = 0.0;
+        //data->y.f = 1.0;
+        //data->z.f = 0.0;
 
 	//Getting the values in euler angles. These are taking directly from freescale's application note AN3416
-	data->roll = atan((data->x / sqrt((data->y*data->y)+(data->z*data->z)))); //Labeled x on the sensor stick
-	data->pitch = atan((data->y / sqrt((data->x*data->x)+(data->z*data->z)))); //Labeled y on the sensor stick
+	//data->roll = atan((data->x / sqrt((data->y*data->y)+(data->z*data->z)))); //Labeled x on the sensor stick
+	//data->pitch = atan((data->y / sqrt((data->x*data->x)+(data->z*data->z)))); //Labeled y on the sensor stick
 
-
+        data->roll = 0.0;
+        data->pitch = 0.0;
 
 	return response;
 }

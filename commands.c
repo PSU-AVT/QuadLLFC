@@ -17,12 +17,6 @@
 
 void commands_set_motor(unsigned char *buff, uint8_t length);
 
-//This is for debugging purposes - should not be used!
-typedef union throt_data {
-	int i;
-	float f;
-} throt_data;
-
 //Despite the name command_send, can also be used to send messages to HLFC
 void command_send(command_out_id id, const unsigned char *data, uint16_t len) {
 	unsigned char msg_buff[256];
