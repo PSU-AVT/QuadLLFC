@@ -158,14 +158,14 @@ void I2C_IRQHandler(void)
     case I2CERR_DATRX_ACKTX:
       /* Data byte has been received, regardless following ACK or NACK */
       I2CSlaveBuffer[RdIndex++] = I2C_I2CDAT;
-      if ( RdIndex < I2CReadLength )
+      if ( RdIndex < (I2CReadLength-1) )
       {
         I2CMasterState = I2CSTATE_DATA_ACK;
         I2C_I2CCONSET = I2C_I2CCONSET_AA;       /* assert ACK after data is received */
       }
       else
       {
-        I2CMasterState = I2CSTATE_DATA_NACK;
+              //I2CMasterState = I2CSTATE_DATA_NACK;
         I2C_I2CCONCLR = I2C_I2CCONCLR_AAC;      /* assert NACK on last byte */
       }
       I2C_I2CCONCLR = I2C_I2CCONCLR_SIC;
