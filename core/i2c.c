@@ -55,6 +55,7 @@
 #include "i2c.h"
 #include "systick.h"
 #include "i2cError.h"
+#include "gpio.h"
 
 volatile i2cState_t I2CMasterState = I2CSTATE_IDLE;
 volatile i2cState_t I2CSlaveState = I2CSTATE_IDLE;
@@ -316,7 +317,7 @@ uint32_t i2cInit( i2cMode_t mode )
 void I2C_FreeBus (void)
 {
         // If slave is holding SDA low because of an improper bus reset or error
-        unsigned char j,i;                    // Temporary counter variable
+        unsigned char j;                    // Temporary counter variable
         j=0;
         //Below makes I2C bus controllable so we can clear the bus before enabling I2C interrupts
 

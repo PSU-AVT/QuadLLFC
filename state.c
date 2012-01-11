@@ -68,12 +68,12 @@ void state_update_from_gyro(void) {
 	if(itg3200GetData(&_state_gyro_last) == i2c_ok) {
 		uint32_t tick_diff = systickGetTicks() - last_gyro_update_ticks;
 		float dt = tick_diff / 1000.0;
-                command_send(COMMAND_ERROR, "gyro_good", 10);
+                command_send(COMMAND_ERROR, (unsigned char*)"gyro_good", 10);
 		command_send(COMMAND_GYRO_STATE, (unsigned char*)&_state_gyro_last.X, sizeof(float)*3);
 		rotation_matrix_velocity_update(rotation_b_to_i, _state_gyro_last.X, _state_gyro_last.Y, _state_gyro_last.Z, dt);
 		last_gyro_update_ticks = systickGetTicks();
 	} else {
-                command_send(COMMAND_ERROR, "gyro_i2c_error", 15);
+                command_send(COMMAND_ERROR, (unsigned char*)"gyro_i2c_error", 15);
         }
 	inertial_needs_update = 1;
 }
