@@ -17,8 +17,10 @@
 
 int main(void) {
 	systemInit();
+	// Initialize Systick to be 1ms
 	systickInit(1);
 
+	// Uart is 115200 Baud, 8 N 1
 	uartInit(115200);
 
 	esc_init_all();

@@ -115,4 +115,6 @@ void esc_arm_all(void) {
 		esc_set_throttle(i, 0);
 
 	pwm_16_start_timers(PWM_TIMER_16_0 | PWM_TIMER_16_1);
+	// Wait for arming
+	systickDelay(6000);
 }
