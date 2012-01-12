@@ -31,6 +31,9 @@ void control_set_enabled(int value) {
 	_control_enabled = value;
 }
 
+int control_enabled(void) {
+	return _control_enabled;
+}
 
 void control_state_gains_multiply_to_motors(state_t *gains,
                                             state_t *error,

@@ -12,6 +12,7 @@
 void control_init(void);
 void control_reset(void);
 void control_set_enabled(int value);
+int control_enabled(void);
 void control_update(void);
 
 void control_set_p_gains(const state_t *gains);
