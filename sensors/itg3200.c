@@ -264,7 +264,7 @@ void itg3200Calibrate(GyroData *data, uint32_t cnt, uint32_t delay) {
                 systickDelay(delay);
         }
         
-        data->x_bias = x / cnt;
-        data->y_bias = y / cnt;
-        data->z_bias = z / cnt;
+        data->x_bias = -x / cnt;
+        data->y_bias = -y / cnt;
+        data->z_bias = -z / cnt;
 }

@@ -8,7 +8,7 @@
 #define STATE_GYRO_UPDATE_INTERVAL 5
 #define STATE_DOF_CNT 6
 
-static uint32_t _state_send_interval = 0;
+static uint32_t _state_send_interval = 20;
 
 static float rotation_b_to_i[3][3]; // Body to inertial rotation matrix
 static state_t inertial_state;
@@ -55,7 +55,7 @@ void state_copy(const state_t *src, state_t *dest) {
 
 void state_init(void) {
 	rotation_matrix_init(rotation_b_to_i);
-	itg3200Calibrate(&_state_gyro_last, 100, STATE_GYRO_UPDATE_INTERVAL);
+	itg3200Calibrate(&_state_gyro_last, 1000, STATE_GYRO_UPDATE_INTERVAL);
 }
 
 void state_reset(void) {
