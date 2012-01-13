@@ -4,14 +4,15 @@
 #include "sensors/adxl345.h"
 #include "core/systick.h"
 #include "commands.h"
+#include "logging.h"
 
 #define STATE_GYRO_UPDATE_INTERVAL 5
 #define STATE_DOF_CNT 6
 
-static uint32_t _state_send_interval = 20;
+static uint32_t _state_send_interval = 200;
 
 static float rotation_b_to_i[3][3]; // Body to inertial rotation matrix
-static state_t inertial_state;
+static state_t _inertial_state;
 static int inertial_needs_update;
 
 static uint32_t _state_gyro_last_update;
@@ -55,7 +56,9 @@ void state_copy(const state_t *src, state_t *dest) {
 
 void state_init(void) {
 	rotation_matrix_init(rotation_b_to_i);
+	logging_send_string(LOGGING_DEBUG, "Calibrating gyro.");
 	itg3200Calibrate(&_state_gyro_last, 1000, STATE_GYRO_UPDATE_INTERVAL);
+	logging_send_string(LOGGING_DEBUG, "Calibrating gyro complete.");
 }
 
 void state_reset(void) {
@@ -90,15 +93,15 @@ void state_inertial_update(void) {
 		return;
 	float atten[3];
 	rotation_matrix_get_eulers(rotation_b_to_i, atten);
-	inertial_state.roll = atten[0];
-	inertial_state.pitch = atten[1];
-	inertial_state.yaw = atten[2];
+	_inertial_state.roll = atten[0];
+	_inertial_state.pitch = atten[1];
+	_inertial_state.yaw = atten[2];
 	inertial_needs_update = 0;
 }
 
 state_t *state_inertial_get(void) {
 	state_inertial_update();
-	return &inertial_state;
+	return &_inertial_state;
 }
 
 void state_update(void) {

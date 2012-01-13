@@ -42,9 +42,9 @@ void rotation_matrix_normalize(float r[][3]) {
 
 // Get euler angles (X, Y', Z'') from R
 void rotation_matrix_get_eulers(float r[][3], float eulers[3]) {
-	eulers[0] = (float)atan2((double)r[2][1], (double)r[2][2]);
-	eulers[1] = (float)asin((double)r[2][0]);
-	eulers[2] = (float)atan2((double)r[0][1], (double)r[0][0]);
+	eulers[0] = (float)atan2(r[2][1], r[2][2]);
+	eulers[1] = (float)asin(r[2][0]);
+	eulers[2] = (float)atan2(r[0][1], r[0][0]);
 }
 
 void rotation_matrix_velocity_update(float r[][3], float roll, float pitch, float yaw, float dt) {

@@ -9,7 +9,7 @@
 
 #include <string.h>
 
-static LOGGING_LEVEL LOG_LEVEL = 3;
+static LOGGING_LEVEL LOG_LEVEL = 0;
 
 void logging_send_string(LOGGING_LEVEL level, const char *str) {
 	uint16_t len = 0;
