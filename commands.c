@@ -69,6 +69,7 @@ void commands_handle_message(unsigned char *buff, uint8_t length) {
 		case 7: // turn on
 			state_reset();
 			control_set_enabled(1);
+			uartRxBufferClearFIFO();
 			break;
 		case 8: // Set P gains
 			if(length == sizeof(state_t)+1)
