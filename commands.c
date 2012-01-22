@@ -99,8 +99,12 @@ void commands_handle_message(unsigned char *buff, uint8_t length) {
 				state_set_send_interval(*((uint32_t*)&buff[1]));
 			break;
 		case 14: // Set Setpoint
-			memcpy(current_state, &buff[1], sizeof(state_t));
-			state_send();
+			if(length == (sizeof(state_t)+1)) {
+				current_state->roll = *((float *)&buff[1]);
+				current_state->pitch = *((float *)&buff[5]);
+				current_state->yaw = *((float *)&buff[9]);
+				setpoint_send();
+			}
 			break;
 		case 0xD3: //Set  motor speed. This is demo/debug purpose ONLY!
 			//This will be a floating point from 0 - 1
