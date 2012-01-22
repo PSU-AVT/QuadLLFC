@@ -48,6 +48,7 @@ int main(void) {
 		proto_update();
 		state_update();
 		control_update();
+		esc_update();
 	}
 
 	return 0;

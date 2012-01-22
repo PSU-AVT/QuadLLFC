@@ -10,6 +10,7 @@ typedef enum command_out_id {
 	COMMAND_ACCELERO_STATE = 5,
 	COMMAND_INERTIAL_STATE = 6,
 	COMMAND_MOTORS_STATE = 7,
+	COMMAND_SETPOINT = 8,
 } command_out_id;
 
 /* Send command using buff to generate data. buff == data is valid */

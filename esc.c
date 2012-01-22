@@ -7,6 +7,7 @@
 #include "esc.h"
 #include "core/pwm.h"
 #include "core/systick.h"
+#include "commands.h"
 
 //1.92ms coresponds to 100% Throttle with our esc's.
 #define ESC_PWM_MAX 14000 //Gives a pwm width of 1.916ms. 
@@ -16,6 +17,7 @@
 #define ESC_ARM_DUTY_CYCLE 36000
 
 static float throttle_to_pwm_factor = ESC_PWM_MAX - ESC_PWM_MIN;
+static uint32_t _send_state_ticks = 500;
 
 //#define ESC_CNT 4
 
@@ -118,3 +120,23 @@ void esc_arm_all(void) {
 	// Wait for arming
 	systickDelay(6000);
 }
+
+void esc_send_state(void) {
+	float throttles[4];
+	throttles[0] = _escs[0].throttle;
+	throttles[1] = _escs[1].throttle;
+	throttles[2] = _escs[2].throttle;
+	throttles[3] = _escs[3].throttle;
+
+	command_send(COMMAND_MOTORS_STATE, (unsigned char*)throttles, sizeof(float)*4);
+}
+
+static uint32_t _last_send_state_ticks;
+
+void esc_update(void) {
+	if((systickGetTicks() - _last_send_state_ticks) >= _send_state_ticks) {
+		esc_send_state();
+		_last_send_state_ticks = systickGetTicks();
+	}
+}
+
