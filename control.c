@@ -6,9 +6,9 @@
 
 #define CONTROL_UPDATE_INTERVAL 20
 
-static state_t _control_p_gains;
-static state_t _control_i_gains;
-static state_t _control_d_gains;
+static state_t _control_p_gains[4];
+static state_t _control_i_gains[4];
+static state_t _control_d_gains[4];
 
 static uint32_t _control_last_update;
 static state_t _control_setpoint_error_last;
@@ -19,6 +19,32 @@ static uint32_t _control_enabled;
 void control_init(void) {
 	// TODO
 	// Set the gain values
+        int i, j;
+        
+        float ** gains = ((float*)&_control_p_gains);
+        for (i=0; i<4; i++)
+        {
+                for (j=0; j<6; j++)
+                {
+                        gains[i][j] = 0;
+                }
+        }
+        gains = ((float*)&_control_p_gains);
+        for (i=0; i<4; i++)
+        {
+                for (j=0; j<6; j++)
+                {
+                        gains[i][j] = 0;
+                }
+        }
+        gains = ((float*)&_control_p_gains);
+        for (i=0; i<4; i++)
+        {
+                for (j=0; j<6; j++)
+                {
+                        gains[i][j] = 0;
+                }
+        }
 }
 
 void control_reset(void) {
@@ -65,7 +91,7 @@ void control_update(void) {
 	float dt = d_msecs / 1000.0f;
 	_control_last_update = systickGetTicks();
 
-	// Calculate error
+	// Calculate p error
 	state_subtract(state_inertial_get(), setpoint_get(), &setpoint_error);
 
 	// Calculate d error / dt
@@ -84,6 +110,7 @@ void control_update(void) {
 	// Accumulate gains * error
 	float motor_accum[4] = { 0, 0, 0, 0 };
 
+        /*This is a test, putting in the code from v1
 	// Accumulate P
 	control_state_gains_multiply_to_motors(&_control_p_gains,
 	                                       &setpoint_error,
@@ -98,16 +125,47 @@ void control_update(void) {
 	control_state_gains_multiply_to_motors(&_control_d_gains,
 	                                       &setpoint_error,
 	                                       motor_accum);
+        */
+        int j;
+        //for(i = 0;i < 3;i++) {
+        //p
+        for(j = 0;j < 4;j++) {
+                motor_accum[j] += setpoint_error.roll*_control_p_gains[j].roll + setpoint_error.pitch*_control_p_gains[j].pitch +
+                        setpoint_error.yaw*_control_p_gains[j].yaw + setpoint_error.z*_control_p_gains[j].z;
+        }
+        //d
+        for(j = 0;j < 4;j++) {
+                motor_accum[j] += error_dt.roll*_control_d_gains[j].roll + error_dt.pitch*_control_d_gains[j].pitch +
+                        error_dt.yaw*_control_d_gains[j].yaw + error_dt.z*_control_d_gains[j].z;
+        }
+        //i
+        for(j = 0;j < 4;j++) {
+                motor_accum[j] += error_integral_slice.roll*_control_i_gains[j].roll + error_integral_slice.pitch*_control_i_gains[j].pitch +
+                        error_integral_slice.yaw*_control_i_gains[j].yaw + error_integral_slice.z*_control_i_gains[j].z;
+        }
+                //}
 }
 
 void control_set_p_gains(const state_t *gains) {
-	state_copy(gains, &_control_p_gains);
+        int i;
+        for (i =0; i <4; i++)
+        {
+                state_copy(&gains[i], &_control_p_gains[i]);
+        }
 }
 
 void control_set_i_gains(const state_t *gains) {
-	state_copy(gains, &_control_i_gains);
+        int i;
+        for (i =0; i <4; i++)
+        {
+                state_copy(&gains[i], &_control_i_gains[i]);
+        }
 }
 
 void control_set_d_gains(const state_t *gains) {
-	state_copy(gains, &_control_d_gains);
+        int i;
+        for (i =0; i <4; i++)
+        {
+                state_copy(&gains[i], &_control_d_gains[i]);
+        }
 }
