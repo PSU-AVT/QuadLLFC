@@ -10,6 +10,7 @@
 #include "state.h"
 
 state_t *setpoint_get(void);
+void setpoint_send(void);
 
 #endif
 

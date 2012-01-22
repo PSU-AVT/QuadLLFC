@@ -98,6 +98,10 @@ void commands_handle_message(unsigned char *buff, uint8_t length) {
 			if(length == 5)
 				state_set_send_interval(*((uint32_t*)&buff[1]));
 			break;
+		case 14: // Set Setpoint
+			memcpy(current_state, &buff[1], sizeof(state_t));
+			state_send();
+			break;
 		case 0xD3: //Set  motor speed. This is demo/debug purpose ONLY!
 			//This will be a floating point from 0 - 1
 			val = *((float *)&(buff[1]));
