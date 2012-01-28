@@ -21,30 +21,8 @@ void control_init(void) {
 	// Set the gain values
         int i, j;
         
-        float ** gains = ((float*)&_control_p_gains);
-        for (i=0; i<4; i++)
-        {
-                for (j=0; j<6; j++)
-                {
-                        gains[i][j] = 0;
-                }
-        }
-        gains = ((float*)&_control_p_gains);
-        for (i=0; i<4; i++)
-        {
-                for (j=0; j<6; j++)
-                {
-                        gains[i][j] = 0;
-                }
-        }
-        gains = ((float*)&_control_p_gains);
-        for (i=0; i<4; i++)
-        {
-                for (j=0; j<6; j++)
-                {
-                        gains[i][j] = 0;
-                }
-        }
+	_control_p_gains[0].roll = .01;
+	_control_p_gains[2].roll = -.01;
 }
 
 void control_reset(void) {
@@ -144,6 +122,7 @@ void control_update(void) {
                         error_integral_slice.yaw*_control_i_gains[j].yaw + error_integral_slice.z*_control_i_gains[j].z;
         }
                 //}
+	esc_set_all_throttles(motor_accum);
 }
 
 void control_set_p_gains(const state_t *gains) {

@@ -41,6 +41,7 @@ int main(void) {
 	logging_send_string(LOGGING_DEBUG, "Initializing accelerometer complete.");
 
 	state_init();
+	control_init();
 
 	logging_send_string(LOGGING_DEBUG, "Entering main control loop.");
 	// Main loop
