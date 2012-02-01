@@ -26,6 +26,7 @@ If you are using LPCXpresso and an LPC1343 you can flash your device using the
 following command:
 
 > make boot
+
 > make flash
 
 The make boot command is required only once after the device is plugged in and
@@ -36,6 +37,7 @@ If you are using LPCXpresso and an LPC1343 you can use GDB to debug the
 software on the target board by using the following command:
 
 > make boot
+
 > make debug
 
 See the Flashing section for information on make boot.
