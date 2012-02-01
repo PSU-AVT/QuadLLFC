@@ -18,11 +18,13 @@ path using the following command:
 
 ### Compilation
 To compile run the following command:
+
 > make
 
 ### Flashing
 If you are using LPCXpresso and an LPC1343 you can flash your device using the
 following command:
+
 > make boot
 > make flash
 
@@ -32,6 +34,7 @@ subsequent flashes can be performed by just executing make flash.
 ### Debug (GDB)
 If you are using LPCXpresso and an LPC1343 you can use GDB to debug the
 software on the target board by using the following command:
+
 > make boot
 > make debug
 
