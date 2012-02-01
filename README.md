@@ -14,6 +14,7 @@ You must have a valid arm-none-eabi gnu compiler and toolchain in your path.
 
 If you have LPCXpresso installed you can add the included toolchain to your
 path using the following command:
+
 > export PATH=$PATH:/usr/local/lpcxpresso_4.1.0_164/lpcxpresso/tools/bin:/usr/local/lpcxpresso_4.1.0_164/lpcxpresso/bin
 
 ### Compilation
