@@ -21,8 +21,15 @@ void control_init(void) {
 	// Set the gain values
         int i, j;
         
-	_control_p_gains[0].roll = .01;
-	_control_p_gains[2].roll = -.01;
+	//_control_p_gains[1].roll = -.105;
+	//_control_p_gains[3].roll = .105;
+	//_control_i_gains[1].roll = -.1;
+	//_control_i_gains[3].roll = .1;	
+
+	_control_p_gains[0].z = 1;
+	_control_p_gains[1].z = 1;
+	_control_p_gains[2].z = 1;
+	_control_p_gains[3].z = 1;
 }
 
 void control_reset(void) {
@@ -70,7 +77,7 @@ void control_update(void) {
 	_control_last_update = systickGetTicks();
 
 	// Calculate p error
-	state_subtract(state_inertial_get(), setpoint_get(), &setpoint_error);
+	state_subtract(setpoint_get(), state_inertial_get(), &setpoint_error);
 
 	// Calculate d error / dt
 	state_subtract(&setpoint_error, &_control_setpoint_error_last, &error_dt);
@@ -118,8 +125,7 @@ void control_update(void) {
         }
         //i
         for(j = 0;j < 4;j++) {
-                motor_accum[j] += error_integral_slice.roll*_control_i_gains[j].roll + error_integral_slice.pitch*_control_i_gains[j].pitch +
-                        error_integral_slice.yaw*_control_i_gains[j].yaw + error_integral_slice.z*_control_i_gains[j].z;
+                motor_accum[j] += _control_setpoint_error_integral.roll*_control_i_gains[j].roll + _control_setpoint_error_integral.pitch*_control_i_gains[j].pitch + _control_setpoint_error_integral.yaw*_control_i_gains[j].yaw + _control_setpoint_error_integral.z*_control_i_gains[j].z;
         }
                 //}
 	esc_set_all_throttles(motor_accum);

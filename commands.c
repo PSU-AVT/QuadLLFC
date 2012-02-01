@@ -104,6 +104,9 @@ void commands_handle_message(unsigned char *buff, uint8_t length) {
 				current_state->roll = *((float *)&buff[1]);
 				current_state->pitch = *((float *)&buff[5]);
 				current_state->yaw = *((float *)&buff[9]);
+				current_state->x = *((float *)&buff[13]);
+				current_state->y = *((float *)&buff[17]);
+				current_state->z = *((float *)&buff[21]);
 				setpoint_send();
 			}
 			break;
