@@ -15,8 +15,8 @@ void control_set_enabled(int value);
 int control_enabled(void);
 void control_update(void);
 
-void control_set_p_gains(const state_t *gains);
-void control_set_i_gains(const state_t *gains);
-void control_set_d_gains(const state_t *gains);
+state_t *control_get_p_gains(void);
+state_t *control_get_i_gains(void);
+state_t *control_get_d_gains(void);
 
 #endif

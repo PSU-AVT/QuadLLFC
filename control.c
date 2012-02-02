@@ -19,7 +19,6 @@ static uint32_t _control_enabled;
 void control_init(void) {
 	// TODO
 	// Set the gain values
-        int i, j;
         
 	//_control_p_gains[1].roll = -.105;
 	//_control_p_gains[3].roll = .105;
@@ -131,26 +130,15 @@ void control_update(void) {
 	esc_set_all_throttles(motor_accum);
 }
 
-void control_set_p_gains(const state_t *gains) {
-        int i;
-        for (i =0; i <4; i++)
-        {
-                state_copy(&gains[i], &_control_p_gains[i]);
-        }
+state_t *control_get_p_gains(void) {
+	return _control_p_gains;
 }
 
-void control_set_i_gains(const state_t *gains) {
-        int i;
-        for (i =0; i <4; i++)
-        {
-                state_copy(&gains[i], &_control_i_gains[i]);
-        }
+state_t *control_get_i_gains(void) {
+	return _control_i_gains;
 }
 
-void control_set_d_gains(const state_t *gains) {
-        int i;
-        for (i =0; i <4; i++)
-        {
-                state_copy(&gains[i], &_control_d_gains[i]);
-        }
+state_t *control_get_d_gains(void) {
+	return _control_d_gains;
 }
+
