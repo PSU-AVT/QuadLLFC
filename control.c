@@ -32,9 +32,14 @@ void control_init(void) {
 }
 
 void control_reset(void) {
-	state_scale(&_control_setpoint_error_last, 0, &_control_setpoint_error_last);
+        /* Zero error integral */
+	state_scale(&_control_setpoint_error_last, 0,
+	            &_control_setpoint_error_last);
+	/* Zero error */
 	state_scale(&_control_setpoint_error_integral, 0,
 	            &_control_setpoint_error_integral);
+
+        _control_last_update = 0;
 }
 
 void control_set_enabled(int value) {
@@ -94,34 +99,19 @@ void control_update(void) {
 	// Accumulate gains * error
 	float motor_accum[4] = { 0, 0, 0, 0 };
 
-        /*This is a test, putting in the code from v1
-	// Accumulate P
-	control_state_gains_multiply_to_motors(&_control_p_gains,
-	                                       &setpoint_error,
-	                                       motor_accum);
-
-	// Accumulate I
-	control_state_gains_multiply_to_motors(&_control_i_gains,
-	                                       &setpoint_error,
-	                                       motor_accum);
-
-	// Accumulate D
-	control_state_gains_multiply_to_motors(&_control_d_gains,
-	                                       &setpoint_error,
-	                                       motor_accum);
-        */
         int j;
-        //for(i = 0;i < 3;i++) {
         //p
         for(j = 0;j < 4;j++) {
                 motor_accum[j] += setpoint_error.roll*_control_p_gains[j].roll + setpoint_error.pitch*_control_p_gains[j].pitch +
                         setpoint_error.yaw*_control_p_gains[j].yaw + setpoint_error.z*_control_p_gains[j].z;
         }
+
         //d
         for(j = 0;j < 4;j++) {
                 motor_accum[j] += error_dt.roll*_control_d_gains[j].roll + error_dt.pitch*_control_d_gains[j].pitch +
                         error_dt.yaw*_control_d_gains[j].yaw + error_dt.z*_control_d_gains[j].z;
         }
+
         //i
         for(j = 0;j < 4;j++) {
                 motor_accum[j] += _control_setpoint_error_integral.roll*_control_i_gains[j].roll + _control_setpoint_error_integral.pitch*_control_i_gains[j].pitch + _control_setpoint_error_integral.yaw*_control_i_gains[j].yaw + _control_setpoint_error_integral.z*_control_i_gains[j].z;
