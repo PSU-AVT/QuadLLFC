@@ -39,6 +39,7 @@ void commands_handle_message(unsigned char *buff, uint8_t length) {
 	float val;
 	float motor_vals[ESC_CNT];
 	int i;
+	state_t *gains_arr;
 
 	switch(ndx) 
 	{
@@ -67,6 +68,7 @@ void commands_handle_message(unsigned char *buff, uint8_t length) {
 			esc_set_all_throttles(motor_vals);
 			break;
 		case 7: // turn on
+			logging_send_string(LOGGING_DEBUG, "Got turn on");
 			state_reset();
 			control_set_enabled(1);
 			uartRxBufferClearFIFO();

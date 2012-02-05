@@ -62,6 +62,10 @@ void esc_init_all(void) {
 	int i;
 	for(i = 0;i < ESC_CNT;++i)
 		esc_init(i);
+	esc_set_throttle(ESC_FRONT, 0);
+	esc_set_throttle(ESC_LEFT, 0);
+	esc_set_throttle(ESC_BACK, 0);
+	esc_set_throttle(ESC_RIGHT, 0);
 }
 
 void esc_update_pwm(ESC_LABEL esc) {

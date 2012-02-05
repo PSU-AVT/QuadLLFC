@@ -3,6 +3,7 @@
 #include "core/systick.h"
 #include "state.h"
 #include "esc.h"
+#include "logging.h"
 
 #define CONTROL_UPDATE_INTERVAL 20
 
@@ -20,10 +21,12 @@ void control_init(void) {
 	// TODO
 	// Set the gain values
         
-	//_control_p_gains[1].roll = -.105;
-	//_control_p_gains[3].roll = .105;
-	//_control_i_gains[1].roll = -.1;
-	//_control_i_gains[3].roll = .1;	
+	_control_p_gains[1].roll = -.02;
+	_control_p_gains[3].roll = .02;
+	_control_d_gains[1].roll = -16.18;
+	_control_d_gains[3].roll = 16.18;
+	_control_i_gains[1].roll = -.049;
+	_control_i_gains[3].roll = .049;	
 
 	_control_p_gains[0].z = 1;
 	_control_p_gains[1].z = 1;
@@ -63,6 +66,8 @@ void control_state_gains_multiply_to_motors(state_t *gains,
 }
 
 void control_update(void) {
+	float motor_accum[4] = { 0, 0, 0, 0 };
+
 	// Check if control is enabled
 	if(!_control_enabled)
 		return;
@@ -75,6 +80,15 @@ void control_update(void) {
 	state_t error_dt;
 	state_t error_integral_slice;
 
+	// Safety Third!
+	state_t *inertial_state = state_inertial_get();
+	if(inertial_state->roll >= 1.57 || inertial_state->roll <= -1.57 || inertial_state->pitch >= 1.57 || inertial_state->pitch <= -1.57) {
+		logging_send_string(LOGGING_ERROR, "Shutting down due to extreme attenuation");
+		esc_set_all_throttles(motor_accum);	
+		_control_enabled = 0;
+		return;
+	}
+
 	// Calculate dt and update last_ticks
 	uint32_t d_msecs = systickGetTicks() - _control_last_update;
 	float dt = d_msecs / 1000.0f;
@@ -85,7 +99,7 @@ void control_update(void) {
 
 	// Calculate d error / dt
 	state_subtract(&setpoint_error, &_control_setpoint_error_last, &error_dt);
-	state_scale(&error_dt, 1 / d_msecs, &error_dt);
+	state_scale(&error_dt, dt, &error_dt);
 
 	// Calculate error integral
 	state_scale(&setpoint_error, dt, &error_integral_slice);
@@ -97,7 +111,6 @@ void control_update(void) {
 	state_copy(&setpoint_error, &_control_setpoint_error_last);
 
 	// Accumulate gains * error
-	float motor_accum[4] = { 0, 0, 0, 0 };
 
         int j;
         //p
