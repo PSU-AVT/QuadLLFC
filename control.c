@@ -21,12 +21,28 @@ void control_init(void) {
 	// TODO
 	// Set the gain values
         
-	_control_p_gains[1].roll = -.02;
-	_control_p_gains[3].roll = .02;
-	_control_d_gains[1].roll = -16.18;
-	_control_d_gains[3].roll = 16.18;
-	_control_i_gains[1].roll = -.049;
-	_control_i_gains[3].roll = .049;	
+	_control_p_gains[1].roll = -.4;
+	_control_p_gains[3].roll = .4;
+	_control_d_gains[1].roll = -91.8;
+	_control_d_gains[3].roll = 91.8;
+	_control_i_gains[1].roll = -.05;
+	_control_i_gains[3].roll = .05;	
+
+	_control_p_gains[0].pitch = .4;
+	_control_p_gains[2].pitch = -.4;
+	_control_d_gains[0].pitch = 91.8;
+	_control_d_gains[2].pitch = -91.8;
+	_control_i_gains[0].pitch = .05;
+	_control_i_gains[2].pitch = -.05;
+
+	_control_p_gains[0].yaw = -.1;
+	_control_p_gains[1].yaw = .1;
+	_control_p_gains[2].yaw = -.1;
+	_control_p_gains[3].yaw = .1;
+	_control_d_gains[0].yaw = -5.0;
+	_control_d_gains[1].yaw = 5.0;
+	_control_d_gains[2].yaw = -5.0;
+	_control_d_gains[3].yaw = 5.0;
 
 	_control_p_gains[0].z = 1;
 	_control_p_gains[1].z = 1;
@@ -65,6 +81,10 @@ void control_state_gains_multiply_to_motors(state_t *gains,
 	}
 }
 
+static state_t setpoint_error;
+static state_t error_dt;
+static state_t error_integral_slice;
+
 void control_update(void) {
 	float motor_accum[4] = { 0, 0, 0, 0 };
 
@@ -76,13 +96,10 @@ void control_update(void) {
 	if((systickGetTicks() - _control_last_update) < 5)
 		return;
 
-	state_t setpoint_error;
-	state_t error_dt;
-	state_t error_integral_slice;
 
 	// Safety Third!
 	state_t *inertial_state = state_inertial_get();
-	if(inertial_state->roll >= 1.57 || inertial_state->roll <= -1.57 || inertial_state->pitch >= 1.57 || inertial_state->pitch <= -1.57) {
+	if(inertial_state->roll >= .7 || inertial_state->roll <= -.7 || inertial_state->pitch >= .7 || inertial_state->pitch <= -.7) {
 		logging_send_string(LOGGING_ERROR, "Shutting down due to extreme attenuation");
 		esc_set_all_throttles(motor_accum);	
 		_control_enabled = 0;
