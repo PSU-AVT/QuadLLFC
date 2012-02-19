@@ -22,7 +22,7 @@ int main(void) {
         control_init();
 
 	// Uart is 115200 Baud, 8 N 1
-	uartInit(115200);
+	uartInit(57600);
 
 	logging_send_string(LOGGING_DEBUG, "Hello!");
 
