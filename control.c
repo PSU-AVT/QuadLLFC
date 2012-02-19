@@ -21,17 +21,17 @@ void control_init(void) {
 	// TODO
 	// Set the gain values
         
-	_control_p_gains[1].roll = -.4;
-	_control_p_gains[3].roll = .4;
-	_control_d_gains[1].roll = -91.8;
-	_control_d_gains[3].roll = 91.8;
-	_control_i_gains[1].roll = -.05;
-	_control_i_gains[3].roll = .05;	
+	_control_p_gains[1].roll = -.07;
+	_control_p_gains[3].roll = .07;
+	_control_d_gains[1].roll = -70.8;
+	_control_d_gains[3].roll = 70.8;
+	_control_i_gains[1].roll = -.02;
+	_control_i_gains[3].roll = .02;	
 
-	_control_p_gains[0].pitch = .4;
-	_control_p_gains[2].pitch = -.4;
-	_control_d_gains[0].pitch = 91.8;
-	_control_d_gains[2].pitch = -91.8;
+	_control_p_gains[0].pitch = .35;
+	_control_p_gains[2].pitch = -.35;
+	_control_d_gains[0].pitch = 70.8;
+	_control_d_gains[2].pitch = -70.8;
 	_control_i_gains[0].pitch = .05;
 	_control_i_gains[2].pitch = -.05;
 
