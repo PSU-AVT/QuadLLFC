@@ -59,6 +59,8 @@ static int _gpioInitialised = 0;
     @brief IRQ Handler for GPIO port 0 (currently checks pin 0.1)
 */
 /**************************************************************************/
+/* Redefined in sensors/maxbotixs.c for the maxbotixs sensor.
+   May need to revisit if we do more interupt controlled stuff.
 void PIOINT0_IRQHandler(void)
 {
   uint32_t regVal;
@@ -70,7 +72,7 @@ void PIOINT0_IRQHandler(void)
   }		
   return;
 }
-
+*/
 /**************************************************************************/
 /*! 
     @brief IRQ Handler for GPIO port 1 (currently checks pin 1.1)
