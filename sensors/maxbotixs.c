@@ -2,6 +2,7 @@
 
 void init_sensor()
 {
+        data_good = 0;
         tick_count = 0;
         //Set port.pin to an input 
         gpioSetDir(0, 6, gpioDirection_Input);
@@ -17,7 +18,8 @@ void init_sensor()
 
 void measure(float * dist)
 {
-        *dist = tick_count;
+        while(!data_good);
+        *dist = (tick_count/timerSpeed)/uSperInch;
 }
         
 void PIOINT0_IRQHandler(void)
@@ -30,9 +32,17 @@ void PIOINT0_IRQHandler(void)
           uint32_t status = gpioGetValue(0,6);
           gpioIntClear(0, 6);
           if (status)
-                  tick_count = systickGetTicks();
+          {
+                  //tick_count = systickGetTicks();
+                  tick_count = TMR_TMR16B0TC;
+                  data_good = 0;
+          }
           else
-                  tick_count = systickGetTicks() - tick_count;
+          {
+                  //tick_count = systickGetTicks() - tick_count;
+                  data_good = 1;
+                  tick_count = TMR_TMR16B0TC - tick_count;
+          }
   }
   return;
 }
