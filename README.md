@@ -1,5 +1,5 @@
-Portland State University Quadcopter Low Level Flight Computer
-==============================================================
+Portland State University Quadcopter LLFC
+=========================================
 
 This repository contains firmware for the Portland State University Quadcopter.
 
