@@ -3,7 +3,8 @@
 void init_sensor()
 {
         data_good = 0;
-        tick_count = 0;
+        Htick_count = 0;
+        Ltick_count = 0;
         //Set port.pin to an input 
         gpioSetDir(0, 6, gpioDirection_Input);
         //Disable the internal pullup/down resistor
@@ -18,8 +19,13 @@ void init_sensor()
 
 void measure(float * dist)
 {
-        while(!data_good);
-        *dist = (tick_count/timerSpeed)/uSperInch;
+        while(!data_good)
+        {
+                if (Ltick_count - Htick_count > 60000)
+                        data_good = 0;
+                else
+                        *dist = ((Ltick_count - Htick_count)/timerSpeed);
+        }
 }
         
 void PIOINT0_IRQHandler(void)
@@ -34,14 +40,14 @@ void PIOINT0_IRQHandler(void)
           if (status)
           {
                   //tick_count = systickGetTicks();
-                  tick_count = TMR_TMR16B0TC;
+                  Htick_count = TMR_TMR16B0TC;
                   data_good = 0;
           }
           else
           {
                   //tick_count = systickGetTicks() - tick_count;
                   data_good = 1;
-                  tick_count = TMR_TMR16B0TC - tick_count;
+                  Ltick_count = TMR_TMR16B0TC;
           }
   }
   return;

@@ -73,6 +73,7 @@ typedef struct
 
 	float roll;
 	float pitch;
+        float mag;
 }
 AccelData;
 
