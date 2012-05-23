@@ -13,12 +13,12 @@ static state_t _control_d_gains[4];
 
 static uint32_t _control_last_update;
 static state_t _control_setpoint_error_last;
-static state_t _control_setpoint_error_integral;
 
 static uint32_t _control_enabled;
 
-static float _control_integral_slice_max[4];
-static float _control_integral_max[4];
+float _control_integral_slice_max[4];
+float _control_integral_max[4];
+static float _control_motor_integrals[4];
 
 void control_init(void) {
 	// TODO
@@ -52,20 +52,21 @@ void control_init(void) {
 	_control_p_gains[2].z = 1;
 	_control_p_gains[3].z = 1;
 
-	int i;
-	for(i = 0;i < 4;i++) {
-		_control_integral_max[i] = _control_p_gains[i] * .05;
-		_control_integral_slice_max[i] = _control_p_gains[i] * .05;
-	}
+	_control_integral_slice_max[0] = _control_p_gains[0].pitch;
+	_control_integral_slice_max[1] = _control_p_gains[0].roll;
+	_control_integral_slice_max[2] = _control_p_gains[2].pitch;
+	_control_integral_slice_max[3] = _control_p_gains[0].roll;
 }
 
 void control_reset(void) {
         /* Zero error integral */
 	state_scale(&_control_setpoint_error_last, 0,
 	            &_control_setpoint_error_last);
-	/* Zero error */
-	state_scale(&_control_setpoint_error_integral, 0,
-	            &_control_setpoint_error_integral);
+
+	int i = 0;
+	for(i = 0;i < 4;i++) {
+		_control_motor_integrals[i] = 0;
+	}
 
         _control_last_update = 0;
 }
@@ -94,7 +95,9 @@ static state_t setpoint_error;
 static state_t error_dt;
 static state_t error_integral_slice;
 
+
 void control_update(void) {
+	int i;
         int j;
 	float motor_accum[4] = { 0, 0, 0, 0 };
 
@@ -130,24 +133,25 @@ void control_update(void) {
 
 	// Calculate error integral
 	state_scale(&setpoint_error, dt, &error_integral_slice);
-	
-	// Limit error_integral_slice to _control_integral_slice_max
-	for(j = 0;j < 6;j++) {
-		if(error_integral_slice[j] > _control_integral_slice_max)
-			error_integral_slice[j] = _control_integral_slice_max;
-		else if(error_integral_slice[j] < (-_control_integral_slice_max))
-			error_integral_slice[j] = -_control_integral_slice_max;
+
+	float motor_slice[4];
+	for(i = 0;i < 4;i++) {
+		float *motor_i_gains = &((float*)_control_i_gains)[i];
+		motor_slice[i] = 0;
+		for(j = 0;j < 6;j++) {
+			motor_slice[i] += ((float*)&error_integral_slice)[j] * motor_i_gains[j];
+		}
+		if(motor_slice[i] > _control_integral_slice_max[i])
+			motor_slice[i] = _control_integral_slice_max[i];
+		else if (motor_slice[i] < -_control_integral_slice_max[i])
+			motor_slice[i] = -_control_integral_slice_max[i];
+		_control_motor_integrals[i] += motor_slice[i];
 	}
-
-	state_add(&error_integral_slice,
-	          &_control_setpoint_error_integral,
-	          &_control_setpoint_error_integral);
-
+	
 	// Update error_last
 	state_copy(&setpoint_error, &_control_setpoint_error_last);
 
 	// Accumulate gains * error
-
         //p
         for(j = 0;j < 4;j++) {
                 motor_accum[j] += setpoint_error.roll*_control_p_gains[j].roll + setpoint_error.pitch*_control_p_gains[j].pitch +
@@ -161,16 +165,13 @@ void control_update(void) {
         }
 
         //i
-        float tmp_motor;
         for(j = 0;j < 4;j++) {
-                tmp_motor = _control_setpoint_error_integral.roll*_control_i_gains[j].roll + _control_setpoint_error_integral.pitch*_control_i_gains[j].pitch + _control_setpoint_error_integral.yaw*_control_i_gains[j].yaw + _control_setpoint_error_integral.z*_control_i_gains[j].z;
-		if(tmp_motor > _control_integral_max)
-			tmp_motor = _control_integral_max;
-		else if(tmp_motor < (-_control_integral_max))
-			tmp_motor = -_control_integral_max;
-		motor_accum[j] += tmp_motor;
-        }
-                //}
+		if(_control_motor_integrals[i] > _control_integral_max[i])
+			_control_motor_integrals[i] = _control_integral_max[i];
+		else if(_control_motor_integrals[i] < -_control_integral_max[i])
+			_control_motor_integrals[i] = -_control_integral_max[i];
+		motor_accum[j] += _control_motor_integrals[j];
+	}
 	esc_set_all_throttles(motor_accum);
 }
 
