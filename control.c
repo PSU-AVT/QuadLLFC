@@ -136,7 +136,7 @@ void control_update(void) {
 
 	float motor_slice[4];
 	for(i = 0;i < 4;i++) {
-		float *motor_i_gains = &((float*)_control_i_gains)[i];
+		float *motor_i_gains = (float*)(&_control_i_gains[i]);
 		motor_slice[i] = 0;
 		for(j = 0;j < 6;j++) {
 			motor_slice[i] += ((float*)&error_integral_slice)[j] * motor_i_gains[j];
@@ -145,7 +145,14 @@ void control_update(void) {
 			motor_slice[i] = _control_integral_slice_max[i];
 		else if (motor_slice[i] < -_control_integral_slice_max[i])
 			motor_slice[i] = -_control_integral_slice_max[i];
+
 		_control_motor_integrals[i] += motor_slice[i];
+
+		// Check for max motor integral val
+		if(_control_motor_integrals[i] > _control_integral_max[i])
+			_control_motor_integrals[i] = _control_integral_max[i];
+		else if(_control_motor_integrals[i] < -_control_integral_max[i])
+			_control_motor_integrals[i] = -_control_integral_max[i];
 	}
 	
 	// Update error_last
@@ -165,13 +172,10 @@ void control_update(void) {
         }
 
         //i
-        for(j = 0;j < 4;j++) {
-		if(_control_motor_integrals[i] > _control_integral_max[i])
-			_control_motor_integrals[i] = _control_integral_max[i];
-		else if(_control_motor_integrals[i] < -_control_integral_max[i])
-			_control_motor_integrals[i] = -_control_integral_max[i];
+        for(j = 0;j < 4;j++)
 		motor_accum[j] += _control_motor_integrals[j];
-	}
+
+	// Apply throttles
 	esc_set_all_throttles(motor_accum);
 }
 
