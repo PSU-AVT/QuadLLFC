@@ -13,50 +13,60 @@ static state_t _control_d_gains[4];
 
 static uint32_t _control_last_update;
 static state_t _control_setpoint_error_last;
-static state_t _control_setpoint_error_integral;
 
 static uint32_t _control_enabled;
+
+float _control_integral_slice_max[4];
+float _control_integral_max[4];
+static float _control_motor_integrals[4];
 
 void control_init(void) {
 	// TODO
 	// Set the gain values
         
-	_control_p_gains[1].roll = -.07;
-	_control_p_gains[3].roll = .07;
-	_control_d_gains[1].roll = 0;
+	_control_p_gains[1].roll = -.042;
+	_control_p_gains[3].roll = .042;
+	_control_d_gains[1].roll = -0;
 	_control_d_gains[3].roll = 0;
-	_control_i_gains[1].roll = 0;
+	_control_i_gains[1].roll = -0;
 	_control_i_gains[3].roll = 0;	
 
-	_control_p_gains[0].pitch = .35;
-	_control_p_gains[2].pitch = -.35;
+	_control_p_gains[0].pitch = .03075;
+	_control_p_gains[2].pitch = -.03075;
 	_control_d_gains[0].pitch = 0;
-	_control_d_gains[2].pitch = 0;
+	_control_d_gains[2].pitch = -0;
 	_control_i_gains[0].pitch = 0;
-	_control_i_gains[2].pitch = 0;
+	_control_i_gains[2].pitch = -0;
 
-	_control_p_gains[0].yaw = -.1;
-	_control_p_gains[1].yaw = .1;
-	_control_p_gains[2].yaw = -.1;
-	_control_p_gains[3].yaw = .1;
-	_control_d_gains[0].yaw = 0;
+	_control_p_gains[0].yaw = -0;
+	_control_p_gains[1].yaw = 0;
+	_control_p_gains[2].yaw = -0;
+	_control_p_gains[3].yaw = 0;
+	_control_d_gains[0].yaw = -0;
 	_control_d_gains[1].yaw = 0;
-	_control_d_gains[2].yaw = 0;
+	_control_d_gains[2].yaw = -0;
 	_control_d_gains[3].yaw = 0;
 
 	_control_p_gains[0].z = 1;
 	_control_p_gains[1].z = 1;
 	_control_p_gains[2].z = 1;
 	_control_p_gains[3].z = 1;
+
+	_control_integral_slice_max[0] = _control_p_gains[0].pitch;
+	_control_integral_slice_max[1] = _control_p_gains[0].roll;
+	_control_integral_slice_max[2] = _control_p_gains[2].pitch;
+	_control_integral_slice_max[3] = _control_p_gains[0].roll;
 }
 
 void control_reset(void) {
         /* Zero error integral */
 	state_scale(&_control_setpoint_error_last, 0,
 	            &_control_setpoint_error_last);
-	/* Zero error */
-	state_scale(&_control_setpoint_error_integral, 0,
-	            &_control_setpoint_error_integral);
+
+	int i = 0;
+	for(i = 0;i < 4;i++) {
+		_control_motor_integrals[i] = 0;
+	}
 
         _control_last_update = 0;
 }
@@ -85,7 +95,10 @@ static state_t setpoint_error;
 static state_t error_dt;
 static state_t error_integral_slice;
 
+
 void control_update(void) {
+	int i;
+        int j;
 	float motor_accum[4] = { 0, 0, 0, 0 };
 
 	// Check if control is enabled
@@ -99,7 +112,7 @@ void control_update(void) {
 
 	// Safety Third!
 	state_t *inertial_state = state_inertial_get();
-	if(inertial_state->roll >= .7 || inertial_state->roll <= -.7 || inertial_state->pitch >= .7 || inertial_state->pitch <= -.7) {
+	if(inertial_state->roll >= 1 || inertial_state->roll <= -1 || inertial_state->pitch >= 1 || inertial_state->pitch <= -1) {
 		logging_send_string(LOGGING_ERROR, "Shutting down due to extreme attenuation");
 		esc_set_all_throttles(motor_accum);	
 		_control_enabled = 0;
@@ -120,16 +133,32 @@ void control_update(void) {
 
 	// Calculate error integral
 	state_scale(&setpoint_error, dt, &error_integral_slice);
-	state_add(&error_integral_slice,
-	          &_control_setpoint_error_integral,
-	          &_control_setpoint_error_integral);
 
+	float motor_slice[4];
+	for(i = 0;i < 4;i++) {
+		float *motor_i_gains = (float*)(&_control_i_gains[i]);
+		motor_slice[i] = 0;
+		for(j = 0;j < 6;j++) {
+			motor_slice[i] += ((float*)&error_integral_slice)[j] * motor_i_gains[j];
+		}
+		if(motor_slice[i] > _control_integral_slice_max[i])
+			motor_slice[i] = _control_integral_slice_max[i];
+		else if (motor_slice[i] < -_control_integral_slice_max[i])
+			motor_slice[i] = -_control_integral_slice_max[i];
+
+		_control_motor_integrals[i] += motor_slice[i];
+
+		// Check for max motor integral val
+		if(_control_motor_integrals[i] > _control_integral_max[i])
+			_control_motor_integrals[i] = _control_integral_max[i];
+		else if(_control_motor_integrals[i] < -_control_integral_max[i])
+			_control_motor_integrals[i] = -_control_integral_max[i];
+	}
+	
 	// Update error_last
 	state_copy(&setpoint_error, &_control_setpoint_error_last);
 
 	// Accumulate gains * error
-
-        int j;
         //p
         for(j = 0;j < 4;j++) {
                 motor_accum[j] += setpoint_error.roll*_control_p_gains[j].roll + setpoint_error.pitch*_control_p_gains[j].pitch +
@@ -143,10 +172,10 @@ void control_update(void) {
         }
 
         //i
-        for(j = 0;j < 4;j++) {
-                motor_accum[j] += _control_setpoint_error_integral.roll*_control_i_gains[j].roll + _control_setpoint_error_integral.pitch*_control_i_gains[j].pitch + _control_setpoint_error_integral.yaw*_control_i_gains[j].yaw + _control_setpoint_error_integral.z*_control_i_gains[j].z;
-        }
-                //}
+        for(j = 0;j < 4;j++)
+		motor_accum[j] += _control_motor_integrals[j];
+
+	// Apply throttles
 	esc_set_all_throttles(motor_accum);
 }
 
