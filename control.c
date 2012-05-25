@@ -23,20 +23,19 @@ static float _control_motor_integrals[4];
 void control_init(void) {
 	// TODO
 	// Set the gain values
-        
-	_control_p_gains[1].roll = -.085;
-	_control_p_gains[3].roll = .085;
-	_control_d_gains[1].roll = -0;
-	_control_d_gains[3].roll = 0.00;
-	_control_i_gains[1].roll = -.001;	
-	_control_i_gains[3].roll = .001;	
+	_control_p_gains[1].roll = -.075;
+	_control_p_gains[3].roll = .075;
+	_control_d_gains[1].roll = -220.0;
+	_control_d_gains[3].roll = 220.0;
+	_control_i_gains[1].roll = -.003;	
+	_control_i_gains[3].roll = .003;	
 
-	_control_p_gains[0].pitch = .085;
-	_control_p_gains[2].pitch = -.085;
-	_control_d_gains[0].pitch = 0;
-	_control_d_gains[2].pitch = -0;
-	_control_i_gains[0].roll = -.001;	
-	_control_i_gains[2].roll = .001;	
+	_control_p_gains[0].pitch = .075;
+	_control_p_gains[2].pitch = -.075;
+	_control_d_gains[0].pitch = 220.0;
+	_control_d_gains[2].pitch = -220.0;
+	_control_i_gains[0].roll = -.003;	
+	_control_i_gains[2].roll = .003;	
 
 	_control_p_gains[0].yaw = -0;
 	_control_p_gains[1].yaw = 0;
@@ -130,41 +129,44 @@ void control_update(void) {
 
 	uint32_t d_msecs = systickGetTicks() - _control_last_update;
 	float dt = d_msecs / 1000.0f;
-	_control_last_update = systickGetTicks();
 
 	// Calculate p error
 	state_subtract(setpoint_get(), state_inertial_get(), &setpoint_error);
 
-	// Calculate d error / dt
-	state_subtract(&setpoint_error, &_control_setpoint_error_last, &error_dt);
-	state_scale(&error_dt, dt, &error_dt);
-
-	// Calculate error integral
-	state_scale(&setpoint_error, dt, &error_integral_slice);
-
 	float motor_slice[4];
-	for(i = 0;i < 4;i++) {
-		float *motor_i_gains = (float*)(&_control_i_gains[i]);
-		motor_slice[i] = 0;
-		for(j = 0;j < 6;j++) {
-			motor_slice[i] += ((float*)&error_integral_slice)[j] * motor_i_gains[j];
-		}
-/*
-		if(motor_slice[i] > _control_integral_slice_max[i])
-			motor_slice[i] = _control_integral_slice_max[i];
-		else if (motor_slice[i] < -_control_integral_slice_max[i])
-			motor_slice[i] = -_control_integral_slice_max[i];
-*/
-		_control_motor_integrals[i] += motor_slice[i];
-/*
+	if(_control_last_update != 0) {
+		// Calculate error integral
+		state_scale(&setpoint_error, dt, &error_integral_slice);
 
-		// Check for max motor integral val
-		if(_control_motor_integrals[i] > _control_integral_max[i])
-			_control_motor_integrals[i] = _control_integral_max[i];
-		else if(_control_motor_integrals[i] < -_control_integral_max[i])
-			_control_motor_integrals[i] = -_control_integral_max[i];
-*/
+		// Calculate d error / dt
+		state_subtract(&setpoint_error, &_control_setpoint_error_last, &error_dt);
+		state_scale(&error_dt, dt, &error_dt);
+
+		for(i = 0;i < 4;i++) {
+			float *motor_i_gains = (float*)(&_control_i_gains[i]);
+			motor_slice[i] = 0;
+			for(j = 0;j < 6;j++) {
+				motor_slice[i] += ((float*)&error_integral_slice)[j] * motor_i_gains[j];
+			}
+	/*
+			if(motor_slice[i] > _control_integral_slice_max[i])
+				motor_slice[i] = _control_integral_slice_max[i];
+			else if (motor_slice[i] < -_control_integral_slice_max[i])
+				motor_slice[i] = -_control_integral_slice_max[i];
+	*/
+			_control_motor_integrals[i] += motor_slice[i];
+	/*
+
+			// Check for max motor integral val
+			if(_control_motor_integrals[i] > _control_integral_max[i])
+				_control_motor_integrals[i] = _control_integral_max[i];
+			else if(_control_motor_integrals[i] < -_control_integral_max[i])
+				_control_motor_integrals[i] = -_control_integral_max[i];
+	*/
+		}
 	}
+
+	_control_last_update = systickGetTicks();
 
 	// Update error_last
 	state_copy(&setpoint_error, &_control_setpoint_error_last);
