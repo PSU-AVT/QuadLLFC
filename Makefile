@@ -17,7 +17,7 @@ CRT_FLAGS=-g -2 -pLPC1343 -wire=winUSB
 
 OCFLAGS=--strip-unneeded
 
-CFLAGS=-g -c -I./ -Wall -mthumb -ffunction-sections -fdata-sections -fmessage-length=0 -mcpu=cortex-m3 -DTARGET=LPC13xx -D__NEWLIB__
+CFLAGS=-g -c -I./ -Wall -mthumb -ffunction-sections -fdata-sections -fmessage-length=0 -mcpu=cortex-m3 -DTARGET=LPC13xx -D__NEWLIB__ -O0
 LD_FLAGS= -nostartfiles -mthumb -mcpu=$(CPU_TYPE) -Wl,--gc-sections -lm
 ASFLAGS = -c -O0 $(INCLUDE_PATHS) -Wall -mthumb -ffunction-sections -fdata-sections -fmessage-length=0 -mcpu=$(CPU_TYPE) -D__ASSEMBLY__ -x assembler-with-cpp
 

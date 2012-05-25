@@ -16,27 +16,27 @@ static state_t _control_setpoint_error_last;
 
 static uint32_t _control_enabled;
 
-float _control_integral_slice_max[4];
-float _control_integral_max[4];
+static float _control_integral_slice_max[4];
+static float _control_integral_max[4];
 static float _control_motor_integrals[4];
 
 void control_init(void) {
 	// TODO
 	// Set the gain values
         
-	_control_p_gains[1].roll = -.042;
-	_control_p_gains[3].roll = .042;
+	_control_p_gains[1].roll = -.085;
+	_control_p_gains[3].roll = .085;
 	_control_d_gains[1].roll = -0;
-	_control_d_gains[3].roll = 0;
-	_control_i_gains[1].roll = -0;
-	_control_i_gains[3].roll = 0;	
+	_control_d_gains[3].roll = 0.00;
+	_control_i_gains[1].roll = -.001;	
+	_control_i_gains[3].roll = .001;	
 
-	_control_p_gains[0].pitch = .03075;
-	_control_p_gains[2].pitch = -.03075;
+	_control_p_gains[0].pitch = .085;
+	_control_p_gains[2].pitch = -.085;
 	_control_d_gains[0].pitch = 0;
 	_control_d_gains[2].pitch = -0;
-	_control_i_gains[0].pitch = 0;
-	_control_i_gains[2].pitch = -0;
+	_control_i_gains[0].roll = -.001;	
+	_control_i_gains[2].roll = .001;	
 
 	_control_p_gains[0].yaw = -0;
 	_control_p_gains[1].yaw = 0;
@@ -52,10 +52,15 @@ void control_init(void) {
 	_control_p_gains[2].z = 1;
 	_control_p_gains[3].z = 1;
 
-	_control_integral_slice_max[0] = _control_p_gains[0].pitch;
-	_control_integral_slice_max[1] = _control_p_gains[0].roll;
-	_control_integral_slice_max[2] = _control_p_gains[2].pitch;
-	_control_integral_slice_max[3] = _control_p_gains[0].roll;
+	_control_integral_slice_max[0] = _control_p_gains[0].pitch * .05;
+	_control_integral_slice_max[1] = _control_p_gains[1].roll * .05;
+	_control_integral_slice_max[2] = _control_p_gains[2].pitch * .05;
+	_control_integral_slice_max[3] = _control_p_gains[3].roll * .05;
+
+	_control_integral_max[0] = _control_p_gains[0].pitch * .5;
+	_control_integral_max[1] = _control_p_gains[1].roll * .5;
+	_control_integral_max[2] = _control_p_gains[2].pitch * .5;
+	_control_integral_max[3] = _control_p_gains[3].roll * .5;
 }
 
 void control_reset(void) {
@@ -91,15 +96,20 @@ void control_state_gains_multiply_to_motors(state_t *gains,
 	}
 }
 
-static state_t setpoint_error;
-static state_t error_dt;
-static state_t error_integral_slice;
-
 
 void control_update(void) {
 	int i;
         int j;
 	float motor_accum[4] = { 0, 0, 0, 0 };
+	state_t setpoint_error;
+	state_t error_dt;
+	state_t error_integral_slice;
+
+	for(i = 0;i < 6;i++) {
+		((float*)&setpoint_error)[i] = 0;
+		((float*)&error_dt)[i] = 0;
+		((float*)&error_integral_slice)[i] = 0;
+	}
 
 	// Check if control is enabled
 	if(!_control_enabled)
@@ -108,7 +118,6 @@ void control_update(void) {
 	// Has enough time passed since last control update
 	if((systickGetTicks() - _control_last_update) < 5)
 		return;
-
 
 	// Safety Third!
 	state_t *inertial_state = state_inertial_get();
@@ -119,7 +128,6 @@ void control_update(void) {
 		return;
 	}
 
-	// Calculate dt and update last_ticks
 	uint32_t d_msecs = systickGetTicks() - _control_last_update;
 	float dt = d_msecs / 1000.0f;
 	_control_last_update = systickGetTicks();
@@ -141,20 +149,23 @@ void control_update(void) {
 		for(j = 0;j < 6;j++) {
 			motor_slice[i] += ((float*)&error_integral_slice)[j] * motor_i_gains[j];
 		}
+/*
 		if(motor_slice[i] > _control_integral_slice_max[i])
 			motor_slice[i] = _control_integral_slice_max[i];
 		else if (motor_slice[i] < -_control_integral_slice_max[i])
 			motor_slice[i] = -_control_integral_slice_max[i];
-
+*/
 		_control_motor_integrals[i] += motor_slice[i];
+/*
 
 		// Check for max motor integral val
 		if(_control_motor_integrals[i] > _control_integral_max[i])
 			_control_motor_integrals[i] = _control_integral_max[i];
 		else if(_control_motor_integrals[i] < -_control_integral_max[i])
 			_control_motor_integrals[i] = -_control_integral_max[i];
+*/
 	}
-	
+
 	// Update error_last
 	state_copy(&setpoint_error, &_control_setpoint_error_last);
 

@@ -120,5 +120,6 @@ void commands_handle_message(unsigned char *buff, uint8_t length) {
 			logging_send_string(LOGGING_ERROR, "Received invalid command id");
 			break;
 	}
+	buff[0] = 0;
 }
 
