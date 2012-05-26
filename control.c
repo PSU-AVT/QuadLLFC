@@ -23,28 +23,28 @@ static float _control_motor_integrals[4];
 void control_init(void) {
 	// TODO
 	// Set the gain values
-	_control_p_gains[1].roll = -.075;
-	_control_p_gains[3].roll = .075;
-	_control_d_gains[1].roll = -220.0;
-	_control_d_gains[3].roll = 220.0;
-	_control_i_gains[1].roll = -.003;	
-	_control_i_gains[3].roll = .003;	
+	_control_p_gains[1].roll = -.080;
+	_control_p_gains[3].roll = .080;
+	_control_d_gains[1].roll = -400.0;
+	_control_d_gains[3].roll = 400.0;
+	_control_i_gains[1].roll = -.028;	
+	_control_i_gains[3].roll = .028;	
 
-	_control_p_gains[0].pitch = .075;
-	_control_p_gains[2].pitch = -.075;
-	_control_d_gains[0].pitch = 220.0;
-	_control_d_gains[2].pitch = -220.0;
-	_control_i_gains[0].roll = -.003;	
-	_control_i_gains[2].roll = .003;	
+	_control_p_gains[0].pitch = .080;
+	_control_p_gains[2].pitch = -.080;
+	_control_d_gains[0].pitch = 400.0;
+	_control_d_gains[2].pitch = -400.0;
+	_control_i_gains[0].roll = -.028;	
+	_control_i_gains[2].roll = .028;	
 
-	_control_p_gains[0].yaw = -0;
-	_control_p_gains[1].yaw = 0;
-	_control_p_gains[2].yaw = -0;
-	_control_p_gains[3].yaw = 0;
-	_control_d_gains[0].yaw = -0;
-	_control_d_gains[1].yaw = 0;
-	_control_d_gains[2].yaw = -0;
-	_control_d_gains[3].yaw = 0;
+	_control_p_gains[0].yaw = 0.075;
+	_control_p_gains[1].yaw = -0.075;
+	_control_p_gains[2].yaw = 0.075;
+	_control_p_gains[3].yaw = -0.075;
+	_control_d_gains[0].yaw = 240.0;
+	_control_d_gains[1].yaw = -240.0;
+	_control_d_gains[2].yaw = 240.0;
+	_control_d_gains[3].yaw = -240.0;
 
 	_control_p_gains[0].z = 1;
 	_control_p_gains[1].z = 1;
