@@ -23,19 +23,20 @@ static float _control_motor_integrals[4];
 void control_init(void) {
 	// TODO
 	// Set the gain values
-	_control_p_gains[1].roll = -.080;
-	_control_p_gains[3].roll = .080;
-	_control_d_gains[1].roll = -400.0;
-	_control_d_gains[3].roll = 400.0;
-	_control_i_gains[1].roll = -.028;	
-	_control_i_gains[3].roll = .028;	
+	//
+	_control_p_gains[1].roll = -.065;
+	_control_p_gains[3].roll = .065;
+	_control_d_gains[1].roll = -440.0;
+	_control_d_gains[3].roll = 440.0;
+	_control_i_gains[1].roll = -.03;	
+	_control_i_gains[3].roll = .03;	
 
-	_control_p_gains[0].pitch = .080;
-	_control_p_gains[2].pitch = -.080;
-	_control_d_gains[0].pitch = 400.0;
-	_control_d_gains[2].pitch = -400.0;
-	_control_i_gains[0].roll = -.028;	
-	_control_i_gains[2].roll = .028;	
+	_control_p_gains[0].pitch = .065;
+	_control_p_gains[2].pitch = -.065;
+	_control_d_gains[0].pitch = 440.0;
+	_control_d_gains[2].pitch = -440.0;
+	_control_i_gains[0].roll = -.03;	
+	_control_i_gains[2].roll = .03;	
 
 	_control_p_gains[0].yaw = 0.075;
 	_control_p_gains[1].yaw = -0.075;
@@ -165,11 +166,13 @@ void control_update(void) {
 	*/
 		}
 	}
-
 	_control_last_update = systickGetTicks();
 
 	// Update error_last
 	state_copy(&setpoint_error, &_control_setpoint_error_last);
+
+	if(_control_last_update == 0)
+		return;
 
 	// Accumulate gains * error
         //p
