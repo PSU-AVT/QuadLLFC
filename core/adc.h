@@ -31,6 +31,14 @@
 
 /**
  * This ADC module multiplexes across selected pins using the ADC interrupt
+
+   To use this library you need to
+   adcInit(ADC_PIN5 | ...); //This sets the selected pins to be adc pins and 
+                           //enables the interupt
+   adcSelectPins(ADC_PIN5 | ...); //This adds the selected pin to the inpurupt hadnler
+   adcStart(); //This starts the adc
+
+   You can't use several of the adc pins. The known safe pins 5,6,7.
  */
 
 #include "../projectconfig.h"

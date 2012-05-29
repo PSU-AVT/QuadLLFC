@@ -120,7 +120,7 @@ void adcStart()
 {
 	int i;
 
-	if(!(_adc_selected_pins & 1))
+	if((_adc_selected_pins & 1))
 		adcSelectNextPin();
 	else
 		_adc_selected_pin = 1;
@@ -137,7 +137,7 @@ void adcStart()
 
 void adcSelectPins(int pins)
 {
-	_adc_selected_pins |= pins;
+	_adc_selected_pins = pins;
 }
 
 void adcInit(int pins)
