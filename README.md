@@ -17,6 +17,10 @@ path using the following command where the x.x.x_xxx corresponds to what version
 
 > export PATH=$PATH:/usr/local/lpcxpresso_x.x.x_xxx/lpcxpresso/tools/bin:/usr/local/lpcxpresso_x.x.x_xxx/lpcxpresso/bin
 
+for the latest version of lpcxpresso the command is:
+
+> export PATH=$PATH:/usr/local/lpcxpresso_4.2.3_255/lpcxpresso/tools/bin/:/usr/local/lpcxpresso_4.2.3_255/lpcxpresso/bin
+
 ### Compilation
 To compile run the following command:
 
