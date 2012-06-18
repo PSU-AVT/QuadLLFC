@@ -17,14 +17,18 @@ void init_sensor()
         gpioIntEnable(0,6);
 }
 
-void measure(float * dist)
+float measure(void)
 {
         while(!data_good)
         {
                 if (Ltick_count - Htick_count > 60000)
+                {
                         data_good = 0;
+                        return 6; //6 is magic! It's the lowest value reported
+                                  //by the sensor.
+                }
                 else
-                        *dist = ((Ltick_count - Htick_count)/timerSpeed);
+                        return ((Ltick_count - Htick_count)/timerSpeed);
         }
 }
         

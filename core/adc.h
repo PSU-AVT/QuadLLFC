@@ -38,7 +38,7 @@
    adcSelectPins(ADC_PIN5 | ...); //This adds the selected pin to the inpurupt hadnler
    adcStart(); //This starts the adc
 
-   You can't use several of the adc pins. The known safe pins 5,6,7.
+   You can't use several of the adc pins. The known safe pins are 5,6,7.
  */
 
 #include "../projectconfig.h"
