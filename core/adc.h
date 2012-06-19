@@ -29,6 +29,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#ifndef ADC_H
+#define ADC_H
+
 /**
  * This ADC module multiplexes across selected pins using the ADC interrupt
 
@@ -43,7 +46,7 @@
 
 #include "../projectconfig.h"
 
-enum ADC_PIN_T
+typedef enum ADC_PIN_T
 {
 	ADC_PIN0 = 1,
 	ADC_PIN1 = 2,
@@ -53,7 +56,7 @@ enum ADC_PIN_T
 	ADC_PIN5 = 32,
 	ADC_PIN6 = 64,
 	ADC_PIN7 = 128
-};
+}ADC_PIN_T;
 
 #define ADC_PIN_CNT 8
 #define ADC_MAX_PINVAL (1 << ADC_PIN_CNT)
@@ -67,3 +70,5 @@ uint16_t adcGetNdxVal(uint8_t ndx);
 void adcStart(void);
 void adcSelectPins(int pin);
 void adcInit(int pins);
+
+#endif
