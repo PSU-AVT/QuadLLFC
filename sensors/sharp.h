@@ -38,7 +38,13 @@
 void SharpInit( ADC_PIN_T PIN);
 
 /*
- *This function reads the distance for a sensor on the given pin. Does not deal with the non linearity in the sensor.
- *If you are going to be operating in the non linear range DO NOT rely on this funtion to give accurate results.
+ *This function reads the distance for a sensor on the given pin. Does not deal
+ * with the non linearity in the sensor. (0-~3.5cm)
+ *If you read beyond the max range (30cm in the data sheet, ~32 in the code) the
+ *return value will be -10.
+ *If you are going to be operating in the non linear range DO NOT rely on this
+ * funtion to give accurate results.
+ *Returns
+ *Range in CM if valid, -10 if too far away
  */
 float Sharp120XGetDistance( ADC_PIN_T PIN);

@@ -40,8 +40,10 @@ void SharpInit( ADC_PIN_T PIN)
 
 float Sharp120XGetDistance(ADC_PIN_T PIN)
 {
-        //return (float)30*((adcGetVal(PIN) - 5)/(float)1014);
-        //http://acroname.com/robotics/info/articles/irlinear/irlinear.html
-        //return ((float)5000/(adcGetVal(PIN) - 5)) - 2;
-        return(adcGetVal(PIN));
+        //http://acroname.com/robotics/info/articles/irlinear/irlinear.html 
+        int val = adcGetVal(PIN);
+        if (val < 150)
+                return (float)-10;
+        else
+                return ((float)4400/(adcGetVal(PIN) - 19)) - 1;
 }
