@@ -3,6 +3,14 @@
  * This is a working file.
  */
 
+// Algorithm:
+// pull accel data
+// pull mag data
+// use existing r_matrix
+// calc total correction
+// calc error
+// feed gyro data - error into kinematics/normalization
+
 // done by others
 
 calibrate gyroscope - itg3200Calibrate
@@ -25,24 +33,31 @@ int RP_error;
 // using the accelerometer and magnetometer data,
 // calculate the total required correction vector
 
-void find_total_correction_vector() {
+void find_total_correction_vector() 
+{
 	float corr_vector[3];
 
-	int W_RP;
-	float RP_corr_plane[3];
-	RP_corr_plane = {AccelData.x,AccelData.y,AccelData.z};
+	const int weight_rollpitch = 0;
+	float rollpitch_corrplane[3];
+	rollpitch_corrplane = {AccelData.x,AccelData.y,AccelData.z};
 
-	int W_Y;
-	float Y_corr_plane[3];
-	Y_corr_plane = {MagData.x,MagData.y,MagData.z};
+	int weight_yaw;
+	float yaw_corrplane[3];
+	Y_corrplane = {MagData.x,MagData.y,MagData.z};
 
-	corr_vector = (W_RP * RP_corr_plane) + (W_Y * Y_corr_plane);
+	int temp = 0;
+	for (i=0; i<2; i++)
+	{
+                temp = weight_rollpitch * rollpitch_corrplane[i];
+		corr_vector[i] = temp + weight_yaw * yaw_corrplane[i];
+	}
+
 }
 
 // PI controller creates value to correct for the determined error 
 // in the rotation correction matrix
 
-void correction_matrix_pi_controller(float dt, float corr_vector) {
+void correction_matrix_pi_controller(const float dt, float corr_vector) {
 
 	int w_correction;
 	int wI_correction; // what to do with this?
