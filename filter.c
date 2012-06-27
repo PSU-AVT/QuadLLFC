@@ -39,14 +39,25 @@ void find_total_correction_vector() {
 	corr_vector = (W_RP * RP_corr_plane) + (W_Y * Y_corr_plane);
 }
 
-// 
+// PI controller creates value to correct for the determined error 
+// in the rotation correction matrix
 
-pi_controller
-	adjusts error
+void correction_matrix_pi_controller(float dt, float corr_vector) {
 
-drift_adjustment
-	w = gyroscope - adjustment
+	int w_correction;
+	int wI_correction; // what to do with this?
+	int kP;
+		int kI;
 
-pass w into rotation_matrix_velocity_update()
+	w_correction = (kP * corr_vector) + (wI_correction + kI * dt * corr_vector);
+}
 
+// drift_adjustment
+// pass w into rotation_matrix_velocity_update()
+
+void drift_adjustment() {
+
+// error_correction = gyroscope - adjustment
+
+}
 
