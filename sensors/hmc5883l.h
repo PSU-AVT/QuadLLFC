@@ -1,7 +1,8 @@
 /*
  * HMC5883L
  *
- * Author: Eric Dinger
+ * Author: Eric Dinger, Jen Hanni
+ * Heavily depended on M.Ryan (ryanmechantronics.com)'s example itg3200.h
  * Created on: 1/2012
  */
 
@@ -32,5 +33,24 @@
 #define HMC_5883L_ID_C     0x0C
 
 #define HMC_5883L_MODE_CFG_CONT 0x00
+
+typedef enum
+{
+  hmc5883_ERROR_OK = 0,		// Everything executed normally
+  hmc5883_ERROR_I2CINIT,	// Unable to initialize I2C
+  hmc5883_ERROR_I2CBUSY,	// I2C already in use
+  hmc5883_ERROR_LAST
+} hmc5883lError_e;
+
+#pragma pack (push) // what
+#pragma pack (1)    // is this
+
+// isn't the above the same as?
+#pragma pack (push, 1)
+
+typedef struct
+{
+  short status; // whoami
+} MagData;
 
 #endif
