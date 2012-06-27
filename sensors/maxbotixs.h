@@ -11,4 +11,4 @@ volatile uint32_t data_good;
 
 void init_sensor();
 
-void measure(float * dist);
+float measure(void);

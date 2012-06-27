@@ -75,22 +75,22 @@ uint16_t adcGetNdxVal(uint8_t ndx)
 
 void ADC_IRQHandler(void)
 {
-	if(ADC_AD0STAT & ADC_PIN0) // This works...trust me
-		_adc_vals[0] = ADC_GET_VAL(ADC_AD0DR0);
-	if(ADC_AD0STAT & ADC_PIN1)
-		_adc_vals[1] = ADC_GET_VAL(ADC_AD0DR1);
-	if(ADC_AD0STAT & ADC_PIN2)
-		_adc_vals[2] = ADC_GET_VAL(ADC_AD0DR2);
-	if(ADC_AD0STAT & ADC_PIN3)
-		_adc_vals[3] = ADC_GET_VAL(ADC_AD0DR3);
-	if(ADC_AD0STAT & ADC_PIN4)
-		_adc_vals[4] = ADC_GET_VAL(ADC_AD0DR4);
-	if(ADC_AD0STAT & ADC_PIN5)
-		_adc_vals[5] = ADC_GET_VAL(ADC_AD0DR5);
-	if(ADC_AD0STAT & ADC_PIN6)
-		_adc_vals[6] = ADC_GET_VAL(ADC_AD0DR6);
-	if(ADC_AD0STAT & ADC_PIN7)
-		_adc_vals[7] = ADC_GET_VAL(ADC_AD0DR7);
+	if((*(pREG32(ADC_AD0STAT))) & ADC_PIN0) // This works...trust me
+		_adc_vals[0] = ADC_GET_VAL((*(pREG32(ADC_AD0DR0))));
+	if((*(pREG32(ADC_AD0STAT))) & ADC_PIN1)
+		_adc_vals[1] = ADC_GET_VAL((*(pREG32(ADC_AD0DR1))));
+	if((*(pREG32(ADC_AD0STAT))) & ADC_PIN2)
+		_adc_vals[2] = ADC_GET_VAL((*(pREG32(ADC_AD0DR2))));
+	if((*(pREG32(ADC_AD0STAT))) & ADC_PIN3)
+		_adc_vals[3] = ADC_GET_VAL((*(pREG32(ADC_AD0DR3))));
+	if((*(pREG32(ADC_AD0STAT))) & ADC_PIN4)
+		_adc_vals[4] = ADC_GET_VAL((*(pREG32(ADC_AD0DR4))));
+	if((*(pREG32(ADC_AD0STAT))) & ADC_PIN5)
+                _adc_vals[5] = ADC_GET_VAL((*(pREG32(ADC_AD0DR5))));
+	if((*(pREG32(ADC_AD0STAT))) & ADC_PIN6)
+		_adc_vals[6] = ADC_GET_VAL((*(pREG32(ADC_AD0DR6))));
+	if((*(pREG32(ADC_AD0STAT))) & ADC_PIN7)
+		_adc_vals[7] = ADC_GET_VAL((*(pREG32(ADC_AD0DR7))));
 
 	adcSelectNextPin();
 	ADC_AD0CR |= ADC_AD0CR_START_STARTNOW;

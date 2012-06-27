@@ -1,5 +1,5 @@
 /*
- * Author: Gregory Haynes <greg@greghaynes.net>
+ * Author: Eric Dinger <egdinger@cs.pdx.edu>
  *
  * Software License Agreement (BSD License)
  *
@@ -29,46 +29,22 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef ADC_H
-#define ADC_H
+#include "../core/adc.h"
 
-/**
- * This ADC module multiplexes across selected pins using the ADC interrupt
-
-   To use this library you need to
-   adcInit(ADC_PIN5 | ...); //This sets the selected pins to be adc pins and 
-                           //enables the interupt
-   adcSelectPins(ADC_PIN5 | ...); //This adds the selected pin to the inpurupt hadnler
-   adcStart(); //This starts the adc
-
-   You can't use several of the adc pins. The known safe pins are 5,6,7.
+/*
+ *This function sets up the ADC to read from the selected pin for the sensor
+ *This function DOES NOT start the adc reading.
  */
+void SharpInit( ADC_PIN_T PIN);
 
-#include "../projectconfig.h"
-
-typedef enum ADC_PIN_T
-{
-	ADC_PIN0 = 1,
-	ADC_PIN1 = 2,
-	ADC_PIN2 = 4,
-	ADC_PIN3 = 8,
-	ADC_PIN4 = 16,
-	ADC_PIN5 = 32,
-	ADC_PIN6 = 64,
-	ADC_PIN7 = 128
-}ADC_PIN_T;
-
-#define ADC_PIN_CNT 8
-#define ADC_MAX_PINVAL (1 << ADC_PIN_CNT)
-#define ADC_RESULT_INVALID 2048
-
-#define adcIsResultValid(VAL) (VAL & ADC_RESULT_INVALID)
-
-uint16_t adcGetVal(uint16_t pin);
-uint8_t adcPinToNdx(uint16_t pin);
-uint16_t adcGetNdxVal(uint8_t ndx);
-void adcStart(void);
-void adcSelectPins(int pin);
-void adcInit(int pins);
-
-#endif
+/*
+ *This function reads the distance for a sensor on the given pin. Does not deal
+ * with the non linearity in the sensor. (0-~3.5cm)
+ *If you read beyond the max range (30cm in the data sheet, ~32 in the code) the
+ *return value will be -10.
+ *If you are going to be operating in the non linear range DO NOT rely on this
+ * funtion to give accurate results.
+ *Returns
+ *Range in CM if valid, -10 if too far away
+ */
+float Sharp120XGetDistance( ADC_PIN_T PIN);

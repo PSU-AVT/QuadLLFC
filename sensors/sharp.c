@@ -1,5 +1,5 @@
 /*
- * Author: Gregory Haynes <greg@greghaynes.net>
+ * Author: Eric Dinger <egdinger@cs.pdx.edu>
  *
  * Software License Agreement (BSD License)
  *
@@ -29,46 +29,21 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef ADC_H
-#define ADC_H
+#include "sharp.h"
 
-/**
- * This ADC module multiplexes across selected pins using the ADC interrupt
-
-   To use this library you need to
-   adcInit(ADC_PIN5 | ...); //This sets the selected pins to be adc pins and 
-                           //enables the interupt
-   adcSelectPins(ADC_PIN5 | ...); //This adds the selected pin to the inpurupt hadnler
-   adcStart(); //This starts the adc
-
-   You can't use several of the adc pins. The known safe pins are 5,6,7.
- */
-
-#include "../projectconfig.h"
-
-typedef enum ADC_PIN_T
+void SharpInit( ADC_PIN_T PIN)
 {
-	ADC_PIN0 = 1,
-	ADC_PIN1 = 2,
-	ADC_PIN2 = 4,
-	ADC_PIN3 = 8,
-	ADC_PIN4 = 16,
-	ADC_PIN5 = 32,
-	ADC_PIN6 = 64,
-	ADC_PIN7 = 128
-}ADC_PIN_T;
+        adcInit(PIN);
+        adcSelectPins(PIN);
+}
 
-#define ADC_PIN_CNT 8
-#define ADC_MAX_PINVAL (1 << ADC_PIN_CNT)
-#define ADC_RESULT_INVALID 2048
 
-#define adcIsResultValid(VAL) (VAL & ADC_RESULT_INVALID)
-
-uint16_t adcGetVal(uint16_t pin);
-uint8_t adcPinToNdx(uint16_t pin);
-uint16_t adcGetNdxVal(uint8_t ndx);
-void adcStart(void);
-void adcSelectPins(int pin);
-void adcInit(int pins);
-
-#endif
+float Sharp120XGetDistance(ADC_PIN_T PIN)
+{
+        //http://acroname.com/robotics/info/articles/irlinear/irlinear.html 
+        int val = adcGetVal(PIN);
+        if (val < 150)
+                return (float)-10;
+        else
+                return ((float)4400/(adcGetVal(PIN) - 19)) - 1;
+}
