@@ -1,4 +1,5 @@
 void state_update(void) {
+
         uint32_t ticks = systickGetTicks();
 
 // pull accel data
@@ -11,7 +12,7 @@ void state_update(void) {
 
 			// Set dt in seconds
 			float dt;
-			if(_last_gyro_update_ticks == 0)
+			if(_last_accel_update_ticks == 0)
 				dt = 0;
 			else
 				dt = tick_diff / 1000.0;
@@ -20,6 +21,18 @@ void state_update(void) {
 // pull mag data
 // doesn't exist yet
 
+	if((ticks - _state_mag_last_update) >= STATE_MAG_UPDATE_INTERVAL) {
+
+		if(hmc5883lGetData(&_state_mag_last) == i2c_ok) {
+			uint32_t tick_diff = systickGetTicks() - _last_mag_update_ticks;
+
+			// Set dt in seconds
+			float dt;
+			if(_last_mag_update_ticks == 0)
+				dt = 0;
+			else
+				dt = tick_diff / 1000.0;
+		}
 
 // using existing r_matrix, accel data, magdata -- find total_correction
 
@@ -43,13 +56,26 @@ void state_update(void) {
         	}
 	}
 
-
 // using total_correction and available globals, find the error
+// PI controller creates value to correct for the determined error 
+// in the rotation correction matrix
+// WARNING: these should actually be matrices
 
+void correction_matrix_pi_controller(const float dt, float corr_vector) {
 
+        int weight_correction;
+        int wI_correction; // what to do with this?
+        int kP; // proportional gain constant
+        int kI; // integral gain constant
+
+        weight_correction = (kP * corr_vector) + (wI_correction + kI * dt * corr_vector);
+	// what is weight_correction, exactly? I think this includes the error.
+	// we should have weight_correction.x, weight_correction.y, weight_correction.z
+}
 
 // pull the gyro data so _state_gyro_last.X etc are available
-// subtract the error from the gyro data and feed that into rotation_matrix_velocity_update as before
+// correct for drift adjustment by subtract the error from the gyro data and 
+// feed that into rotation_matrix_velocity_update as before
 
         if((ticks - _state_gyro_last_update) >= STATE_GYRO_UPDATE_INTERVAL) {
 
@@ -62,6 +88,11 @@ void state_update(void) {
 	       	                 dt = 0;
 	     	        else
 	       	                 dt = tick_diff / 1000.0;
+
+			// element by element, subtract error from gyro vector
+			_state_gyro_last.X =- weight_correction.X;
+			_state_gyro_last.Y =- weight_correction.Y;
+			_state_gyro_last.Z =- weight_correction.Z;
 
 	                // Update rotation matrix
 	                // transforms from body frame readings from gyro to world frame readings
@@ -96,7 +127,7 @@ void rotation_matrix_velocity_update(float r[][3], float roll, float pitch, floa
          
 
        // Update last update ticks
-                _last_gyro_update_ticks = systickGetTicks();
+        _last_gyro_update_ticks = systickGetTicks();
         } else
                 command_send(COMMAND_ERROR, (unsigned char*)"Invalid gyro read.", 18);
 
