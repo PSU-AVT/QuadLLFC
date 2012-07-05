@@ -82,7 +82,7 @@ void correction_matrix_pi_controller(float dt) {
 
         if((ticks - _state_gyro_last_update) >= STATE_GYRO_UPDATE_INTERVAL) {
 
-        void state_update_from_gyro(void) { 
+	void state_update_from_gyro(void) { 
         // i2c_ok is in the itg3200.h, enum 
         // we did this for human-readbility 
 
