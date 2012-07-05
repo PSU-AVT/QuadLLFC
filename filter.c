@@ -18,13 +18,14 @@ static uint32_t _last_mag_update_ticks;
 static MagData  _state_mag_last;
 
 static float _corr_vector[3];
-static float _gyro_error[3];i
+static float _gyro_error[3];
 
 // pull accelerometer data
 // make _state_accel_last.X, etc. available for use and update ticks
 
 void filter_get_accel_data(float accel_dt) 
 {
+	uint32_t ticks = systickGetTicks();
         if((ticks - _state_accel_last_update) >= STATE_ACCEL_UPDATE_INTERVAL) {
 
                 if(adxl345GetData(&_state_accel_last) == i2c_ok) {
@@ -43,6 +44,7 @@ void filter_get_accel_data(float accel_dt)
 
 void filter_get_mag_data(float mag_dt)
 {
+	uint32_t ticks = systickGetTicks();
         if((ticks - _state_mag_last_update) >= STATE_MAG_UPDATE_INTERVAL) {
 
                 if(hmc5883lGetData(&_state_mag_last) == i2c_ok) {
