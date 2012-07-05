@@ -78,7 +78,11 @@ void state_reset(void) {
 	state_init();
 }
 
-void state_update_from_gyro(void) {   // move this to filter.c
+// pull the gyro data so _state_gyro_last.X etc are available
+// correct for drift adjustment by subtract the error from the gyro data and 
+// feed that into rotation_matrix_velocity_update as before
+
+void state_update_from_filter() { // this is calling functions in filter.c
 	// i2c_ok is in the itg3200.h, enum
 	// we did this for human-readbility
 	if(itg3200GetData(&_state_gyro_last) == i2c_ok) {
@@ -90,12 +94,15 @@ void state_update_from_gyro(void) {   // move this to filter.c
 			gyro_dt = 0;
 		else
 			gyro_dt = tick_diff / 1000.0;
+		filter_get_corrections_for_gyro();
 
-		// element by element, subtract error from gyro vector
-		
-
-		// Update rotation matrix
-		// transforms from body frame readings from gyro to world frame readings
+                // element by element, subtract error from gyro vector
+                _state_gyro_last.X -= _gyro_error[1];
+                _state_gyro_last.Y -= _gyro_error[2];
+                _state_gyro_last.Z -= _gyro_error[3];
+	
+		// Update rotation matrix - transforms from body frame readings from 
+		// gyro to world frame readings and normalizes the result
 		rotation_matrix_velocity_update(rotation_b_to_i, _state_gyro_last.X, _state_gyro_last.Y, _state_gyro_last.Z, gyro_dt);
 
 		// Update last update ticks
@@ -126,7 +133,7 @@ void state_update(void) {
 	uint32_t ticks = systickGetTicks();
 
 	if((ticks - _state_gyro_last_update) >= STATE_GYRO_UPDATE_INTERVAL) {
-		state_update_from_filter(); // in filter.c
+		state_update_from_filter(); 
 		_state_gyro_last_update = ticks;
 	}
 	ticks = systickGetTicks();

@@ -1,25 +1,25 @@
-/* Sensor fusion using an accelerometer and magenetometer to correct the gyro drift.
- *
- * This is a working file.
- */
+#include "filter.h"
+#include "sensors/itg3200.h"
+#include "sensors/adxl345.h"
+#include "sensors/hmc5883l.h"
+#include "core/systick.h"
+#include "commands.h"
+#include "logging.h"
 
-// Algorithm:
-// pull accel data
-// pull mag data
-// use existing r_matrix
-// calc total correction
-// calc error
-// feed gyro data - error into kinematics/normalization
+// Sensor fusion using an accelerometer and magenetometer to correct the gyro drift.
 
-// calibrate magnetometer
-//	calculate heading
+void filter_get_accel_data();
 
-// drift_detection
-//	find roll-pitch error
-//	find heading error
+void filter_get_mag_data();
 
-int rollpitch_error;
-int heading_error;
+void filter_find_total_correction_vector();
+
+void filter_correction_matrix_pi_controller();
+
+void filter_get_and_correct_gyro_data();
+
+/*********************************************************************/
+/* everything below this line is still a mix of __new.c and filter.c */
 
 // using the accelerometer and magnetometer data,
 // calculate the total required correction vector
