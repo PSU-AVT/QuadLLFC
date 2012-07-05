@@ -26,7 +26,8 @@ static float _gyro_error[3];
 void filter_get_accel_data(float accel_dt) 
 {
 	uint32_t ticks = systickGetTicks();
-        if((ticks - _state_accel_last_update) >= STATE_ACCEL_UPDATE_INTERVAL) {
+        if((ticks - _state_accel_last_update) >= FILTER_ACCEL_UPDATE_INTERVAL) 
+	{
 
                 if(adxl345GetData(&_state_accel_last) == i2c_ok) {
                         uint32_t accel_tick_diff = systickGetTicks() - _last_accel_update_ticks;
@@ -36,6 +37,7 @@ void filter_get_accel_data(float accel_dt)
                                 accel_dt = 0;
                         else
                                 accel_dt = accel_tick_diff / 1000.0;
+		}
          }
 
 }
@@ -45,9 +47,10 @@ void filter_get_accel_data(float accel_dt)
 void filter_get_mag_data(float mag_dt)
 {
 	uint32_t ticks = systickGetTicks();
-        if((ticks - _state_mag_last_update) >= STATE_MAG_UPDATE_INTERVAL) {
-
-                if(hmc5883lGetData(&_state_mag_last) == i2c_ok) {
+        if((ticks - _state_mag_last_update) >= FILTER_MAG_UPDATE_INTERVAL) 
+	{
+                if(hmc5883lGetData(&_state_mag_last) == i2c_ok) 
+		{
                         uint32_t mag_tick_diff = systickGetTicks() - _last_mag_update_ticks;
 
                         // Set dt in seconds
@@ -55,6 +58,7 @@ void filter_get_mag_data(float mag_dt)
                                 mag_dt = 0;
                         else
                                 mag_dt = mag_tick_diff / 1000.0;
+		}
         }
 }
 
@@ -64,13 +68,18 @@ void filter_find_total_correction_vector()
 {
         const int weight_rollpitch = 0;
         float rollpitch_corrplane[3];
-        rollpitch_corrplane = {AccelData.X,AccelData.Y,AccelData.Z};
+        rollpitch_corrplane[0] = AccelData.X;
+	rollpitch_corrplane[1] = AccelData.Y;
+	rollpitch_corrplane[2] = AccelData.Z;
 
         int weight_yaw = 0;
         float yaw_corrplane[3];
-        yaw_corrplane = {MagData.X,MagData.Y,MagData.Z};
+        yaw_corrplane[0] = MagData.X;
+	yaw_corrplane[1] = MagData.Y;
+	yaw_corrplane[2] = MagData.Z;
 
         int temp = 0;
+	int i;
         for (i=0; i<3; i++)
         {
             temp = weight_rollpitch * rollpitch_corrplane[i];
@@ -88,14 +97,16 @@ void filter_get_gyro_correction_data(float dt)
         int kP = 1; // proportional gain constant
         int kI = 1; // integral gain constant
 
-        int temp_yaw = 0;
-        int temp_rollpitch = 0;
+        int fix_yaw = 0;
+        int fix_rollpitch = 0;
+	int i;
 
         for (i=0; i<3; i++)
         {
-                fix_yaw = kP * corr_vector[i]
-                fix_rollpitch = kI * dt * corr_vector[i];
-                fix_rollpitch = temp2 + wI_correction;
+                fix_yaw = kP * _corr_vector[i];
+                fix_rollpitch = kI * dt;
+		fix_rollpitch = fix_rollpitch * _corr_vector[i];
+                fix_rollpitch = fix_rollpitch + wI_correction;
                 _gyro_error[i] = fix_yaw + fix_rollpitch;
         }
 }
