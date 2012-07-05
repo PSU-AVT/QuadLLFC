@@ -58,9 +58,7 @@ void state_update(void) {
 // PI controller creates value to correct for the determined error 
 // in the rotation correction matrix
 
-// where does dt come from?
-
-void correction_matrix_pi_controller(const float dt) {
+void correction_matrix_pi_controller(float dt) {
 
         int wI_correction = 1; // what is the value of this? no idea.
         int kP = 1; // proportional gain constant
@@ -84,59 +82,45 @@ void correction_matrix_pi_controller(const float dt) {
 
         if((ticks - _state_gyro_last_update) >= STATE_GYRO_UPDATE_INTERVAL) {
 
+        void state_update_from_gyro(void) { 
+        // i2c_ok is in the itg3200.h, enum 
+        // we did this for human-readbility 
+
 		if(itg3200GetData(&_state_gyro_last) == i2c_ok) {
 	                uint32_t tick_diff = systickGetTicks() - _last_gyro_update_ticks;
 	
         	        // Set dt in seconds
-                	float dt;
+                	float gyro_dt;
 	                if(_last_gyro_update_ticks == 0)
-	       	                 dt = 0;
+	       	                 gyro_dt = 0;
 	     	        else
-	       	                 dt = tick_diff / 1000.0;
+	       	                 gyro_dt = tick_diff / 1000.0;
 
 			// element by element, subtract error from gyro vector
-			_state_gyro_last.X =- weight_correction.X;
-			_state_gyro_last.Y =- weight_correction.Y;
-			_state_gyro_last.Z =- weight_correction.Z;
+			_state_gyro_last.X -= _gyro_error[1];
+			_state_gyro_last.Y -= _gyro_error[2];
+			_state_gyro_last.Z -= _gyro_error[3];
 
 	                // Update rotation matrix
 	                // transforms from body frame readings from gyro to world frame readings
 
-	rotation_matrix_velocity_update(rotation_b_to_i, _state_gyro_last.X, _state_gyro_last.Y, _state_gyro_last.Z, dt);
-
-void rotation_matrix_velocity_update(float r[][3], float roll, float pitch, float yaw, float dt) {
-        float r_dth_dt[3][3];
-        yaw = yaw*dt;
-        pitch = pitch*dt;
-        roll = roll*dt;
-
-        // Row 1
-        r_dth_dt[0][0] = 1;
-        r_dth_dt[0][1] = -yaw;
-        r_dth_dt[0][2] = pitch;
-        // Row 2
-        r_dth_dt[1][0] = yaw;
-        r_dth_dt[1][1] = 1;
-        r_dth_dt[1][2] = -roll;
-        // Row 3
-        r_dth_dt[2][0] = -pitch;
-        r_dth_dt[2][1] = roll;
-        r_dth_dt[2][2] = 1;
-
-        float tmp_matrix[3][3];
-
-        matrix_3_3_multiply(r, r_dth_dt, tmp_matrix);
-        matrix_3_3_copy(tmp_matrix, r);
-
-        rotation_matrix_normalize(r);
-         
+	rotation_matrix_velocity_update(rotation_b_to_i, _state_gyro_last.X, _state_gyro_last.Y, _state_gyro_last.Z, gyro_dt);
 
        // Update last update ticks
         _last_gyro_update_ticks = systickGetTicks();
         } else
                 command_send(COMMAND_ERROR, (unsigned char*)"Invalid gyro read.", 18);
 
-        inertial_needs_update = 1;
+	 inertial_needs_update = 1;
+
+}
+
+
+
+
+
+
+
 
          _state_gyro_last_update = ticks;
         }

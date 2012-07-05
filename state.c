@@ -78,22 +78,25 @@ void state_reset(void) {
 	state_init();
 }
 
-void state_update_from_gyro(void) {
+void state_update_from_gyro(void) {   // move this to filter.c
 	// i2c_ok is in the itg3200.h, enum
 	// we did this for human-readbility
 	if(itg3200GetData(&_state_gyro_last) == i2c_ok) {
 		uint32_t tick_diff = systickGetTicks() - _last_gyro_update_ticks;
 	
 		// Set dt in seconds
-		float dt;
+		float gyro_dt;
 		if(_last_gyro_update_ticks == 0)
-			dt = 0;
+			gyro_dt = 0;
 		else
-			dt = tick_diff / 1000.0;
+			gyro_dt = tick_diff / 1000.0;
+
+		// element by element, subtract error from gyro vector
+		
 
 		// Update rotation matrix
 		// transforms from body frame readings from gyro to world frame readings
-		rotation_matrix_velocity_update(rotation_b_to_i, _state_gyro_last.X, _state_gyro_last.Y, _state_gyro_last.Z, dt);
+		rotation_matrix_velocity_update(rotation_b_to_i, _state_gyro_last.X, _state_gyro_last.Y, _state_gyro_last.Z, gyro_dt);
 
 		// Update last update ticks
 		_last_gyro_update_ticks = systickGetTicks();
@@ -123,9 +126,7 @@ void state_update(void) {
 	uint32_t ticks = systickGetTicks();
 
 	if((ticks - _state_gyro_last_update) >= STATE_GYRO_UPDATE_INTERVAL) {
-		state_update_from_accel();
-		state_update_from_gyro();
-
+		state_update_from_filter(); // in filter.c
 		_state_gyro_last_update = ticks;
 	}
 	ticks = systickGetTicks();
