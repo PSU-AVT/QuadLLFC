@@ -21,16 +21,7 @@ static uint32_t _state_gyro_last_update;
 static uint32_t _last_gyro_update_ticks;
 static GyroData _state_gyro_last;
 
-static uint32_t  _state_accel_last_update;
-static uint32_t  _last_accel_update_ticks;
-static AccelData _state_accel_last;
-
-static uint32_t _state_mag_last_update;
-static uint32_t _last_mag_update_ticks;
-static MagData  _state_mag_last;
-
-static float _corr_vector[3]; // correction vector
-static float _gyro_error[3]; // error to apply to the gyro
+extern static float _gyro_error[3]; // error to apply to the gyro
 
 void state_add(state_t *s1, state_t *s2, state_t *sum) {
 	float *s1_arr = (float*)s1;
@@ -78,9 +69,8 @@ void state_reset(void) {
 	state_init();
 }
 
-// pull the gyro data so _state_gyro_last.X etc are available
-// correct for drift adjustment by subtract the error from the gyro data and 
-// feed that into rotation_matrix_velocity_update as before
+// this corrects for drift adjustment by subtract the error from the sampled gyro data
+// before applying to the rotation matrix
 
 void state_update_from_filter() { // this is calling functions in filter.c
 	// i2c_ok is in the itg3200.h, enum

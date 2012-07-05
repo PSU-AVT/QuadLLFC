@@ -6,6 +6,20 @@
 #include "commands.h"
 #include "logging.h"
 
+#define FILTER_ACCEL_UPDATE_INTERVAL 5
+#define FILTER_MAG_UPDATE_INTERVAL 5
+
+static uint32_t  _state_accel_last_update;
+static uint32_t  _last_accel_update_ticks;
+static AccelData _state_accel_last;
+
+static uint32_t _state_mag_last_update;
+static uint32_t _last_mag_update_ticks;
+static MagData  _state_mag_last;
+
+static float _corr_vector[3];
+static float _gyro_error[3];i
+
 // pull accelerometer data
 // make _state_accel_last.X, etc. available for use and update ticks
 
@@ -27,7 +41,7 @@ void filter_get_accel_data(float accel_dt)
 
 // pull mag data, which doesn't exist yet
 
-void filter_get_mag_data( float mag_dt)
+void filter_get_mag_data(float mag_dt)
 {
         if((ticks - _state_mag_last_update) >= STATE_MAG_UPDATE_INTERVAL) {
 
@@ -46,43 +60,20 @@ void filter_get_mag_data( float mag_dt)
 
 void filter_find_total_correction_vector() 
 {
-	        void find_total_correction_vector()
+        const int weight_rollpitch = 0;
+        float rollpitch_corrplane[3];
+        rollpitch_corrplane = {AccelData.X,AccelData.Y,AccelData.Z};
+
+        int weight_yaw = 0;
+        float yaw_corrplane[3];
+        yaw_corrplane = {MagData.X,MagData.Y,MagData.Z};
+
+        int temp = 0;
+        for (i=0; i<3; i++)
         {
-                const int weight_rollpitch = 0;
-                float rollpitch_corrplane[3];
-                rollpitch_corrplane = {AccelData.X,AccelData.Y,AccelData.Z};
-
-                int weight_yaw = 0;
-                float yaw_corrplane[3];
-                yaw_corrplane = {MagData.X,MagData.Y,MagData.Z};
-
-                int temp = 0;
-                for (i=0; i<3; i++)
-                {
-                        temp = weight_rollpitch * RP_corrplane[i];
-                        _corr_vector[i] = temp + weight_yaw * Y_corrplane[i];
-                }
+            temp = weight_rollpitch * rollpitch_corrplane[i];
+            _corr_vector[i] = temp + (weight_yaw * yaw_corrplane[i]);
         }
-}
-
-// using existing r_matrix, accel data, magdata -- find total_correction
-
-void filter_correction_matrix_pi_controller()
-{
-                const int weight_rollpitch = 0;
-                float rollpitch_corrplane[3];
-                rollpitch_corrplane = {AccelData.X,AccelData.Y,AccelData.Z};
-
-                int weight_yaw = 0;
-                float yaw_corrplane[3];
-                yaw_corrplane = {MagData.X,MagData.Y,MagData.Z};
-
-                int temp = 0;
-                for (i=0; i<3; i++)
-                {
-                        temp = weight_rollpitch * RP_corrplane[i];
-                        _corr_vector[i] = temp + weight_yaw * Y_corrplane[i];
-                }
 }
 
 // using total_correction and available globals, find the error
