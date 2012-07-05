@@ -38,8 +38,6 @@ void state_update(void) {
 
 	void find_total_correction_vector()
 	{	
-	        float _corr_vector[3];
-	
 	        const int weight_rollpitch = 0;
 	        float rollpitch_corrplane[3];
 	        rollpitch_corrplane = {AccelData.X,AccelData.Y,AccelData.Z};
@@ -59,18 +57,25 @@ void state_update(void) {
 // using total_correction and available globals, find the error
 // PI controller creates value to correct for the determined error 
 // in the rotation correction matrix
-// WARNING: these should actually be matrices
 
-void correction_matrix_pi_controller(const float dt, float corr_vector) {
+// where does dt come from?
 
-        int weight_correction;
-        int wI_correction; // what to do with this?
-        int kP; // proportional gain constant
-        int kI; // integral gain constant
+void correction_matrix_pi_controller(const float dt) {
 
-        weight_correction = (kP * corr_vector) + (wI_correction + kI * dt * corr_vector);
-	// what is weight_correction, exactly? I think this includes the error.
-	// we should have weight_correction.x, weight_correction.y, weight_correction.z
+        int wI_correction = 1; // what is the value of this? no idea.
+        int kP = 1; // proportional gain constant
+        int kI = 1; // integral gain constant
+
+	int temp_yaw = 0;
+	int temp_rollpitch = 0;
+
+	for (i=0; i<3; i++)
+        {
+		fix_yaw = kP * corr_vector[i]
+		fix_rollpitch = kI * dt * corr_vector[i];
+		fix_rollpitch = temp2 + wI_correction;
+		_gyro_error[i] = fix_yaw + fix_rollpitch;
+	}
 }
 
 // pull the gyro data so _state_gyro_last.X etc are available

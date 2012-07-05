@@ -30,6 +30,7 @@ static uint32_t _last_mag_update_ticks;
 static MagData  _state_mag_last;
 
 static float _corr_vector[3]; // correction vector
+static float _gyro_error[3]; // error to apply to the gyro
 
 void state_add(state_t *s1, state_t *s2, state_t *sum) {
 	float *s1_arr = (float*)s1;
