@@ -51,6 +51,12 @@ typedef enum
 typedef struct
 {
   short status; // whoami
+  float x_scale;
+  float y_scale;
+  float z_scale;
+  float x_max;
+  float y_max;
+  float z_max;
 } MagData;
 
 #endif

@@ -11,16 +11,6 @@
 // calc error
 // feed gyro data - error into kinematics/normalization
 
-// done by others
-
-calibrate gyroscope - itg3200Calibrate
-calibrate accelerometer - adx345Calibrate
-
-// the next pieces are not done yet
-
-read gyroscope
-read accelerometer
-
 // calibrate magnetometer
 //	calculate heading
 
@@ -28,7 +18,8 @@ read accelerometer
 //	find roll-pitch error
 //	find heading error
 
-int RP_error;
+int rollpitch_error;
+int heading_error;
 
 // using the accelerometer and magnetometer data,
 // calculate the total required correction vector
@@ -46,7 +37,7 @@ void find_total_correction_vector()
 	Y_corrplane = {MagData.x,MagData.y,MagData.z};
 
 	int temp = 0;
-	for (i=0; i<2; i++)
+	for (i=0; i<3; i++)
 	{
                 temp = weight_rollpitch * rollpitch_corrplane[i];
 		corr_vector[i] = temp + weight_yaw * yaw_corrplane[i];
@@ -71,7 +62,7 @@ void correction_matrix_pi_controller(const float dt, float corr_vector) {
 // pass w into rotation_matrix_velocity_update()
 
 void drift_adjustment() {
-
+	
 // error_correction = gyroscope - adjustment
 
 }

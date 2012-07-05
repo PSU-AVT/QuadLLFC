@@ -86,18 +86,19 @@ typedef struct
 {
         short status; //low byte is "whoami".  High is pending
         short raw_temp;
-        short raw_X;
+        short raw_X; // 
         short raw_Y;
-        short raw_Z;
-        float temp;
-        float X;
+        short raw_Z; 
+        float temp; // convert to our desired g range
+        float X; 
         float Y;
         float Z;
         float x_bias;
         float y_bias;
         float z_bias;
 }
-GyroData;
+GyroData;  // look up attribute flags
+
 //#pragma push (pop)
 
 i2c_error itg3200Init(void);

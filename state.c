@@ -15,10 +15,21 @@ static float rotation_b_to_i[3][3]; // Body to inertial rotation matrix
 static state_t _inertial_state;
 static int inertial_needs_update;
 
+static uint32_t _state_send_last;
+
 static uint32_t _state_gyro_last_update;
 static uint32_t _last_gyro_update_ticks;
-static uint32_t _state_send_last;
 static GyroData _state_gyro_last;
+
+static uint32_t  _state_accel_last_update;
+static uint32_t  _last_accel_update_ticks;
+static AccelData _state_accel_last;
+
+static uint32_t _state_mag_last_update;
+static uint32_t _last_mag_update_ticks;
+static MagData  _state_mag_last;
+
+static float _corr_vector[3]; // correction vector
 
 void state_add(state_t *s1, state_t *s2, state_t *sum) {
 	float *s1_arr = (float*)s1;
@@ -67,6 +78,8 @@ void state_reset(void) {
 }
 
 void state_update_from_gyro(void) {
+	// i2c_ok is in the itg3200.h, enum
+	// we did this for human-readbility
 	if(itg3200GetData(&_state_gyro_last) == i2c_ok) {
 		uint32_t tick_diff = systickGetTicks() - _last_gyro_update_ticks;
 	
@@ -78,6 +91,7 @@ void state_update_from_gyro(void) {
 			dt = tick_diff / 1000.0;
 
 		// Update rotation matrix
+		// transforms from body frame readings from gyro to world frame readings
 		rotation_matrix_velocity_update(rotation_b_to_i, _state_gyro_last.X, _state_gyro_last.Y, _state_gyro_last.Z, dt);
 
 		// Update last update ticks
@@ -108,7 +122,9 @@ void state_update(void) {
 	uint32_t ticks = systickGetTicks();
 
 	if((ticks - _state_gyro_last_update) >= STATE_GYRO_UPDATE_INTERVAL) {
+		state_update_from_accel();
 		state_update_from_gyro();
+
 		_state_gyro_last_update = ticks;
 	}
 	ticks = systickGetTicks();

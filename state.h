@@ -1,13 +1,15 @@
 #ifndef STATE_H
 #define STATE_H
 
+// euler angles determine these ranges
 typedef struct state_t {
 	float roll;
 	float pitch;
 	float yaw;
-	float x;
-	float y;
-	float z;
+        // this is in the world coordinate system
+	float x; // does not exist
+	float y; // does not exist
+	float z; // 
 } state_t;
 
 void state_add(state_t *s1, state_t *s2, state_t *sum);

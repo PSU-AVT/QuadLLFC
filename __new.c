@@ -8,14 +8,14 @@ void state_update(void) {
 	if((ticks - _state_accel_last_update) >= STATE_ACCEL_UPDATE_INTERVAL) {
 
 		if(adxl345GetData(&_state_accel_last) == i2c_ok) {
-			uint32_t tick_diff = systickGetTicks() - _last_accel_update_ticks;
+			uint32_t accel_tick_diff = systickGetTicks() - _last_accel_update_ticks;
 
 			// Set dt in seconds
-			float dt;
+			float accel_dt;
 			if(_last_accel_update_ticks == 0)
-				dt = 0;
+				accel_dt = 0;
 			else
-				dt = tick_diff / 1000.0;
+				accel_dt = accel_tick_diff / 1000.0;
 		}
 
 // pull mag data
@@ -24,35 +24,35 @@ void state_update(void) {
 	if((ticks - _state_mag_last_update) >= STATE_MAG_UPDATE_INTERVAL) {
 
 		if(hmc5883lGetData(&_state_mag_last) == i2c_ok) {
-			uint32_t tick_diff = systickGetTicks() - _last_mag_update_ticks;
+			uint32_t mag_tick_diff = systickGetTicks() - _last_mag_update_ticks;
 
 			// Set dt in seconds
-			float dt;
+			float mag_dt;
 			if(_last_mag_update_ticks == 0)
-				dt = 0;
+				mag_dt = 0;
 			else
-				dt = tick_diff / 1000.0;
+				mag_dt = mag_tick_diff / 1000.0;
 		}
 
 // using existing r_matrix, accel data, magdata -- find total_correction
 
 	void find_total_correction_vector()
 	{	
-	        float corr_vector[3];
+	        float _corr_vector[3];
 	
 	        const int weight_rollpitch = 0;
 	        float rollpitch_corrplane[3];
-	        rollpitch_corrplane = {AccelData.x,AccelData.y,AccelData.z};
+	        rollpitch_corrplane = {AccelData.X,AccelData.Y,AccelData.Z};
 	
-        	int weight_yaw;
+        	int weight_yaw = 0;
 	        float yaw_corrplane[3];
-	        Y_corrplane = {MagData.x,MagData.y,MagData.z};
+	        yaw_corrplane = {MagData.X,MagData.Y,MagData.Z};
 
         	int temp = 0;
-	        for (i=0; i<2; i++)
+	        for (i=0; i<3; i++)
         	{
                 	temp = weight_rollpitch * RP_corrplane[i];
-	                corr_vector[i] = temp + weight_yaw * Y_corrplane[i];
+	                _corr_vector[i] = temp + weight_yaw * Y_corrplane[i];
         	}
 	}
 
