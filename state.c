@@ -84,7 +84,7 @@ void state_update_from_filter() { // this is calling functions in filter.c
 			gyro_dt = 0;
 		else
 			gyro_dt = tick_diff / 1000.0;
-		filter_get_corrections_for_gyro();
+		filter_get_gyro_correction_data();
 
                 // element by element, subtract error from gyro vector
                 _state_gyro_last.X -= _gyro_error[1];

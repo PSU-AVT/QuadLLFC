@@ -99,8 +99,6 @@ typedef struct
 }
 GyroData;  // look up attribute flags
 
-//#pragma push (pop)
-
 i2c_error itg3200Init(void);
 i2c_error itg3200GetData (GyroData *data);
 unsigned char itg3200_Get_WhoAmI (void);

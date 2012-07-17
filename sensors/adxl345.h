@@ -67,9 +67,9 @@ typedef struct
 	short raw_y;
 	short raw_z;
 	//Should be x and y? Check with Greg.
-	float x;
-	float y;
-	float z;
+	float X;
+	float Y;
+	float Z;
 
 	float roll;
 	float pitch;

@@ -45,18 +45,13 @@ typedef enum
 #pragma pack (push) // what
 #pragma pack (1)    // is this
 
-// isn't the above the same as?
-#pragma pack (push, 1)
-
 typedef struct
 {
   short status; // whoami
-  float x_scale;
-  float y_scale;
-  float z_scale;
-  float x_max;
-  float y_max;
-  float z_max;
+  uint16_t X;
+  uint16_t Y;
+  uint16_t Z;
+  uint32_t ID;
 } MagData;
 
 #endif
