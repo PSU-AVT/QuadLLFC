@@ -32,6 +32,11 @@ notes
 *.sql
 *.sqlite
 
+# LPCXpresso Code Red Files #
+#############################
+
+.metadata/*
+
 # OS generated files #
 ######################
 .DS_Store
