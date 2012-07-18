@@ -13,26 +13,27 @@
 #include "../core/i2cError.h"
 #include "../core/i2c.h"
 
-#define HMC5883L_ADDRESS (0x3C) //0x1E in the datasheet shifted.
-#define HMC5883L_READBIT (0x01)
+#define HMC5883L_ADDRESS  (0x3C) 
+#define HMC5883L_READBIT  (0x3D)
+#define HMC5883L_WRITEBIT (0x3C) 
 
 //Device registers - given in the data sheet
 
-#define HMC_5883L_CONFIG_A 0x00
-#define HMC_5883L_CONFIG_B 0x01
-#define HMC_5883L_MODE     0x02
-#define HMC_5883L_DATAX0   0x03
-#define HMC_5883L_DATAX1   0x04
-#define HMC_5883L_DATAZ0   0x05
-#define HMC_5883L_DATAZ1   0x06
-#define HMC_5883L_DATAY0   0x07
-#define HMC_5883L_DATAY1   0x08
-#define HMC_5883L_STATUS   0x09
-#define HMC_5883L_ID_A     0x0A
-#define HMC_5883L_ID_B     0x0B
-#define HMC_5883L_ID_C     0x0C
+#define HMC5883L_REG_CONFIG_A (0x00)
+#define HMC5883L_REG_CONFIG_B (0x01)
+#define HMC5883L_REG_MODE     (0x02)
+#define HMC5883L_REG_DATAX0   (0x03)
+#define HMC5883L_REG_DATAX1   (0x04)
+#define HMC5883L_REG_DATAZ0   (0x05)
+#define HMC5883L_REG_DATAZ1   (0x06)
+#define HMC5883L_REG_DATAY0   (0x07)
+#define HMC5883L_REG_DATAY1   (0x08)
+#define HMC5883L_REG_STATUS   (0x09)
+#define HMC5883L_REG_ID_A     (0x0A)
+#define HMC5883L_REG_ID_B     (0x0B)
+#define HMC5883L_REG_ID_C     (0x0C)
 
-#define HMC_5883L_MODE_CFG_CONT 0x00
+#define HMC_5883L_MODE_CFG_CONT (0x00)
 
 typedef enum
 {
@@ -48,6 +49,12 @@ typedef enum
 typedef struct
 {
   short status; // whoami
+  uint16_t raw_X;
+  uint16_t raw_Y;
+  uint16_t raw_Z;
+  uint16_t X_bias;
+  uint16_t Y_bias;
+  uint16_t Z_bias;
   uint16_t X;
   uint16_t Y;
   uint16_t Z;

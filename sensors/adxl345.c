@@ -128,18 +128,18 @@ i2c_error adxl345GetData(AccelData *data)
 	data->raw_z = (short) ((int)tempData[5] << 8) | ((int) tempData[4]);
 
 	//Getting the value in G's lsb correction is defined in adxl345.h
-	data->x = data->raw_x * adxl345_LSB_CORRECTION;
-	data->y = data->raw_y * adxl345_LSB_CORRECTION;
-	data->z = data->raw_z * adxl345_LSB_CORRECTION;
+	data->X = data->raw_x * adxl345_LSB_CORRECTION;
+	data->Y = data->raw_y * adxl345_LSB_CORRECTION;
+	data->Z = data->raw_z * adxl345_LSB_CORRECTION;
         //data->x.f = 0.0;
         //data->y.f = 1.0;
         //data->z.f = 0.0;
 
         
 
-        data->roll = atan(-data->x/hypot(data->y, data->z));
-        data->pitch = atan2(data->y, data->z);
-        data->mag = sqrt((data->x*data->x)+(data->y*data->y)+(data->z+data->z));
+        data->roll = atan(-data->X/hypot(data->Y, data->Z));
+        data->pitch = atan2(data->Y, data->Z);
+        data->mag = sqrt((data->X*data->X)+(data->Y*data->Y)+(data->Z+data->Z));
 
 	return response;
 }

@@ -21,7 +21,7 @@ static uint32_t _state_gyro_last_update;
 static uint32_t _last_gyro_update_ticks;
 static GyroData _state_gyro_last;
 
-extern static float _gyro_error[3]; // error to apply to the gyro
+extern float _gyro_error[3]; // error to apply to the gyro
 
 void state_add(state_t *s1, state_t *s2, state_t *sum) {
 	float *s1_arr = (float*)s1;

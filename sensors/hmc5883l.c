@@ -1,6 +1,8 @@
 /* Jen Hanni
- * Draws heavily on Ryan@Mechatronics and Eric Dinger
+ * Draws heavily on Ryan@Mechatronics and Eric Dinger itg3200 and adxl345 drivers
+ *
  * HMC5883L driver
+ * no guarantees.
 */
 
 #include "hmc5883l.h"
@@ -12,6 +14,12 @@ extern volatile uint32_t  I2CReadLength, I2CWriteLength;
 
 uint32_t i;
 uint8_t mag_init;
+
+/**************************************************************************/
+/*!
+    @brief  Functions read a byte, write a byte, and read multibytes
+*/
+/**************************************************************************/
 
 static i2c_error hmc5883lWriteByte (uint8_t address, uint8_t reg, uint32_t value)
 {
@@ -42,7 +50,7 @@ static i2c_error hmc5883lReadByte(uint8_t address, uint8_t reg, int *value)
   I2CMasterBuffer[0] = address;             // I2C device address
   I2CMasterBuffer[1] = reg;                       // Command register
   // Append address w/read bit
-  I2CMasterBuffer[2] = address | hmc5883l_READBIT;
+  I2CMasterBuffer[2] = address | HMC5883L_READBIT;
   i2c_error status = i2cEngine();
   if(status == i2c_ok)
   {
@@ -66,7 +74,7 @@ static i2c_error hmc5883lReadMultiByte(uint8_t address, uint8_t reg, uint8_t num
   I2CMasterBuffer[0] = address;             // I2C device address
   I2CMasterBuffer[1] = reg;                       // Command register
   // Append address w/read bit
-  I2CMasterBuffer[2] = address | hmc5883l_READBIT;
+  I2CMasterBuffer[2] = address | HMC5883L_READBIT;
   i2c_error returned = i2cEngine();
   if(returned == i2c_ok)
   {
@@ -98,22 +106,23 @@ i2c_error hmc5883lInit(void)
 
   int checkValue;
 
-  response_error = hmc5883lWriteByte(itg3200_ADDRESS, itg3200_REGISTER_CONFIG_DLPF, 0x19);
-  response_error = hmc5883lReadByte(itg3200_ADDRESS, itg3200_REGISTER_CONFIG_DLPF, &checkValue);
+  response_error = hmc5883lWriteByte(HMC5883L_ADDRESS, HMC5883L_REG_CONFIG_A, 0x10);
+  response_error = hmc5883lReadByte(HMC5883L_ADDRESS, HMC5883L_REG_CONFIG_A, &checkValue);
 
-  if (checkValue != 0x19)
+  if (checkValue != 0x10)
           return i2c_error_last;
 
-  response_error = hmc5883lWriteByte (itg3200_ADDRESS, itg3200_REGISTER_CONFIG_PMU, 0x01);
-  response_error = hmc5883lReadByte(itg3200_ADDRESS, itg3200_REGISTER_CONFIG_PMU, &checkValue);
+  response_error = hmc5883lWriteByte (HMC5883L_ADDRESS, HMC5883L_REG_CONFIG_B, 0x20);
+  response_error = hmc5883lReadByte(HMC5883L_ADDRESS, HMC5883L_REG_CONFIG_B, &checkValue);
+
+  if (checkValue != 0x20)
+          return i2c_error_last;
+
+  // default is single measurement mode
+  response_error = hmc5883lWriteByte (HMC5883L_ADDRESS, HMC5883L_REG_MODE, 0x01);
+  response_error = hmc5883lReadByte(HMC5883L_ADDRESS, HMC5883L_REG_MODE, &checkValue);
 
   if (checkValue != 0x01)
-          return i2c_error_last;
-
-  response_error = hmc5883lWriteByte (itg3200_ADDRESS, itg3200_REGISTER_CONFIG_SMPLDIV, 0x07);
-  response_error = hmc5883lReadByte(itg3200_ADDRESS, itg3200_REGISTER_CONFIG_SMPLDIV, &checkValue);
-
-  if (checkValue != 0x07)
           return i2c_error_last;
 
   if (response_error == i2c_ok)
@@ -130,7 +139,9 @@ i2c_error hmc5883lInit(void)
     @brief  Reads the mag data set (full)
 
     @note   This method will read the entire data set from the magnetometer
-             and return it in the mag structure.
+             and return it in the mag structure. 
+
+    @caution This method currently returns the raw data
 */
 /**************************************************************************/
 
@@ -142,5 +153,53 @@ i2c_error hmc5883lGetData (MagData *data)
   if (!mag_init)
      hmc5883lInit();
 
-  error = hmc5883lReadMultiByte(hmc5883l_ADDRESS, hmc588l_REGISTER_
+ // not entirely sure about error handling here
+  error = hmc5883lReadMultiByte(HMC5883L_ADDRESS, HMC5883L_REG_DATAX0, 8, tmpdat);
+  if (error != i2c_ok)
+     return error;
+
+  data->raw_X = (short) ((int) tmpdat[0] << 8) | ((int) tmpdat[1]);
+  data->raw_Y = (short) ((int) tmpdat[2] << 8) | ((int) tmpdat[3]);
+  data->raw_Z = (short) ((int) tmpdat[4] << 8) | ((int) tmpdat[5]);
+
+  // Mag scaling: no idea
+  data->X = data->raw_X;
+  data->Y = data->raw_Y;
+  data->Z = data->raw_Z;
+
+  return error;  
+}
+
+/**************************************************************************/
+/*!
+    @brief  Reads identification registers A, B, C 
+            but why and what for?
+*/
+/**************************************************************************/
+
+/**************************************************************************/
+/*!
+    @brief  Calibrates the magnetometer to determine initial bias
+*/
+/**************************************************************************/
+
+void hmc5883lCalibrate(MagData *data, uint32_t cnt, uint32_t delay) {
+  int i;
+  float x, y, z;
+
+  data->X_bias = 0;
+  data->Y_bias = 0;
+  data->Z_bias = 0;
+ 
+  for(i = 0; i < cnt; i++) {
+    hmc5883lGetData(data);
+    x += data->X;
+    y += data->Y;
+    z += data->Z;
+    systickDelay(delay);
+  }
+
+  data->X_bias = -x / cnt;
+  data->Y_bias = -y / cnt;
+  data->Z_bias = -z / cnt;
 }
