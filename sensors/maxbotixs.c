@@ -1,6 +1,6 @@
 #include "maxbotixs.h"
 
-void init_sensor()
+void init_maxbotix()
 {
         data_good = 0;
         Htick_count = 0;
@@ -17,19 +17,21 @@ void init_sensor()
         gpioIntEnable(0,6);
 }
 
-float measure(void)
+float measure_maxbotix_in(void)
 {
-        while(!data_good)
+        if (Ltick_count <= Htick_count) 
         {
-                if (Ltick_count - Htick_count > 60000)
-                {
-                        data_good = 0;
-                        return 6; //6 is magic! It's the lowest value reported
-                                  //by the sensor.
-                }
-                else
-                        return ((Ltick_count - Htick_count)/timerSpeed);
+                return (((Ltick_count + 0xEA57) - Htick_count)/timerSpeed)/uSperInch;
         }
+        else
+        {
+                return ((Ltick_count - Htick_count)/timerSpeed)/uSperInch;
+        }
+}
+
+float measure_maxbotix_cm(void)
+{
+        return (measure_maxbotix_in())*2.54; //magic number
 }
         
 void PIOINT0_IRQHandler(void)
