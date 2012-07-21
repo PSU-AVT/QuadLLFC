@@ -10,7 +10,9 @@ volatile uint32_t data_good;
 #define zzzi uSperInch * timerSpeed
 
 //Initializes the sensor on port 0.6
-void init_sensor();
+void init_maxbotix();
 
 //Returns the distance in inches
-float measure(void);
+float measure_maxbotix_in(void);
+
+float measure_maxbotix_cm(void);
