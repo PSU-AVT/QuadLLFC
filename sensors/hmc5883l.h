@@ -61,4 +61,13 @@ typedef struct
   uint32_t ID;
 } MagData;
 
+static i2c_error hmc5883lWriteByte (uint8_t address, uint8_t reg, uint32_t value);
+static i2c_error hmc5883lReadByte(uint8_t address, uint8_t reg, int *value);
+static i2c_error hmc5883lReadMultiByte(uint8_t address, uint8_t reg, uint8_t numBytes, uint8_t value[]);
+i2c_error hmc5883lInit();
+i2c_error hmc5883lGetData (MagData *data);
+void hmc5883lCalibrate(MagData *data, uint32_t cnt, uint32_t delay);
+
+
+
 #endif
