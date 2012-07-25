@@ -14,6 +14,7 @@
 #include "core/systick.h"
 #include "sensors/itg3200.h"
 #include "sensors/adxl345.h"
+#include "sensors/hmc5883l.h"
 
 int main(void) {
 	systemInit();
@@ -39,6 +40,9 @@ int main(void) {
 	logging_send_string(LOGGING_DEBUG, "Initializing accelerometer.");
 	adxl345_Init();
 	logging_send_string(LOGGING_DEBUG, "Initializing accelerometer complete.");
+	logging_send_string(LOGGING_DEBUG, "Initializing magnetometer.");
+	hmc5883lInit();
+	logging_send_string(LOGGING_DEBUG, "Initializing magnetometer complete.");
 
 	state_init();
 	control_init();
