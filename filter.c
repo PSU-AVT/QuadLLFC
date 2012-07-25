@@ -18,7 +18,7 @@ static uint32_t _last_mag_update_ticks;
 static MagData  _state_mag_last;
 
 static float _corr_vector[3];
- float _gyro_error[3];
+float _gyro_error[] = {0,0,0};
 
 // pull accelerometer data
 // make _state_accel_last.X, etc. available for use and update ticks
