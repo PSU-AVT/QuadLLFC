@@ -77,13 +77,13 @@ void filter_find_total_correction_vector()
         g_ref[1] = _state_accel_last.Y;
         g_ref[2] = _state_accel_last.Z;
 
-        const int weight_rollpitch = 0;
+        const float weight_rollpitch = 1;
         float rollpitch_corrplane[3];
         rollpitch_corrplane[0] = rotation_b_to_i[3][1];
   	rollpitch_corrplane[1] = rotation_b_to_i[3][2];
 	rollpitch_corrplane[2] = rotation_b_to_i[3][3];
 
-        int weight_yaw = 0;
+        const float weight_yaw = 1;
         float yaw_corrplane[3];
         yaw_corrplane[0] = _state_mag_last.X;
 	yaw_corrplane[1] = _state_mag_last.Y;
@@ -108,12 +108,12 @@ void filter_get_gyro_correction_data(float *gyro_dt)
 {
         filter_find_total_correction_vector();
 
-        int wI_correction = 1; // what is the value of this? no idea.
-        int kP = 1; // proportional gain constant
-        int kI = 1; // integral gain constant
+        float wI_correction = 1; // what is the value of this? no idea.
+        float kP = 1; // proportional gain constant
+        float kI = 1; // integral gain constant
 
-        int fix_yaw = 0;
-        int fix_rollpitch = 0;
+        float fix_yaw = 0;
+        float fix_rollpitch = 0;
 	int i;
 
         int dt = (int) gyro_dt;
