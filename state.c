@@ -11,7 +11,7 @@
 
 static uint32_t _state_send_interval = 500;
 
-static float rotation_b_to_i[3][3]; // Body to inertial rotation matrix
+float rotation_b_to_i[3][3]; // Body to inertial rotation matrix
 static state_t _inertial_state;
 static int inertial_needs_update;
 
