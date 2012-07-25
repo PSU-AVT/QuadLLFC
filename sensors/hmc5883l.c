@@ -119,7 +119,7 @@ i2c_error hmc5883lInit(void)
           return i2c_error_last;
 
   // default is single measurement mode
-  response_error = hmc5883lWriteByte (HMC5883L_ADDRESS, HMC5883L_REG_MODE, 0x01);
+  response_error = hmc5883lWriteByte (HMC5883L_ADDRESS, HMC5883L_REG_MODE, 0x00);
   response_error = hmc5883lReadByte(HMC5883L_ADDRESS, HMC5883L_REG_MODE, &checkValue);
 
   if (checkValue != 0x01)
