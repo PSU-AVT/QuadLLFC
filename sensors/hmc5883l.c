@@ -159,8 +159,8 @@ i2c_error hmc5883lGetData (MagData *data)
      return error;
 
   data->raw_X = (short) ((int) tmpdat[0] << 8) | ((int) tmpdat[1]);
-  data->raw_Y = (short) ((int) tmpdat[2] << 8) | ((int) tmpdat[3]);
-  data->raw_Z = (short) ((int) tmpdat[4] << 8) | ((int) tmpdat[5]);
+  data->raw_Y = (short) ((int) tmpdat[4] << 8) | ((int) tmpdat[5]);
+  data->raw_Z = (short) ((int) tmpdat[2] << 8) | ((int) tmpdat[3]);
 
   // Mag scaling: no idea
   data->X = data->raw_X;

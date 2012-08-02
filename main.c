@@ -47,9 +47,18 @@ int main(void) {
 	state_init();
 	control_init();
 
+//        state_t inert_test;
+//        MagData mag_test;
+
 	logging_send_string(LOGGING_DEBUG, "Entering main control loop.");
 	// Main loop
 	while(1) {
+//                hmc5883lGetData(&mag_test);
+//                inert_test.roll = mag_test.X;
+//                inert_test.pitch = mag_test.Y;
+//                inert_test.yaw = mag_test.Z;
+//                inert_test.yaw = atan2(mag_test.Y,mag_test.X);
+//                command_send(COMMAND_INERTIAL_STATE, (unsigned char*)&inert_test, sizeof(state_t));
 		proto_update();
 		state_update();
 		control_update();

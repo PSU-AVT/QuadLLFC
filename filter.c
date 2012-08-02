@@ -1,3 +1,4 @@
+#include "math.h"
 #include "filter.h"
 #include "sensors/itg3200.h"
 #include "sensors/adxl345.h"
@@ -84,19 +85,15 @@ void filter_find_total_correction_vector()
 	rollpitch_corrplane[2] = rotation_b_to_i[3][3];
 
         const float weight_yaw = 1;
-        float yaw_corrplane[3];
-        yaw_corrplane[0] = _state_mag_last.X;
-	yaw_corrplane[1] = _state_mag_last.Y;
-	yaw_corrplane[2] = _state_mag_last.Z;
-
-        
+        float yaw_corr_heading;
+        yaw_corr_heading = atan2(_state_mag_last.Y,_state_mag_last.X);
 
         int temp = 0;
 	int i;
         for (i=0; i<3; i++)
         {
             temp = weight_rollpitch * rollpitch_corrplane[i];
-            _corr_vector[i] = temp + (weight_yaw * yaw_corrplane[i]);
+            _corr_vector[i] = temp + (weight_yaw * yaw_corr_heading);
         }
 }
 
