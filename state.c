@@ -87,9 +87,9 @@ void state_update_from_filter() { // this is calling functions in filter.c
 		filter_get_gyro_correction_data();
 
                 // element by element, subtract error from gyro vector
-                _state_gyro_last.X -= _gyro_error[1];
-                _state_gyro_last.Y -= _gyro_error[2];
-                _state_gyro_last.Z -= _gyro_error[3];
+                _state_gyro_last.X -= _gyro_error[0];
+                _state_gyro_last.Y -= _gyro_error[1];
+                _state_gyro_last.Z -= _gyro_error[2];
 	
 		// Update rotation matrix - transforms from body frame readings from 
 		// gyro to world frame readings and normalizes the result
@@ -128,7 +128,7 @@ void state_update(void) {
 	}
 	ticks = systickGetTicks();
 	if(_state_send_interval && (ticks - _state_send_last) >= _state_send_interval) {
-		state_send();
+//		state_send();
 		_state_send_last = ticks;
 	}
 }

@@ -1,4 +1,5 @@
 #include "math.h"
+#include "state.h"
 #include "filter.h"
 #include "sensors/itg3200.h"
 #include "sensors/adxl345.h"
@@ -48,7 +49,7 @@ void filter_get_accel_data()
 
 // pull mag data, which doesn't exist yet
 
-void filter_get_mag_data()
+/*void filter_get_mag_data()
 {
 	uint32_t ticks = systickGetTicks();
         if((ticks - _state_mag_last_update) >= FILTER_MAG_UPDATE_INTERVAL) 
@@ -64,14 +65,14 @@ void filter_get_mag_data()
                                 mag_dt = mag_tick_diff / 1000.0;
 		}
         }
-}
+}*/
 
 // using existing r_matrix, accel data, magdata -- find total_correction
 
 void filter_find_total_correction_vector() 
 {
 	filter_get_accel_data();
-	filter_get_mag_data();
+//	filter_get_mag_data();
 
         float g_ref[3];
         g_ref[0] = _state_accel_last.X;
@@ -80,20 +81,20 @@ void filter_find_total_correction_vector()
 
         const float weight_rollpitch = 1;
         float rollpitch_corrplane[3];
-        rollpitch_corrplane[0] = rotation_b_to_i[3][1];
-  	rollpitch_corrplane[1] = rotation_b_to_i[3][2];
-	rollpitch_corrplane[2] = rotation_b_to_i[3][3];
+        rollpitch_corrplane[0] = rotation_b_to_i[2][0];
+  	rollpitch_corrplane[1] = rotation_b_to_i[2][1];
+	rollpitch_corrplane[2] = rotation_b_to_i[2][2];
 
-        const float weight_yaw = 1;
-        float yaw_corr_heading;
-        yaw_corr_heading = atan2(_state_mag_last.Y,_state_mag_last.X);
+//      const float weight_yaw = 1;
+//      float yaw_corr_heading;
+//      yaw_corr_heading = atan2(_state_mag_last.Y,_state_mag_last.X);
 
         int temp = 0;
 	int i;
         for (i=0; i<3; i++)
         {
-            temp = weight_rollpitch * rollpitch_corrplane[i];
-            _corr_vector[i] = temp + (weight_yaw * yaw_corr_heading);
+            _corr_vector[i] = weight_rollpitch * rollpitch_corrplane[i];
+//            _corr_vector[i] = temp + (weight_yaw * yaw_corr_heading);
         }
 }
 
@@ -109,19 +110,27 @@ void filter_get_gyro_correction_data(float *gyro_dt)
         float kP = 1; // proportional gain constant
         float kI = 1; // integral gain constant
 
-        float fix_yaw = 0;
+        state_t test;
+
+//        float fix_yaw = 0;
         float fix_rollpitch = 0;
 	int i;
 
         int dt = (int) gyro_dt;
 
+        test.roll = _corr_vector[0];
+        test.pitch = _corr_vector[1];
+        test.yaw = _corr_vector[2];
+
+        command_send(COMMAND_INERTIAL_STATE, (unsigned char*)&test, sizeof(state_t));
+
         for (i=0; i<3; i++)
         {
-                fix_yaw = kP * _corr_vector[i];
+//                fix_yaw = kP * _corr_vector[i];
                 fix_rollpitch = kI * dt;
 		fix_rollpitch = fix_rollpitch * _corr_vector[i];
                 fix_rollpitch = fix_rollpitch + wI_correction;
-                _gyro_error[i] = fix_yaw + fix_rollpitch;
+                _gyro_error[i] = fix_rollpitch;
         }
 }
 
