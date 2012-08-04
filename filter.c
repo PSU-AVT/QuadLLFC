@@ -81,9 +81,9 @@ void filter_find_total_correction_vector()
 
         const float weight_rollpitch = 1;
         float rollpitch_corrplane[3];
-        rollpitch_corrplane[0] = rotation_b_to_i[2][0];
-  	rollpitch_corrplane[1] = rotation_b_to_i[2][1];
-	rollpitch_corrplane[2] = rotation_b_to_i[2][2];
+        rollpitch_corrplane[0] = _state_accel_last.roll;
+  	rollpitch_corrplane[1] = _state_accel_last.pitch;
+	rollpitch_corrplane[2] = 1;
 
 //      const float weight_yaw = 1;
 //      float yaw_corr_heading;
@@ -96,6 +96,15 @@ void filter_find_total_correction_vector()
             _corr_vector[i] = weight_rollpitch * rollpitch_corrplane[i];
 //            _corr_vector[i] = temp + (weight_yaw * yaw_corr_heading);
         }
+
+        state_t test;
+
+        test.roll = _corr_vector[0];
+        test.pitch = _corr_vector[1];
+        test.yaw = _corr_vector[2];
+
+        command_send(COMMAND_INERTIAL_STATE, (unsigned char*)&test, sizeof(state_t));
+
 }
 
 // using total_correction and available globals, find the error
@@ -106,23 +115,15 @@ void filter_get_gyro_correction_data(float *gyro_dt)
 {
         filter_find_total_correction_vector();
 
-        float wI_correction = 1; // what is the value of this? no idea.
+        static float wI_correction = 0; // what is the value of this? no idea.
         float kP = 1; // proportional gain constant
         float kI = 1; // integral gain constant
-
-        state_t test;
 
 //        float fix_yaw = 0;
         float fix_rollpitch = 0;
 	int i;
 
         int dt = (int) gyro_dt;
-
-        test.roll = _corr_vector[0];
-        test.pitch = _corr_vector[1];
-        test.yaw = _corr_vector[2];
-
-        command_send(COMMAND_INERTIAL_STATE, (unsigned char*)&test, sizeof(state_t));
 
         for (i=0; i<3; i++)
         {
