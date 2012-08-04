@@ -53,7 +53,7 @@
 
 //The following are the values that we wish to be in the named register after initializing the accelerometer
 #define adxl345_REGISTER_CONFIG_POWER_CTL (0x08) //Set the Measure bit to begin measuring.
-#define adxl345_REGISTER_CONFIG_BW_RATE (0x0C);  //Set the bandwidth the 200hz. see tables 6 & 7 in the data sheet for further information.
+#define adxl345_REGISTER_CONFIG_BW_RATE (0x0C)  //Set the bandwidth the 200hz. see tables 6 & 7 in the data sheet for further information.
 //The rest of the registers have default values that work - for now.
 
 uint8_t accel_init;
