@@ -94,6 +94,8 @@ i2c_error adxl345_Init(void)
 		return false; /* Fatal error */
 	}
 
+        response = adxl345WriteByte(adxl345_ADDRESS, adxl345_REGISTER_BW_RATE, adxl345_REGISTER_CONFIG_BW_RATE);
+	response = adxl345ReadByte(adxl345_ADDRESS, adxl345_REGISTER_BW_RATE, &checkValue);
 	response = adxl345WriteByte(adxl345_ADDRESS, adxl345_REGISTER_POWER_CTL, adxl345_REGISTER_CONFIG_POWER_CTL);
 	response = adxl345ReadByte(adxl345_ADDRESS, adxl345_REGISTER_POWER_CTL, &checkValue);
 
