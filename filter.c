@@ -47,9 +47,7 @@ void filter_get_accel_data()
 
 }
 
-// pull mag data, which doesn't exist yet
-
-/*void filter_get_mag_data()
+void filter_get_mag_data()
 {
 	uint32_t ticks = systickGetTicks();
         if((ticks - _state_mag_last_update) >= FILTER_MAG_UPDATE_INTERVAL) 
@@ -65,14 +63,14 @@ void filter_get_accel_data()
                                 mag_dt = mag_tick_diff / 1000.0;
 		}
         }
-}*/
+}
 
 // using existing r_matrix, accel data, magdata -- find total_correction
 
 void filter_find_total_correction_vector() 
 {
 	filter_get_accel_data();
-//	filter_get_mag_data();
+	filter_get_mag_data();
 
         float g_ref[3];
         g_ref[0] = _state_accel_last.X;
@@ -83,19 +81,18 @@ void filter_find_total_correction_vector()
         float rollpitch_corrplane[3];
         rollpitch_corrplane[0] = rotation_b_to_i[2][1];
         rollpitch_corrplane[1] = rotation_b_to_i[0][2];
-//      rollpitch_corrplane[0] = _state_accel_last.roll;
-// 	rollpitch_corrplane[1] = _state_accel_last.pitch;
 	rollpitch_corrplane[2] = 1;
 
-//      const float weight_yaw = 1;
-//      float yaw_corr_heading;
-//      yaw_corr_heading = atan2(_state_mag_last.Y,_state_mag_last.X);
+        const float weight_yaw = 1;
+        float yaw_corr_heading;
+        yaw_corr_heading = atan2(_state_mag_last.Y,_state_mag_last.X);
 
+        int temp;
 	int i;
         for (i=0; i<3; i++)
         {
-            _corr_vector[i] = weight_rollpitch * rollpitch_corrplane[i];
-//            _corr_vector[i] = temp + (weight_yaw * yaw_corr_heading);
+            temp = weight_rollpitch * rollpitch_corrplane[i];
+            _corr_vector[i] = temp + (weight_yaw * yaw_corr_heading);
         }
 
         state_t test;
@@ -122,13 +119,12 @@ void filter_get_gyro_correction_data(float gyro_dt)
         float kP = 1; // proportional gain constant
         float kI = 1; // integral gain constant
 
-//        float fix_yaw = 0;
+        float fix_yaw = 0;
 	int i;
         float dt = gyro_dt;
 
         for (i=0; i<3; i++)
         {
-//                fix_yaw = kP * _corr_vector[i];
                 wP_correction = kP * _corr_vector[i];
                 wI_correction = kI * (dt * _corr_vector[i]);
                 _gyro_error[i] = wP_correction + wI_correction;
