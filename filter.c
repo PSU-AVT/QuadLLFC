@@ -91,7 +91,6 @@ void filter_find_total_correction_vector()
 //      float yaw_corr_heading;
 //      yaw_corr_heading = atan2(_state_mag_last.Y,_state_mag_last.X);
 
-        int temp = 0;
 	int i;
         for (i=0; i<3; i++)
         {
@@ -113,7 +112,7 @@ void filter_find_total_correction_vector()
 // PI controller creates value to correct for the determined error 
 // in the rotation correction matrix
 
-void filter_get_gyro_correction_data(float *gyro_dt)
+void filter_get_gyro_correction_data(float gyro_dt)
 {
         filter_find_total_correction_vector();
 
@@ -124,7 +123,7 @@ void filter_get_gyro_correction_data(float *gyro_dt)
         float kI = 1; // integral gain constant
 
 //        float fix_yaw = 0;
-	float i;
+	int i;
         float dt = gyro_dt;
 
         for (i=0; i<3; i++)
