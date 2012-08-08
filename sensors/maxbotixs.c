@@ -5,7 +5,6 @@ void init_maxbotix()
         SCB_SYSAHBCLKCTRL |= 0x600;
         TMR_TMR32B0TCR |= 0x1;
         TMR_TMR32B0PR |= 0x2;
-        data_good = 0;
         Htick_count = 0;
         Ltick_count = 0;
         //Set port.pin to an input 
@@ -31,12 +30,11 @@ float measure_maxbotix_in(void)
         {
                 return ((Ltick_count - Htick_count)/timerSpeed)/uSperInch;
         }
-        //return ((Ltick_count - Htick_count)/timerSpeed)/uSperInch;
 }
 
 float measure_maxbotix_cm(void)
 {
-        return (measure_maxbotix_in())*2.54; //magic number
+        return (measure_maxbotix_in())*2.54; //2.54 * inch = cm
 }
         
 void PIOINT0_IRQHandler(void)
@@ -52,12 +50,10 @@ void PIOINT0_IRQHandler(void)
           {
                   //tick_count = systickGetTicks();
                   Htick_count = TMR_TMR32B0TC;
-                  data_good = 0;
           }
           else
           {
                   //tick_count = systickGetTicks() - tick_count;
-                  data_good = 1;
                   Ltick_count = TMR_TMR32B0TC;
           }
   }
