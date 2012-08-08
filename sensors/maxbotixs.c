@@ -2,9 +2,12 @@
 
 void init_maxbotix()
 {
-        SCB_SYSAHBCLKCTRL |= 0x600;
+        //Enable TMR_TMR32B0
+        SCB_SYSAHBCLKCTRL |= 0x200;
         TMR_TMR32B0TCR |= 0x1;
+        //Set the prescaler for 24Mhz
         TMR_TMR32B0PR |= 0x2;
+        //
         Htick_count = 0;
         Ltick_count = 0;
         //Set port.pin to an input 
