@@ -3,3 +3,6 @@
 *.bin
 *.swp
 *.hex
+*.out
+\#*
+quadstabilize_dump
