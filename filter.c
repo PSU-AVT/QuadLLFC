@@ -77,13 +77,13 @@ void filter_find_total_correction_vector()
         g_ref[1] = _state_accel_last.Y;
         g_ref[2] = _state_accel_last.Z;
 
-        const float weight_rollpitch = 1;
+        const float weight_rollpitch = 0;
         float rollpitch_corrplane[3];
         rollpitch_corrplane[0] = rotation_b_to_i[2][1];
         rollpitch_corrplane[1] = rotation_b_to_i[0][2];
 	rollpitch_corrplane[2] = 1;
 
-        const float weight_yaw = 1;
+        const float weight_yaw = 0;
         float yaw_corr_heading;
         yaw_corr_heading = atan2(_state_mag_last.Y,_state_mag_last.X);
 
