@@ -95,14 +95,6 @@ void filter_find_total_correction_vector()
             _corr_vector[i] = temp + (weight_yaw * yaw_corr_heading);
         }
 
-        state_t test;
-
-        test.roll = _corr_vector[0];
-        test.pitch = _corr_vector[1];
-        test.yaw = _corr_vector[2];
-
-        command_send(COMMAND_INERTIAL_STATE, (unsigned char*)&test, sizeof(state_t));
-
 }
 
 // using total_correction and available globals, find the error
