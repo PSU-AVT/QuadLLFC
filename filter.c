@@ -19,7 +19,7 @@ static uint32_t _state_mag_last_update;
 static uint32_t _last_mag_update_ticks;
 static MagData  _state_mag_last;
 
-extern float rotation_b_to_i[3][3]; 
+extern static float rotation_b_to_i[3][3]; 
 
 static float _corr_vector[3];
 float _gyro_error[] = {0,0,0};
