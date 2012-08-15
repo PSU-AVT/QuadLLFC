@@ -3,7 +3,7 @@
  *
  * Software License Agreement (BSD License)
  *
- * Copyright (c) 2011, Gregory Haynes
+ * Copyright (c) 2011, Eric Dinger
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
