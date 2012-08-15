@@ -14,7 +14,11 @@
 void init_maxbotix(void);
 
 //Returns the distance in inches
+//if we call this function in the middle of an update it will return the last
+//valid distance reading
 float measure_maxbotix_in(void);
 
 //Returns the distance in CM
+//if we call this function in the middle of an update it will return the last
+//valid distance reading
 float measure_maxbotix_cm(void);
