@@ -40,7 +40,7 @@ float measure_maxbotix_in(void)
         {
                 if (Ltick_count <= Htick_count) 
                 {
-                        distance = ((((long long)Ltick_count + 0xFFFFFFFF) - Htick_count)/timerSpeed)/uSperInch;
+                        distance = ((((uint64_t)Ltick_count + 0xFFFFFFFF) - Htick_count)/timerSpeed)/uSperInch;
                 }
                 else
                 {
