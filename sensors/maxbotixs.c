@@ -1,15 +1,26 @@
 #include "maxbotixs.h"
 
+volatile uint32_t Htick_count;
+volatile uint32_t Ltick_count;
+volatile uint8_t  dataGood;
+static float distance;
+
 void init_maxbotix()
 {
+        //The following configures the timer
         //Enable TMR_TMR32B0
         SCB_SYSAHBCLKCTRL |= 0x200;
         TMR_TMR32B0TCR |= 0x1;
         //Set the prescaler for 24Mhz
         TMR_TMR32B0PR |= 0x2;
-        //
+        
+        //clear the variables
         Htick_count = 0;
         Ltick_count = 0;
+        dataGood = 0;
+        distance = 0;
+        
+        //Configure the pins and the interupt
         //Set port.pin to an input 
         gpioSetDir(0, 6, gpioDirection_Input);
         //Disable the internal pullup/down resistor
@@ -22,19 +33,24 @@ void init_maxbotix()
         gpioIntEnable(0,6);
 }
 
+//Returns the distance in inches
 float measure_maxbotix_in(void)
 {
-        if (Ltick_count <= Htick_count) 
+        if (dataGood)
         {
-                //return (((Ltick_count + 0xEA57) - Htick_count)/timerSpeed)/uSperInch;
-                return -99.0;
+                if (Ltick_count <= Htick_count) 
+                {
+                        distance = ((((long long)Ltick_count + 0xFFFFFFFF) - Htick_count)/timerSpeed)/uSperInch;
+                }
+                else
+                {
+                        distance = ((Ltick_count - Htick_count)/timerSpeed)/uSperInch;
+                }
         }
-        else
-        {
-                return ((Ltick_count - Htick_count)/timerSpeed)/uSperInch;
-        }
+        return distance;
 }
 
+//Returns the distance in cm
 float measure_maxbotix_cm(void)
 {
         return (measure_maxbotix_in())*2.54; //2.54 * inch = cm
@@ -51,13 +67,13 @@ void PIOINT0_IRQHandler(void)
           gpioIntClear(0, 6);
           if (status)
           {
-                  //tick_count = systickGetTicks();
                   Htick_count = TMR_TMR32B0TC;
+                  dataGood = 0;
           }
           else
           {
-                  //tick_count = systickGetTicks() - tick_count;
                   Ltick_count = TMR_TMR32B0TC;
+                  dataGood = 1;
           }
   }
   return;

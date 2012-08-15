@@ -1,12 +1,13 @@
+//This reads the distance value returned by the Maxbotixs sonar sensor. It uses
+//the Pulse Width output from the sensor.
 #include "../core/gpio.h"
-#include "../core/systick.h"
-
-volatile uint32_t Htick_count;
-volatile uint32_t Ltick_count;
 
 #define uSperInch 147 //micro seconds per inch - given by the data sheet
 #define timerSpeed 24.0 //In MHz
 
+//This init funtion needs to be called before any of the measure functions to
+//get valid data back. You should let the sensor run for 2 cycles (1/10th of 
+//a second) before trusting the measured data.
 //Initializes the sensor on port 0.6
 //Todo this it initializes TMR_TMR32B0 at 24MHz
 //it does not initialize any of the timer output pins or match/pwm features
