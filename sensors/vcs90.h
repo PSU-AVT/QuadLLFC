@@ -48,8 +48,11 @@
 //36.60mV/Amp
 #define AMP_SCALE 36.60
 
+//Sets up the adc pins to be used by the measure functions
 void vcs90_init(ADC_PIN_T v_pin, ADC_PIN_T i_pin);
 
+//Returns the voltage currently measured by the sensor
 float vcs90_measure_voltage(void);
 
+//Returns the current currently measured by the sensor
 float vcs90_measure_current(void);
