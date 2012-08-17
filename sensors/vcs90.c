@@ -1,9 +1,9 @@
 /*
- * Author: Gregory Haynes <greg@greghaynes.net>
+ * Author: Eric Dinger <egdinger@cs.pdx.edu>
  *
  * Software License Agreement (BSD License)
  *
- * Copyright (c) 2011, Gregory Haynes
+ * Copyright (c) 2011, Eric Dinger
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -19,7 +19,7 @@
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * WARRNTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
@@ -29,47 +29,28 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef ADC_H
-#define ADC_H
+#include "vcs90.h"
 
-/**
- * This ADC module multiplexes across selected pins using the ADC interrupt
+static ADC_PIN_T v_pin;
+static ADC_PIN_T i_pin;
 
-   To use this library you need to
-   adcInit(ADC_PIN5 | ...); //This sets the selected pins to be adc pins and 
-                           //enables the interupt
-   adcSelectPins(ADC_PIN5 | ...); //This adds the selected pin to the inpurupt hadnler
-   adcStart(); //This starts the adc
-
-   You can't use several of the adc pins. The known safe pins are 5,6,7.
- */
-
-#include "../projectconfig.h"
-
-typedef enum ADC_PIN_T
+void vcs90_init(ADC_PIN_T voltage_pin, ADC_PIN_T current_pin)
 {
-	ADC_PIN0 = 1,
-	ADC_PIN1 = 2,
-	ADC_PIN2 = 4,
-	ADC_PIN3 = 8,
-	ADC_PIN4 = 16,
-	ADC_PIN5 = 32,
-	ADC_PIN6 = 64,
-	ADC_PIN7 = 128
-}ADC_PIN_T;
+        v_pin = voltage_pin;
+        i_pin = current_pin;
+        adcInit(v_pin | i_pin);
+        adcSelectPins(v_pin | i_pin);
+}
 
-#define ADC_PIN_CNT 8
-#define ADC_MAX_PINVAL (1 << ADC_PIN_CNT)
-#define ADC_RESULT_INVALID 2048
+//This formula for works for both voltage and amp conversions
+//(adc_reading * (3300/1024))/scale = 
 
-#define adcIsResultValid(VAL) (VAL & ADC_RESULT_INVALID)
+float vcs90_measure_voltage(void)
+{
+        return (adcGetVal(v_pin) * MV_LSB)/VOLT_SCALE;
+}
 
-uint16_t adcGetVal(uint16_t pin);
-uint8_t adcPinToNdx(uint16_t pin);
-uint16_t adcGetNdxVal(uint8_t ndx);
-void adcStart(void);
-void adcSelectPins(int pin);
-void adcClearSelectedPins(int pin);
-void adcInit(int pins);
-
-#endif
+float vcs90_measure_current(void)
+{
+        return (adcGetVal(i_pin) * MV_LSB)/AMP_SCALE;
+}

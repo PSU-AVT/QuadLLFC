@@ -137,7 +137,12 @@ void adcStart()
 
 void adcSelectPins(int pins)
 {
-	_adc_selected_pins = pins;
+	_adc_selected_pins |= pins;
+}
+
+void adcClearSelectedPins(int pins)
+{
+        _adc_selected_pins &= ~pins;
 }
 
 void adcInit(int pins)
@@ -199,7 +204,7 @@ void adcInit(int pins)
 		IOCON_PIO1_10 &=  ~(IOCON_PIO1_10_ADMODE_MASK |
 		                    IOCON_PIO1_10_FUNC_MASK |
 		                    IOCON_PIO1_10_MODE_MASK);
-		IOCON_PIO1_10 |=   (IOCON_PIO1_10_FUNC_AD6 &
+		IOCON_PIO1_10 |=   (IOCON_PIO1_10_FUNC_AD6 |
 		                    IOCON_PIO1_10_ADMODE_ANALOG);
 	}
 	if(pins & ADC_PIN7)
@@ -207,7 +212,7 @@ void adcInit(int pins)
 		IOCON_PIO1_11 &=  ~(IOCON_PIO1_11_ADMODE_MASK |
 		                    IOCON_PIO1_11_FUNC_MASK |
 		                    IOCON_PIO1_11_MODE_MASK);
-		IOCON_PIO1_11 |=   (IOCON_PIO1_11_FUNC_AD7 &
+		IOCON_PIO1_11 |=   (IOCON_PIO1_11_FUNC_AD7 |
 		                    IOCON_PIO1_11_ADMODE_ANALOG);
 	}
 
