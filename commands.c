@@ -28,7 +28,8 @@ void command_send(command_out_id id, const unsigned char *data, uint16_t len) {
 	}
 
 	msg_buff[0] = id;
-	memcpy((char*)msg_buff+1, (char*)data, len);
+	if(data && len != 0)
+		memcpy((char*)msg_buff+1, (char*)data, len);
 	len = afproto_serialize_payload(msg_buff, len+1, out_buff);
 	uartSend(out_buff, len);
 }
@@ -65,6 +66,7 @@ void commands_handle_message(unsigned char *buff, uint8_t length) {
 			for(i = 0;i < ESC_CNT;++i)
 				motor_vals[i] = 0;
 			esc_set_all_throttles(motor_vals);
+			command_send(12, 0, 0); // Send turn off
 			break;
 		case 7: // turn on
 			logging_send_string(LOGGING_DEBUG, "Got turn on");
@@ -73,6 +75,7 @@ void commands_handle_message(unsigned char *buff, uint8_t length) {
 			float motors[4] = {0, 0, 0, 0};
 			esc_set_all_throttles(motors);
 			uartRxBufferClearFIFO();
+			command_send(11, 0, 0); // Send turn on
 			break;
 		case 8: // Set P gains
 			break;
