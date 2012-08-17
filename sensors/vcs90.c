@@ -36,7 +36,7 @@ static ADC_PIN_T i_pin;
 
 void vcs90_init(ADC_PIN_T voltage_pin, ADC_PIN_T current_pin)
 {
-        v_pin = volatage_pin;
+        v_pin = voltage_pin;
         i_pin = current_pin;
         adcInit(v_pin | i_pin);
         adcSelectPins(v_pin);
