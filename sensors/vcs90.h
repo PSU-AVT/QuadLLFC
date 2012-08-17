@@ -1,9 +1,9 @@
 /*
- * Author: Gregory Haynes <greg@greghaynes.net>
+ * Author: Eric Dinger <egdinger@cs.pdx.edu>
  *
  * Software License Agreement (BSD License)
  *
- * Copyright (c) 2011, Gregory Haynes
+ * Copyright (c) 2011, Eric Dinger
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,47 +29,30 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef ADC_H
-#define ADC_H
 
-/**
- * This ADC module multiplexes across selected pins using the ADC interrupt
+/*
+ *This is the header for the autopilot voltage/current sensor
+ *It does not have a part number or good documentation, and the website
+ *no longer works, the data sheet is on sparkfun though
+ *We are using the 90amp version
+*/
+#include "../core/adc.h"
 
-   To use this library you need to
-   adcInit(ADC_PIN5 | ...); //This sets the selected pins to be adc pins and 
-                           //enables the interupt
-   adcSelectPins(ADC_PIN5 | ...); //This adds the selected pin to the inpurupt hadnler
-   adcStart(); //This starts the adc
+//Assumption adc vref is 3.3 volts
+//this would mean 3300/1024 = 3.22 mv/lsb
+#define MV_LSB 3.22
 
-   You can't use several of the adc pins. The known safe pins are 5,6,7.
- */
+//63.69mV/Volt
+#define VOLT_SCALE 63.69
 
-#include "../projectconfig.h"
+//36.60mV/Amp
+#define AMP_SCALE 36.60
 
-typedef enum ADC_PIN_T
-{
-	ADC_PIN0 = 1,
-	ADC_PIN1 = 2,
-	ADC_PIN2 = 4,
-	ADC_PIN3 = 8,
-	ADC_PIN4 = 16,
-	ADC_PIN5 = 32,
-	ADC_PIN6 = 64,
-	ADC_PIN7 = 128
-}ADC_PIN_T;
+//Sets up the adc pins to be used by the measure functions
+void vcs90_init(ADC_PIN_T v_pin, ADC_PIN_T i_pin);
 
-#define ADC_PIN_CNT 8
-#define ADC_MAX_PINVAL (1 << ADC_PIN_CNT)
-#define ADC_RESULT_INVALID 2048
+//Returns the voltage currently measured by the sensor
+float vcs90_measure_voltage(void);
 
-#define adcIsResultValid(VAL) (VAL & ADC_RESULT_INVALID)
-
-uint16_t adcGetVal(uint16_t pin);
-uint8_t adcPinToNdx(uint16_t pin);
-uint16_t adcGetNdxVal(uint8_t ndx);
-void adcStart(void);
-void adcSelectPins(int pin);
-void adcClearSelectedPins(int pin);
-void adcInit(int pins);
-
-#endif
+//Returns the current currently measured by the sensor
+float vcs90_measure_current(void);
