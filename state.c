@@ -2,11 +2,14 @@
 #include "rotation.h"
 #include "sensors/itg3200.h"
 #include "sensors/adxl345.h"
+#include "sensors/sharp.h"
+#include "sensors/maxbotixs.h"
 #include "core/systick.h"
 #include "commands.h"
 #include "logging.h"
 
-#define STATE_GYRO_UPDATE_INTERVAL 5
+#define STATE_GYRO_UPDATE_INTERVAL 5     //200hz
+#define STATE_HEIGHT_UPDATE_INTERVAL 50  //20hz
 #define STATE_DOF_CNT 6
 
 static uint32_t _state_send_interval = 500;
@@ -19,6 +22,8 @@ static uint32_t _state_gyro_last_update;
 static uint32_t _last_gyro_update_ticks;
 static uint32_t _state_send_last;
 static GyroData _state_gyro_last;
+
+static uint32_t _state_height_last_update;
 
 void state_add(state_t *s1, state_t *s2, state_t *sum) {
 	float *s1_arr = (float*)s1;
@@ -66,6 +71,13 @@ void state_reset(void) {
 	state_init();
 }
 
+void state_update_height() {
+        if (_inertial_state.z < -17) 
+                _inertial_state.z = Sharp120XGetDistance(ADC_PIN5);
+        else
+                _inertial_state.z = measure_maxbotix_cm();
+}
+
 void state_update_from_gyro(void) {
 	if(itg3200GetData(&_state_gyro_last) == i2c_ok) {
 		uint32_t tick_diff = systickGetTicks() - _last_gyro_update_ticks;
@@ -107,6 +119,11 @@ state_t *state_inertial_get(void) {
 void state_update(void) {
 	uint32_t ticks = systickGetTicks();
 
+        if((ticks - _state_height_last_update) >= STATE_HEIGHT_UPDATE_INTERVAL){
+                state_update_height();
+                _state_height_last_update = ticks;
+        }
+        ticks = systickGetTicks();
 	if((ticks - _state_gyro_last_update) >= STATE_GYRO_UPDATE_INTERVAL) {
 		state_update_from_gyro();
 		_state_gyro_last_update = ticks;
