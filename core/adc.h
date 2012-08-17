@@ -69,6 +69,7 @@ uint8_t adcPinToNdx(uint16_t pin);
 uint16_t adcGetNdxVal(uint8_t ndx);
 void adcStart(void);
 void adcSelectPins(int pin);
+void adcClearSelectedPins(int pin);
 void adcInit(int pins);
 
 #endif
