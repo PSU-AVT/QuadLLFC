@@ -46,20 +46,24 @@ void commands_handle_message(unsigned char *buff, uint8_t length) {
 		case 1: //set roll setpoint
 			val = *((float *)&buff[1]);
 			current_state->roll = val;
+			command_send(8, (unsigned char *)&val, 4); // Send roll setpoint
 			break;
 		case 2: //set pitch setpoint
 			val = *((float *)&buff[1]);
 			current_state->pitch = val;
+			command_send(9, (unsigned char *)&val, 4); // Send pitch setpoint
 			break;
 		case 3: //ping
 			break;
-		case 4: //Set motor speed (state monitored)
+		case 4: //Set Z setpoint
                         val = *((float *)&buff[1]);
 			current_state->z = val;
+			command_send(13, (unsigned char *)&val, 4); // Send z setpoint
 			break;
 		case 5: //Set yaw setpoint
 			val = *((float *)&buff[1]);
 			current_state->yaw = val;
+			command_send(10, (unsigned char *)&val, 4); // Send yaw setpoint
 			break;
 		case 6: // shutdown
 			control_set_enabled(0);
