@@ -24,6 +24,7 @@ static uint32_t _state_send_last;
 static GyroData _state_gyro_last;
 
 static uint32_t _state_height_last_update;
+static uint8_t sensor; //0 = ir, 1 = sonar, 2 = future! (baro?)
 
 void state_add(state_t *s1, state_t *s2, state_t *sum) {
 	float *s1_arr = (float*)s1;
@@ -64,6 +65,8 @@ void state_init(void) {
 	logging_send_string(LOGGING_DEBUG, "Calibrating gyro.");
 	itg3200Calibrate(&_state_gyro_last, 1000, STATE_GYRO_UPDATE_INTERVAL);
 	logging_send_string(LOGGING_DEBUG, "Calibrating gyro complete.");
+        SharpInit(ADC_PIN5);
+        init_maxbotix();
 }
 
 void state_reset(void) {
@@ -72,10 +75,22 @@ void state_reset(void) {
 }
 
 void state_update_height() {
-        if (_inertial_state.z < -17) 
+        if (_inertial_state.z < 20)
+                sensor = 0;
+        else if (_inertial_state.z > 25)
+                sensor = 1;
+
+        switch (sensor)
+        {
+        case 0:
                 _inertial_state.z = Sharp120XGetDistance(ADC_PIN5);
-        else
+                break;
+        case 1:
                 _inertial_state.z = measure_maxbotix_cm();
+                break;
+        default:
+                break;
+        }
 }
 
 void state_update_from_gyro(void) {

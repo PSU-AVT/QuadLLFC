@@ -42,7 +42,7 @@ int main(void) {
 
 	state_init();
 	control_init();
-
+        adcStart();
 	logging_send_string(LOGGING_DEBUG, "Entering main control loop.");
 	// Main loop
 	while(1) {
