@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2011 Gregory Haynes <greg@greghaynes.net>
+ * Modified by Jenner Hanni <jeh.wicker@gmail.com>
+ *
+ * Licensed under the BSD license. See LICENSE for more information.
+ */
+
 #include "state.h"
 #include "rotation.h"
 #include "sensors/itg3200.h"

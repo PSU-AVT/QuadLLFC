@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2012 Jenner Hanni <jeh.wicker@gmail.com>
+ *
+ * Licensed under the BSD license. See LICENSE for more information.
+ */
+
 #ifndef FILTER_H
 #define FILTER_H
 
