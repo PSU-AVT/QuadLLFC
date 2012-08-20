@@ -135,7 +135,7 @@ void state_update(void) {
 	}
 	ticks = systickGetTicks();
 	if(_state_send_interval && (ticks - _state_send_last) >= _state_send_interval) {
-//		state_send();
+		state_send();
 		_state_send_last = ticks;
 	}
 }
