@@ -1,9 +1,8 @@
 /*
- * HMC5883L
+ * HMC5883L Magnetomer Driver
  *
  * Author: Eric Dinger, Jen Hanni
  * Heavily depended on M.Ryan (ryanmechantronics.com)'s example itg3200.h
- * Created on: 1/2012
  */
 
 #ifndef _HMC5883L_

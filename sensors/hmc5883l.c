@@ -1,8 +1,7 @@
-/* Jen Hanni
- * Draws heavily on Ryan@Mechatronics and Eric Dinger itg3200 and adxl345 drivers
+/* Copyright (c) 2012 Jenner Hanni
+ * Draws heavily on Ryan@Mechatronics and Eric Dinger's itg3200 and adxl345 drivers
  *
  * HMC5883L driver
- * no guarantees.
 */
 
 #include "hmc5883l.h"
