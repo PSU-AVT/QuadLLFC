@@ -38,14 +38,14 @@ void control_init(void) {
 	_control_i_gains[0].roll = -.03;	
 	_control_i_gains[2].roll = .03;	
 
-	_control_p_gains[0].yaw = 0.075;
-	_control_p_gains[1].yaw = -0.075;
-	_control_p_gains[2].yaw = 0.075;
-	_control_p_gains[3].yaw = -0.075;
-	_control_d_gains[0].yaw = 240.0;
-	_control_d_gains[1].yaw = -240.0;
-	_control_d_gains[2].yaw = 240.0;
-	_control_d_gains[3].yaw = -240.0;
+	_control_p_gains[0].yaw = -0.075;
+	_control_p_gains[1].yaw = 0.075;
+	_control_p_gains[2].yaw = -0.075;
+	_control_p_gains[3].yaw = 0.075;
+	_control_d_gains[0].yaw = -240.0;
+	_control_d_gains[1].yaw = 240.0;
+	_control_d_gains[2].yaw = -240.0;
+	_control_d_gains[3].yaw = 240.0;
 
 	_control_p_gains[0].z = 1;
 	_control_p_gains[1].z = 1;
