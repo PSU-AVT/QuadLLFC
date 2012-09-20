@@ -78,7 +78,7 @@ void state_update_from_gyro(void) {
 			dt = tick_diff / 1000.0;
 
 		// Update rotation matrix
-		rotation_matrix_velocity_update(rotation_b_to_i, _state_gyro_last.X, _state_gyro_last.Y, _state_gyro_last.Z, dt);
+		rotation_matrix_velocity_update(rotation_b_to_i, _state_gyro_last.Y, _state_gyro_last.X, _state_gyro_last.Z, dt);
 
 		// Update last update ticks
 		_last_gyro_update_ticks = systickGetTicks();
