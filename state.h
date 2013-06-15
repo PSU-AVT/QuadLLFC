@@ -1,6 +1,8 @@
 #ifndef STATE_H
 #define STATE_H
 
+// we suspect roll, pitch, and yaw are rotation in degrees
+// we suspect x, y, z are movement of some unit along that axis
 typedef struct state_t {
 	float roll;
 	float pitch;
