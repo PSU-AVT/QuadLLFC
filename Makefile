@@ -9,7 +9,7 @@ SIZE= $(CROSS_COMPILE)size
 OBJCOPY= $(CROSS_COMPILE)objcopy
 OBJDUMP= $(CROSS_COMPILE)objdump
 
-LPC_XPRESSO_DIR=/usr/local/lpcxpresso_4.2.2_238/lpcxpresso/bin
+LPC_XPRESSO_DIR=/usr/local/lpcxpresso_5.1.2_2065/lpcxpresso/bin
 DFU=$(LPC_XPRESSO_DIR)/dfu-util
 DFU_FLAGS=-d 0x471:0xdf55 -c 0 -t 2048 -R -D $(LPC_XPRESSO_DIR)/LPCXpressoWIN.enc
 CRT=$(LPC_XPRESSO_DIR)/crt_emu_lpc11_13_nxp
