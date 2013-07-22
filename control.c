@@ -7,13 +7,13 @@
 
 #define CONTROL_UPDATE_INTERVAL 20
 
-#define YAXIS_P 0.065
-#define YAXIS_I 0.03
-#define YAXIS_D 440.0
+#define YAXIS_P 0.1
+#define YAXIS_I 0.00
+#define YAXIS_D 0.0
 
-#define XAXIS_P 0.065
-#define XAXIS_I 0.03
-#define XAXIS_D 440.0
+#define XAXIS_P 0.1
+#define XAXIS_I 0.00
+#define XAXIS_D 0.0
 
 static state_t _control_p_gains[4];
 static state_t _control_i_gains[4];
@@ -42,12 +42,12 @@ void control_init(void) {
 	_control_d_gains[3].roll = YAXIS_D;	
 
 	// x-axis
-	_control_p_gains[1].pitch = -XAXIS_P;
-	_control_p_gains[3].pitch = XAXIS_P;
-	_control_i_gains[1].pitch = -XAXIS_I;
-	_control_i_gains[3].pitch = XAXIS_I;
-	_control_d_gains[1].pitch = -XAXIS_D;	
-	_control_d_gains[3].pitch = XAXIS_D;	
+	_control_p_gains[2].pitch = -XAXIS_P;
+	_control_p_gains[0].pitch = XAXIS_P;
+	_control_i_gains[2].pitch = -XAXIS_I;
+	_control_i_gains[0].pitch = XAXIS_I;
+	_control_d_gains[2].pitch = -XAXIS_D;	
+	_control_d_gains[0].pitch = XAXIS_D;	
 
 	// z-axis
 	_control_p_gains[0].yaw = 0.075;
@@ -59,10 +59,10 @@ void control_init(void) {
 	_control_d_gains[2].yaw = 240.0;
 	_control_d_gains[3].yaw = -240.0;
 
-	_control_p_gains[0].z = 0;
-	_control_p_gains[1].z = 0;
-	_control_p_gains[2].z = 0;
-	_control_p_gains[3].z = 0;
+	_control_p_gains[0].z = 1;
+	_control_p_gains[1].z = 1;
+	_control_p_gains[2].z = 1;
+	_control_p_gains[3].z = 1;
 
 	_control_integral_slice_max[0] = _control_p_gains[0].pitch * .05;
 	_control_integral_slice_max[1] = _control_p_gains[1].roll * .05;
