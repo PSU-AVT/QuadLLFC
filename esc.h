@@ -9,9 +9,9 @@
 
 typedef enum ESC {
 	ESC_FRONT = 0,
-	ESC_BACK = 1,
-	ESC_LEFT = 2,
-	ESC_RIGHT = 3
+	ESC_RIGHT = 1,
+	ESC_BACK = 2,
+	ESC_LEFT = 3
 } ESC_LABEL;
 
 #define ESC_CNT 4

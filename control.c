@@ -59,10 +59,10 @@ void control_init(void) {
 	_control_d_gains[2].yaw = 240.0;
 	_control_d_gains[3].yaw = -240.0;
 
-	_control_p_gains[0].z = 1;
-	_control_p_gains[1].z = 1;
-	_control_p_gains[2].z = 1;
-	_control_p_gains[3].z = 1;
+	_control_p_gains[0].z = 0; // Back motor
+	_control_p_gains[1].z = 0; // Left Motor
+	_control_p_gains[2].z = 1; // Front motor
+	_control_p_gains[3].z = 0; // Right motor
 
 	_control_integral_slice_max[0] = _control_p_gains[0].pitch * .05;
 	_control_integral_slice_max[1] = _control_p_gains[1].roll * .05;
