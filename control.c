@@ -15,6 +15,11 @@
 #define XAXIS_I 0.00
 #define XAXIS_D 0.0
 
+#define BACK_MOTOR 0
+#define LEFT_MOTOR 1
+#define FRONT_MOTOR 2
+#define RIGHT_MOTOR 3
+
 static state_t _control_p_gains[4];
 static state_t _control_i_gains[4];
 static state_t _control_d_gains[4];
@@ -34,20 +39,20 @@ void control_init(void) {
 	//
 	// y-axis
 	//
-	_control_p_gains[1].roll = -YAXIS_P;
-	_control_p_gains[3].roll = YAXIS_P;
-	_control_i_gains[1].roll = -YAXIS_I;
-	_control_i_gains[3].roll = YAXIS_I;
-	_control_d_gains[1].roll = -YAXIS_D;	
-	_control_d_gains[3].roll = YAXIS_D;	
+	_control_p_gains[LEFT_MOTOR].roll = -YAXIS_P;
+	_control_p_gains[RIGHT_MOTOR].roll = YAXIS_P;
+	_control_i_gains[LEFT_MOTOR].roll = -YAXIS_I;
+	_control_i_gains[RIGHT_MOTOR].roll = YAXIS_I;
+	_control_d_gains[LEFT_MOTOR].roll = -YAXIS_D;	
+	_control_d_gains[RIGHT_MOTOR].roll = YAXIS_D;	
 
 	// x-axis
-	_control_p_gains[2].pitch = -XAXIS_P;
-	_control_p_gains[0].pitch = XAXIS_P;
-	_control_i_gains[2].pitch = -XAXIS_I;
-	_control_i_gains[0].pitch = XAXIS_I;
-	_control_d_gains[2].pitch = -XAXIS_D;	
-	_control_d_gains[0].pitch = XAXIS_D;	
+	_control_p_gains[FRONT_MOTOR].pitch = -XAXIS_P;
+	_control_p_gains[BACK_MOTOR].pitch = XAXIS_P;
+	_control_i_gains[FRONT_MOTOR].pitch = -XAXIS_I;
+	_control_i_gains[BACK_MOTOR].pitch = XAXIS_I;
+	_control_d_gains[FRONT_MOTOR].pitch = -XAXIS_D;	
+	_control_d_gains[BACK_MOTOR].pitch = XAXIS_D;	
 
 	// z-axis
 	_control_p_gains[0].yaw = 0.075;
@@ -59,10 +64,10 @@ void control_init(void) {
 	_control_d_gains[2].yaw = 240.0;
 	_control_d_gains[3].yaw = -240.0;
 
-	_control_p_gains[0].z = 0; // Back motor
-	_control_p_gains[1].z = 0; // Left Motor
+	_control_p_gains[0].z = 1; // Back motor
+	_control_p_gains[1].z = 1; // Left Motor
 	_control_p_gains[2].z = 1; // Front motor
-	_control_p_gains[3].z = 0; // Right motor
+	_control_p_gains[3].z = 1; // Right motor
 
 	_control_integral_slice_max[0] = _control_p_gains[0].pitch * .05;
 	_control_integral_slice_max[1] = _control_p_gains[1].roll * .05;
